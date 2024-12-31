@@ -1,5 +1,4 @@
-import 'package:elearning/screens/home_screen.dart';
-import 'package:elearning/utils/const.dart';
+import 'package:elearning/screens/dashboard_screen.dart';
 import 'package:flutter/material.dart';
 
 void main() => runApp(MyApp());
@@ -10,8 +9,23 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'E-Learning Online Courses App',
       debugShowCheckedModeBanner: false,
-      theme: Constants.lighTheme(context),
-      home: HomeScreen(),
+      theme: ThemeData.dark().copyWith(
+        scaffoldBackgroundColor: Colors.black,
+        appBarTheme: AppBarTheme(
+          backgroundColor: Colors.black,
+          iconTheme: IconThemeData(color: Colors.white),
+        ),
+        textTheme: TextTheme(
+          bodyLarge: TextStyle(color: Colors.white),
+          bodyMedium: TextStyle(color: Colors.white70),
+        ),
+        inputDecorationTheme: InputDecorationTheme(
+          filled: true,
+          fillColor: Colors.grey[800],
+          hintStyle: TextStyle(color: Colors.white54),
+        ),
+      ),
+      home: DashboardScreen(),
     );
   }
 }

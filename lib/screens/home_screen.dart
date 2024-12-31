@@ -36,8 +36,25 @@ class _HomeScreenState extends State<HomeScreen> {
         preferredSize: Size(double.infinity, 100),
         child: SafeArea(
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: <Widget>[
+              Container(
+                margin: EdgeInsets.symmetric(
+                  horizontal: Constants.mainPadding,
+                  vertical: Constants.mainPadding,
+                ),
+                height: 44,
+                width: 44,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: Color.fromRGBO(255,255,255,0.3),
+                  image: DecorationImage(
+                    image: AssetImage("assets/icons/profile.png"),
+                    fit: BoxFit.cover,
+                  )
+                ),
+              ),
+              //Menu Button
               Container(
                 margin: EdgeInsets.symmetric(
                   horizontal: Constants.mainPadding,
