@@ -17,7 +17,7 @@ class ExploreCourseCard extends StatelessWidget {
       child: Container(
         width: 150,
         decoration: BoxDecoration(
-          color: Colors.white24,
+          color: Colors.black12,
           borderRadius: BorderRadius.circular(16.0),
         ),
         child: Column(
@@ -34,8 +34,8 @@ class ExploreCourseCard extends StatelessWidget {
               courseName,
               style: TextStyle(
                 fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+                fontWeight: FontWeight.w900,
+                color: Colors.black87,
               ),
               textAlign: TextAlign.center,
             ),

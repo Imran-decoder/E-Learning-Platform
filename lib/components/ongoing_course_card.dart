@@ -14,7 +14,7 @@ class OngoingCourseCard extends StatelessWidget {
     return Container(
       padding: EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: Colors.white24,
+        color: Colors.black12,
         borderRadius: BorderRadius.circular(20.0),
       ),
       child: Row(
@@ -45,9 +45,9 @@ class OngoingCourseCard extends StatelessWidget {
                 Text(
                   courseName,
                   style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                    color: Colors.black87,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w900,
                   ),
                 ),
                 SizedBox(height: 8),
@@ -57,14 +57,14 @@ class OngoingCourseCard extends StatelessWidget {
                   children: [
                     LinearProgressIndicator(
                       value: progress,
-                      backgroundColor: Colors.white38,
+                      backgroundColor: Colors.black38,
                       color: Colors.blueAccent,
                     ),
                     SizedBox(height: 4),
                     Text(
                       "${(progress * 100).toInt()}% completed",
                       style: TextStyle(
-                        color: Colors.white70,
+                        color: Colors.black,
                         fontSize: 14,
                       ),
                     ),

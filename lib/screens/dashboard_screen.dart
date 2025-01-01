@@ -58,10 +58,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           height: 44,
                           width: 44,
                           decoration: BoxDecoration(
-                            color: Colors.white.withOpacity(0.1),
+                            color: Colors.black.withOpacity(0.1),
                             shape: BoxShape.circle,
                           ),
-                          child: Icon(Icons.notifications, size: 30.0, color: Colors.white),
+                          child: Icon(Icons.notifications, size: 30.0, color: Colors.black45),
                         ),
                         Positioned(
                           top: 10,
@@ -105,7 +105,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       style: TextStyle(
                         fontSize: 28,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: Colors.black,
                       ),
                     ),
                   ),
@@ -114,7 +114,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   Center(
                     child: Container(
                       decoration: BoxDecoration(
-                        color: Colors.white24,
+                        color: Colors.deepOrange,
                         borderRadius: BorderRadius.all(Radius.circular(30.0)),
                       ),
                       child: Row(
@@ -125,11 +125,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                               child: TextField(
                                 controller: _searchControl,
                                 decoration: InputDecoration(
+                                  fillColor: Colors.deepOrange,
                                   border: InputBorder.none,
                                   hintText: "Search courses",
-                                  hintStyle: TextStyle(color: Colors.white70, fontSize: 18.0),
+                                  hintStyle: TextStyle(color: Colors.white70, fontSize: 18.0,),
                                 ),
-                                style: TextStyle(color: Colors.white70, fontSize: 21.0),
+                                style: TextStyle(color: Colors.black54, fontSize: 21.0),
                               ),
                             ),
                           ),
@@ -151,7 +152,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: Colors.black,
                         ),
                       ),
                       Text(
@@ -159,6 +160,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         style: TextStyle(
                           fontSize: 16,
                           color: Colors.blue,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],
@@ -188,7 +190,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: Colors.black,
                         ),
                       ),
                       Text(
@@ -196,6 +198,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                         style: TextStyle(
                           fontSize: 16,
                           color: Colors.blue,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],
