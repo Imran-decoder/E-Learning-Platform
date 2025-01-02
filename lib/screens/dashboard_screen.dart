@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:elearning/components/ongoing_course_card.dart';
 import 'package:elearning/components/explore_course_card.dart';
+import 'package:elearning/screens/course_detail_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
+  const DashboardScreen({super.key});
+
   @override
   _DashboardScreenState createState() => _DashboardScreenState();
 }
@@ -37,182 +40,197 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
-      appBar: PreferredSize(
-        preferredSize: Size.fromHeight(100),
-        child: SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 22.0, vertical: 24.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                CircleAvatar(
-                  backgroundImage: AssetImage('assets/images/profile.png'),
-                  radius: 22,
+      appBar: _buildAppBar(),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: ListView(
+            children: [
+              const SizedBox(height: 20),
+              _buildGreetingSection(),
+              const SizedBox(height: 20),
+              _buildSearchBar(),
+              const SizedBox(height: 28),
+              _buildSectionHeader(
+                title: "Explore All Courses",
+                actionText: "See All",
+              ),
+              const SizedBox(height: 20),
+              _buildCourseList(
+                courses,
+                    (index) => ExploreCourseCard(
+                  logoPath: courses[index]['logo']!,
+                  courseName: courses[index]['name']!,
+                  onTap: () => _onCourseSelected(context, courses[index]),
                 ),
-                Row(
-                  children: [
-                    Stack(
-                      alignment: Alignment.center,
-                      children: [
-                        Container(
-                          height: 44,
-                          width: 44,
-                          decoration: BoxDecoration(
-                            color: Colors.black.withOpacity(0.1),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Icon(Icons.notifications, size: 30.0, color: Colors.black45),
-                        ),
-                        Positioned(
-                          top: 10,
-                          right: 10,
-                          child: Container(
-                            height: 10,
-                            width: 10,
-                            decoration: BoxDecoration(
-                              color: Colors.red,
-                              shape: BoxShape.circle,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(width: 16),
-                    IconButton(
-                      icon: Icon(Icons.more_vert, color: Colors.grey),
-                      onPressed: () {
-                        debugPrint("Menu clicked");
-                      },
-                    ),
-                  ],
-                ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 28),
+              _buildSectionHeader(
+                title: "Ongoing Course",
+                actionText: "See All",
+              ),
+              const SizedBox(height: 20),
+              ..._buildOngoingCourses(),
+            ],
           ),
         ),
       ),
-      body: Stack(
-        children: [
-          SafeArea(
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: ListView(
+    );
+  }
+
+  PreferredSizeWidget _buildAppBar() {
+    return PreferredSize(
+      preferredSize: const Size.fromHeight(100),
+      child: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 22.0, vertical: 24.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const CircleAvatar(
+                backgroundImage: AssetImage('assets/images/profile.png'),
+                radius: 22,
+              ),
+              Row(
                 children: [
-                  SizedBox(height: 20),
-                  Center(
-                    child: Text(
-                      "Hello, Arshad!",
-                      style: TextStyle(
-                        fontSize: 28,
-                        fontWeight: FontWeight.bold,
-                        color: Colors.black,
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 20),
-                  // Search Bar
-                  Center(
-                    child: Container(
-                      decoration: BoxDecoration(
-                        color: Colors.deepOrange,
-                        borderRadius: BorderRadius.all(Radius.circular(30.0)),
-                      ),
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                              child: TextField(
-                                controller: _searchControl,
-                                decoration: InputDecoration(
-                                  fillColor: Colors.deepOrange,
-                                  border: InputBorder.none,
-                                  hintText: "Search courses",
-                                  hintStyle: TextStyle(color: Colors.white70, fontSize: 18.0,),
-                                ),
-                                style: TextStyle(color: Colors.black54, fontSize: 21.0),
-                              ),
-                            ),
-                          ),
-                          Padding(
-                            padding: const EdgeInsets.only(right: 12.0),
-                            child: Icon(Icons.search, color: Colors.white70),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  SizedBox(height: 28),
-                  // Explore All Courses Header
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Text(
-                        "Explore All Courses",
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
+                  Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Container(
+                        height: 44,
+                        width: 44,
+                        decoration: BoxDecoration(
+                          color: Colors.black.withOpacity(0.1),
+                          shape: BoxShape.circle,
                         ),
+                        child: const Icon(Icons.notifications, size: 30.0, color: Colors.black45),
                       ),
-                      Text(
-                        'See All',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.blue,
-                          fontWeight: FontWeight.bold,
+                      Positioned(
+                        top: 10,
+                        right: 10,
+                        child: Container(
+                          height: 10,
+                          width: 10,
+                          decoration: const BoxDecoration(
+                            color: Colors.red,
+                            shape: BoxShape.circle,
+                          ),
                         ),
                       ),
                     ],
                   ),
-                  SizedBox(height: 20),
-                  // Explore Courses Carousel
-                  SizedBox(
-                    height: 200,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      itemCount: courses.length,
-                      itemBuilder: (context, index) {
-                        return ExploreCourseCard(
-                          logoPath: courses[index]['logo']!,
-                          courseName: courses[index]['name']!,
-                        );
-                      },
-                    ),
+                  const SizedBox(width: 16),
+                  IconButton(
+                    icon: const Icon(Icons.more_vert, color: Colors.grey),
+                    onPressed: () => debugPrint("Menu clicked"),
                   ),
-                  SizedBox(height: 28),
-                  // Ongoing Courses Header
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: <Widget>[
-                      Text(
-                        "Ongoing Course",
-                        style: TextStyle(
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black,
-                        ),
-                      ),
-                      Text(
-                        'See All',
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.blue,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 20),
-                  // Ongoing Courses
-                  OngoingCourseCard(courseName: "Flutter Basics", progress: 0.6),
-                  SizedBox(height: 16),
-                  OngoingCourseCard(courseName: "React Native Advanced", progress: 0.3),
                 ],
               ),
-            ),
+            ],
           ),
-        ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildGreetingSection() {
+    return const Center(
+      child: Text(
+        "Hello, Arshad!",
+        style: TextStyle(
+          fontSize: 28,
+          fontWeight: FontWeight.bold,
+          color: Colors.black,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSearchBar() {
+    return Center(
+      child: Container(
+        decoration: const BoxDecoration(
+          color: Colors.deepOrange,
+          borderRadius: BorderRadius.all(Radius.circular(30.0)),
+        ),
+        child: Row(
+          children: [
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                child: TextField(
+                  controller: _searchControl,
+                  decoration: const InputDecoration(
+                    fillColor: Colors.deepOrange,
+                    border: InputBorder.none,
+                    hintText: "Search courses",
+                    hintStyle: TextStyle(color: Colors.white70, fontSize: 18.0),
+                  ),
+                  style: const TextStyle(color: Colors.black54, fontSize: 21.0),
+                ),
+              ),
+            ),
+            const Padding(
+              padding: EdgeInsets.only(right: 12.0),
+              child: Icon(Icons.search, color: Colors.white70),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader({required String title, required String actionText}) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          title,
+          style: const TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: Colors.black,
+          ),
+        ),
+        Text(
+          actionText,
+          style: const TextStyle(
+            fontSize: 16,
+            color: Colors.blue,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCourseList(List<Map<String, String>> courses, Widget Function(int) itemBuilder) {
+    return SizedBox(
+      height: 200,
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        itemCount: courses.length,
+        itemBuilder: (context, index) => itemBuilder(index),
+      ),
+    );
+  }
+
+  List<Widget> _buildOngoingCourses() {
+    return [
+      OngoingCourseCard(courseName: "Flutter Basics", progress: 0.6),
+      const SizedBox(height: 16),
+      OngoingCourseCard(courseName: "React Native Advanced", progress: 0.3),
+    ];
+  }
+
+  void _onCourseSelected(BuildContext context, Map<String, String> course) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => CourseDetailsScreen(
+          courseName: course['name']!,
+          logoPath: course['logo']!,
+        ),
       ),
     );
   }
