@@ -1,7 +1,9 @@
+import 'package:elearning/screens/Admin/admin_dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:elearning/components/ongoing_course_card.dart';
 import 'package:elearning/components/explore_course_card.dart';
 import 'package:elearning/screens/course_detail_screen.dart';
+import 'package:elearning/screens/admin_screen.dart'; // Import the AdminScreen
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -85,14 +87,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 22.0, vertical: 24.0),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.end,
             children: [
-              const CircleAvatar(
-                backgroundImage: AssetImage('assets/images/profile.png'),
-                radius: 22,
-              ),
               Row(
                 children: [
+                  IconButton(
+                    icon: const Icon(Icons.admin_panel_settings_outlined, color: Colors.black),
+                    onPressed: () => Navigator.push(
+                      context,
+                      MaterialPageRoute(builder: (context) => AdminDashboardScreen()),
+                    ),
+                  ),
+                  const SizedBox(width: 20),
                   Stack(
                     alignment: Alignment.center,
                     children: [
@@ -229,7 +235,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
       MaterialPageRoute(
         builder: (context) => CourseDetailsScreen(
           courseName: course['name']!,
-          logoPath: course['logo']!,
         ),
       ),
     );
