@@ -9,8 +9,8 @@ class ExploreCourseCard extends StatelessWidget {
     required this.logoPath,
     required this.courseName,
     required this.onTap,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
