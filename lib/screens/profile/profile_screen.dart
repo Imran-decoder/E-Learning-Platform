@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-// TODO: add flutter_svg to pubspec.yaml
+
 import 'package:flutter_svg/flutter_svg.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -20,27 +20,32 @@ class ProfileScreen extends StatelessWidget {
             const SizedBox(height: 20),
             ProfileMenu(
               text: "My Account",
-              icon: "assets/icons/User Icon.svg",
+              icon: 'assets/icons/user.svg',
               press: () => {},
             ),
             ProfileMenu(
-              text: "Notifications",
-              icon: "assets/icons/Bell.svg",
-              press: () {},
-            ),
-            ProfileMenu(
               text: "Settings",
-              icon: "assets/icons/Settings.svg",
+              icon: "assets/icons/setting.svg",
               press: () {},
             ),
             ProfileMenu(
               text: "Help Center",
-              icon: "assets/icons/Question mark.svg",
+              icon: "assets/icons/help.svg",
+              press: () {},
+            ),
+             ProfileMenu(
+              text: "Admin Login",
+              icon: "assets/icons/admin-eye.svg",
+              press: () {},
+            ),
+               ProfileMenu(
+              text: "Rate Us",
+              icon: "assets/icons/rate-us.svg",
               press: () {},
             ),
             ProfileMenu(
               text: "Log Out",
-              icon: "assets/icons/Log out.svg",
+              icon: "assets/icons/log-out.svg",
               press: () {},
             ),
           ],
