@@ -1,9 +1,8 @@
-import 'package:elearning/screens/Admin/admin_dashboard_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:elearning/components/ongoing_course_card.dart';
 import 'package:elearning/components/explore_course_card.dart';
 import 'package:elearning/screens/course_detail_screen.dart';
-import 'package:elearning/screens/admin_screen.dart'; // Import the AdminScreen
+import 'package:elearning/screens/Admin/admin_dashboard_screen.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -50,8 +49,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
             children: [
               const SizedBox(height: 20),
               _buildGreetingSection(),
-              const SizedBox(height: 20),
-              _buildSearchBar(),
               const SizedBox(height: 28),
               _buildSectionHeader(
                 title: "Explore All Courses",
@@ -60,7 +57,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
               const SizedBox(height: 20),
               _buildCourseList(
                 courses,
-                    (index) => ExploreCourseCard(
+                (index) => ExploreCourseCard(
                   logoPath: courses[index]['logo']!,
                   courseName: courses[index]['name']!,
                   onTap: () => _onCourseSelected(context, courses[index]),
@@ -87,18 +84,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
         child: Padding(
           padding: const EdgeInsets.symmetric(horizontal: 22.0, vertical: 24.0),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.end,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
+              IconButton(
+                icon: const Icon(Icons.admin_panel_settings_outlined,
+                    color: Colors.black),
+                onPressed: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => AdminDashboardScreen()),
+                ),
+              ),
               Row(
                 children: [
-                  IconButton(
-                    icon: const Icon(Icons.admin_panel_settings_outlined, color: Colors.black),
-                    onPressed: () => Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (context) => AdminDashboardScreen()),
-                    ),
-                  ),
-                  const SizedBox(width: 20),
                   Stack(
                     alignment: Alignment.center,
                     children: [
@@ -109,7 +107,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           color: Colors.black.withOpacity(0.1),
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(Icons.notifications, size: 30.0, color: Colors.black45),
+                        child: const Icon(Icons.notifications,
+                            size: 30.0, color: Colors.black45),
                       ),
                       Positioned(
                         top: 10,
@@ -127,6 +126,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                   const SizedBox(width: 16),
                   IconButton(
+                    icon: const Icon(Icons.search, color: Colors.grey),
+                    onPressed: () {
+                      _showSearchPopup(
+                          context); // Trigger search popup when clicked
+                    },
+                  ),
+                  const SizedBox(width: 16),
+                  IconButton(
                     icon: const Icon(Icons.more_vert, color: Colors.grey),
                     onPressed: () => debugPrint("Menu clicked"),
                   ),
@@ -134,6 +141,50 @@ class _DashboardScreenState extends State<DashboardScreen> {
               ),
             ],
           ),
+        ),
+      ),
+    );
+  }
+
+  void _showSearchPopup(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      builder: (context) => Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                color: Colors.deepOrange,
+                borderRadius: const BorderRadius.all(Radius.circular(30.0)),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                      child: TextField(
+                        controller: _searchControl,
+                        decoration: const InputDecoration(
+                          border: InputBorder.none,
+                          hintText: "Search courses",
+                          hintStyle:
+                              TextStyle(color: Colors.white70, fontSize: 18.0),
+                        ),
+                        style: const TextStyle(
+                            color: Colors.white, fontSize: 21.0),
+                      ),
+                    ),
+                  ),
+                  const Padding(
+                    padding: EdgeInsets.only(right: 12.0),
+                    child: Icon(Icons.search, color: Colors.white70),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -152,41 +203,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildSearchBar() {
-    return Center(
-      child: Container(
-        decoration: const BoxDecoration(
-          color: Colors.deepOrange,
-          borderRadius: BorderRadius.all(Radius.circular(30.0)),
-        ),
-        child: Row(
-          children: [
-            Expanded(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: TextField(
-                  controller: _searchControl,
-                  decoration: const InputDecoration(
-                    fillColor: Colors.deepOrange,
-                    border: InputBorder.none,
-                    hintText: "Search courses",
-                    hintStyle: TextStyle(color: Colors.white70, fontSize: 18.0),
-                  ),
-                  style: const TextStyle(color: Colors.black54, fontSize: 21.0),
-                ),
-              ),
-            ),
-            const Padding(
-              padding: EdgeInsets.only(right: 12.0),
-              child: Icon(Icons.search, color: Colors.white70),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSectionHeader({required String title, required String actionText}) {
+  Widget _buildSectionHeader(
+      {required String title, required String actionText}) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
@@ -210,7 +228,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  Widget _buildCourseList(List<Map<String, String>> courses, Widget Function(int) itemBuilder) {
+  Widget _buildCourseList(
+      List<Map<String, String>> courses, Widget Function(int) itemBuilder) {
     return SizedBox(
       height: 200,
       child: ListView.builder(
