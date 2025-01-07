@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:elearning/screens/dashboard_screen.dart'; // Import DashboardScreen
-
+import 'package:elearning/screens/profile/profile_screen.dart';
 void main() => runApp(MyApp());
 
 class MyApp extends StatelessWidget {
@@ -236,23 +236,23 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 }
 
-class ProfileScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text('Profile'),
-        backgroundColor: Colors.deepOrange,
-      ),
-      body: Center(
-        child: Text(
-          'This is the Profile Screen',
-          style: TextStyle(fontSize: 20),
-        ),
-      ),
-    );
-  }
-}
+// class ProfileScreen extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: Text('Profile'),
+//         backgroundColor: Colors.deepOrange,
+//       ),
+//       body: Center(
+//         child: Text(
+//           'This is the Profile Screen',
+//           style: TextStyle(fontSize: 20),
+//         ),
+//       ),
+//     );
+//   }
+// }
 
 class SearchScreen extends StatelessWidget {
   @override

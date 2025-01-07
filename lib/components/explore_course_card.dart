@@ -10,8 +10,8 @@ class ExploreCourseCard extends StatelessWidget {
     required this.logoPath,
     required this.courseName,
     required this.onTap,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   // List of professional color schemes with lighter shades
   final List<List<Color>> _colorSchemes = [
