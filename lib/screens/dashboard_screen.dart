@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:elearning/components/dashboard_header.dart';
 import 'package:elearning/components/ongoing_course_card.dart';
-import 'package:elearning/components/explore_course_card.dart';
 import 'package:elearning/screens/course_detail_screen.dart';
 import 'package:elearning/screens/Admin/admin_dashboard_screen.dart';
+import 'package:elearning/components/greeting_section.dart';
+import 'package:elearning/components/section_header.dart';
+import 'package:elearning/components/course_list.dart';
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -13,239 +16,107 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   final TextEditingController _searchControl = TextEditingController();
-  late FocusNode myFocusNode;
 
   final List<Map<String, String>> courses = [
-    {'logo': 'assets/images/profile.png', 'name': 'HTML'},
-    {'logo': 'assets/images/blob_1.png', 'name': 'CSS'},
-    {'logo': 'assets/images/blob_2.png', 'name': 'JavaScript'},
+    {'logo': 'assets/images/icon_1.png', 'name': 'HTML'},
+    {'logo': 'assets/images/icon_1.png', 'name': 'CSS'},
+    {'logo': 'assets/images/icon_1.png', 'name': 'JavaScript'},
     {'logo': 'assets/images/icon_1.png', 'name': 'React'},
-    {'logo': 'assets/images/icon_2.png', 'name': 'Node.js'},
-    {'logo': 'assets/images/icon_3.png', 'name': 'Next.js'},
+    {'logo': 'assets/images/icon_1.png', 'name': 'Node.js'},
+    {'logo': 'assets/images/icon_1.png', 'name': 'Next.js'},
   ];
-
-  @override
-  void initState() {
-    super.initState();
-    myFocusNode = FocusNode();
-  }
-
-  @override
-  void dispose() {
-    _searchControl.dispose();
-    myFocusNode.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: _buildAppBar(),
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: ListView(
-            children: [
-              const SizedBox(height: 20),
-              _buildGreetingSection(),
-              const SizedBox(height: 28),
-              _buildSectionHeader(
-                title: "Explore All Courses",
-                actionText: "See All",
+      body: CustomScrollView(
+        slivers: [
+          // Header with Navbar
+          SliverAppBar(
+            expandedHeight: 250,
+            backgroundColor: Colors.transparent,
+            flexibleSpace: FlexibleSpaceBar(
+              background: DashboardHeader(
+                animationPath: 'animations/dashboard.json',
               ),
-              const SizedBox(height: 20),
-              _buildCourseList(
-                courses,
-                (index) => ExploreCourseCard(
-                  logoPath: courses[index]['logo']!,
-                  courseName: courses[index]['name']!,
-                  onTap: () => _onCourseSelected(context, courses[index]),
-                ),
-              ),
-              const SizedBox(height: 28),
-              _buildSectionHeader(
-                title: "Ongoing Course",
-                actionText: "See All",
-              ),
-              const SizedBox(height: 20),
-              ..._buildOngoingCourses(),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  PreferredSizeWidget _buildAppBar() {
-    return PreferredSize(
-      preferredSize: const Size.fromHeight(100),
-      child: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 22.0, vertical: 24.0),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
+            ),
+            actions: [
               IconButton(
                 icon: const Icon(Icons.admin_panel_settings_outlined,
-                    color: Colors.black),
+                    color: Colors.white),
                 onPressed: () => Navigator.push(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => AdminDashboardScreen()),
+                    builder: (context) => AdminDashboardScreen(),
+                  ),
                 ),
               ),
-              Row(
-                children: [
-                  Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Container(
-                        height: 44,
-                        width: 44,
-                        decoration: BoxDecoration(
-                          color: Colors.black.withOpacity(0.1),
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(Icons.notifications,
-                            size: 30.0, color: Colors.black45),
-                      ),
-                      Positioned(
-                        top: 10,
-                        right: 10,
-                        child: Container(
-                          height: 10,
-                          width: 10,
-                          decoration: const BoxDecoration(
-                            color: Colors.red,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(width: 16),
-                  IconButton(
-                    icon: const Icon(Icons.search, color: Colors.grey),
-                    onPressed: () {
-                      _showSearchPopup(
-                          context); // Trigger search popup when clicked
-                    },
-                  ),
-                  const SizedBox(width: 16),
-                  IconButton(
-                    icon: const Icon(Icons.more_vert, color: Colors.grey),
-                    onPressed: () => debugPrint("Menu clicked"),
-                  ),
-                ],
+              IconButton(
+                icon: const Icon(Icons.notifications, color: Colors.white),
+                onPressed: () => debugPrint("Notifications clicked"),
+              ),
+              // Remove Search Icon, keep only three dots icon
+              IconButton(
+                icon: const Icon(Icons.more_vert, color: Colors.white),
+                onPressed: () => debugPrint("Menu clicked"),
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
 
-  void _showSearchPopup(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.deepOrange,
-                borderRadius: const BorderRadius.all(Radius.circular(30.0)),
+          // Main body with transparent background and border
+          SliverToBoxAdapter(
+            child: ClipRRect(
+              borderRadius: const BorderRadius.only(
+                topLeft: Radius.circular(32),
+                topRight: Radius.circular(32),
               ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: TextField(
-                        controller: _searchControl,
-                        decoration: const InputDecoration(
-                          border: InputBorder.none,
-                          hintText: "Search courses",
-                          hintStyle:
-                              TextStyle(color: Colors.white70, fontSize: 18.0),
-                        ),
-                        style: const TextStyle(
-                            color: Colors.white, fontSize: 21.0),
-                      ),
+              child: Container(
+                padding: const EdgeInsets.all(16.0),
+                decoration: BoxDecoration(
+                  color: Colors.transparent, // Transparent background
+                  border: Border.all(
+                    color: Colors.grey.withOpacity(0.3),
+                    width: 1.0,
+                  ), // Border around the container
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const GreetingSection(userName: "Arshad"),
+                    const SizedBox(height: 28),
+                    SectionHeader(
+                      title: "Explore All Courses",
+                      actionText: "See All",
+                      onActionTap: () =>
+                          debugPrint("See All Courses clicked"),
                     ),
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.only(right: 12.0),
-                    child: Icon(Icons.search, color: Colors.white70),
-                  ),
-                ],
+                    const SizedBox(height: 20),
+                    CourseList(
+                      courses: courses,
+                      onCourseTap: (course) =>
+                          _onCourseSelected(context, course),
+                    ),
+                    const SizedBox(height: 28),
+                    SectionHeader(
+                      title: "Ongoing Course",
+                      actionText: "See All",
+                      onActionTap: () =>
+                          debugPrint("See All Ongoing Courses clicked"),
+                    ),
+                    const SizedBox(height: 20),
+                    OngoingCourseCard(
+                        courseName: "Flutter Basics", progress: 0.6),
+                    const SizedBox(height: 16),
+                    OngoingCourseCard(
+                        courseName: "React Native Advanced", progress: 0.3),
+                  ],
+                ),
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildGreetingSection() {
-    return const Center(
-      child: Text(
-        "Hello, Arshad!",
-        style: TextStyle(
-          fontSize: 28,
-          fontWeight: FontWeight.bold,
-          color: Colors.black,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildSectionHeader(
-      {required String title, required String actionText}) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-      children: [
-        Text(
-          title,
-          style: const TextStyle(
-            fontSize: 22,
-            fontWeight: FontWeight.bold,
-            color: Colors.black,
           ),
-        ),
-        Text(
-          actionText,
-          style: const TextStyle(
-            fontSize: 16,
-            color: Colors.blue,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildCourseList(
-      List<Map<String, String>> courses, Widget Function(int) itemBuilder) {
-    return SizedBox(
-      height: 200,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: courses.length,
-        itemBuilder: (context, index) => itemBuilder(index),
+        ],
       ),
     );
-  }
-
-  List<Widget> _buildOngoingCourses() {
-    return [
-      OngoingCourseCard(courseName: "Flutter Basics", progress: 0.6),
-      const SizedBox(height: 16),
-      OngoingCourseCard(courseName: "React Native Advanced", progress: 0.3),
-    ];
   }
 
   void _onCourseSelected(BuildContext context, Map<String, String> course) {
