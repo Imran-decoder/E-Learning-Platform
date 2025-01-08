@@ -36,55 +36,61 @@ class ExploreCourseCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap, // Handle tap
       child: Padding(
-        padding: const EdgeInsets.only(right: 16.0, top: 10.0, bottom: 10.0), // Added margin to top and bottom
+        padding: const EdgeInsets.only(right: 16.0, top: 10.0, bottom: 10.0),
         child: Container(
-          width: 160, // Adjusted size for a more spacious look
+          width: 160,
           decoration: BoxDecoration(
             gradient: LinearGradient(
-              colors: randomColors, // Use the lighter random color scheme
+              colors: randomColors,
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
             ),
             borderRadius: BorderRadius.circular(16.0),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.1), // Lighter shadow for a soft look
+                color: Colors.black.withOpacity(0.1),
                 spreadRadius: 2,
                 blurRadius: 12,
                 offset: Offset(0, 6),
-              )
-            ], // Soft shadow effect
+              ),
+            ],
           ),
           child: Column(
-            mainAxisAlignment: MainAxisAlignment.start, // Adjusted alignment for better spacing
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              // Image with top and bottom margin and left-right padding
+              // Handle image loading
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 8.0, vertical: 6.0),
                 child: ClipRRect(
-                  borderRadius: BorderRadius.only(
-                    topLeft: Radius.circular(16.0),
-                    topRight: Radius.circular(16.0),
-                  ),
+                  borderRadius: BorderRadius.circular(16.0),
                   child: Image.asset(
                     logoPath,
-                    height: 100, // Image takes top area with a fixed height
+                    height: 100,
                     width: double.infinity,
-                    fit: BoxFit.cover, // Better image fitting
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Image.asset(
+                        'assets/images/default_logo.webp', // Fallback image
+                        height: 100,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                      );
+                    },
                   ),
                 ),
               ),
-              // Course name below the image
+              // Course name
               Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 8.0, vertical: 6.0),
+                padding: const EdgeInsets.symmetric(
+                    horizontal: 8.0, vertical: 6.0),
                 child: Text(
                   courseName,
-                  style: TextStyle(
-                    fontSize: 18, // Slightly smaller text for better spacing
-                    fontWeight: FontWeight.w700, // Lighter weight for a more modern feel
-                    color: Colors.black87, // Dark text for contrast
-                    letterSpacing: 1.5, // Elegant letter spacing
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: Colors.black87,
+                    letterSpacing: 1.5,
                   ),
                   textAlign: TextAlign.center,
                 ),

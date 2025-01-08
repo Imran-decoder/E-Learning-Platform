@@ -1,7 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:elearning/screens/dashboard_screen.dart'; // Import DashboardScreen
 import 'package:elearning/screens/profile/profile_screen.dart';
-void main() => runApp(MyApp());
+import 'package:firebase_core/firebase_core.dart';
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
+  runApp(MyApp());
+}
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

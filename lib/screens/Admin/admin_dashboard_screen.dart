@@ -166,7 +166,7 @@ class Sidebar extends StatelessWidget {
         _buildMenuItem(
           index: 2,
           icon: Icons.account_circle_outlined,
-          label: 'Profile',
+          label: 'People',
           context: context,
         ),
       ],

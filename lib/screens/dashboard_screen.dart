@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:elearning/components/dashboard_header.dart';
 import 'package:elearning/components/ongoing_course_card.dart';
 import 'package:elearning/screens/course_detail_screen.dart';
@@ -11,111 +12,162 @@ class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
   @override
-  _DashboardScreenState createState() => _DashboardScreenState();
+  State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
   final TextEditingController _searchControl = TextEditingController();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  final List<Map<String, String>> courses = [
-    {'logo': 'assets/images/icon_1.png', 'name': 'HTML'},
-    {'logo': 'assets/images/icon_1.png', 'name': 'CSS'},
-    {'logo': 'assets/images/icon_1.png', 'name': 'JavaScript'},
-    {'logo': 'assets/images/icon_1.png', 'name': 'React'},
-    {'logo': 'assets/images/icon_1.png', 'name': 'Node.js'},
-    {'logo': 'assets/images/icon_1.png', 'name': 'Next.js'},
-  ];
+  // Fetch courses from Firestore
+  Future<List<Map<String, String>>> _fetchCourses() async {
+    try {
+      QuerySnapshot snapshot = await _firestore.collection('Courses').get();
+      return snapshot.docs.map((doc) {
+        return {
+          'id': doc.id,
+          'logo': doc['logo']?.toString().isNotEmpty == true
+              ? doc['logo'].toString()
+              : 'assets/images/default_logo.webp',
+          'name': doc['title']?.toString() ?? 'Unnamed Course',
+        };
+      }).toList();
+    } catch (e) {
+      debugPrint('Error fetching courses: $e');
+      return [];
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: CustomScrollView(
         slivers: [
-          // Header with Navbar
-          SliverAppBar(
-            expandedHeight: 250,
-            backgroundColor: Colors.transparent,
-            flexibleSpace: FlexibleSpaceBar(
-              background: DashboardHeader(
-                animationPath: 'animations/dashboard.json',
-              ),
-            ),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.admin_panel_settings_outlined,
-                    color: Colors.white),
-                onPressed: () => Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => AdminDashboardScreen(),
-                  ),
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.notifications, color: Colors.white),
-                onPressed: () => debugPrint("Notifications clicked"),
-              ),
-              // Remove Search Icon, keep only three dots icon
-              IconButton(
-                icon: const Icon(Icons.more_vert, color: Colors.white),
-                onPressed: () => debugPrint("Menu clicked"),
-              ),
-            ],
-          ),
-
-          // Main body with transparent background and border
-          SliverToBoxAdapter(
-            child: ClipRRect(
-              borderRadius: const BorderRadius.only(
-                topLeft: Radius.circular(32),
-                topRight: Radius.circular(32),
-              ),
-              child: Container(
-                padding: const EdgeInsets.all(16.0),
-                decoration: BoxDecoration(
-                  color: Colors.transparent, // Transparent background
-                  border: Border.all(
-                    color: Colors.grey.withOpacity(0.3),
-                    width: 1.0,
-                  ), // Border around the container
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const GreetingSection(userName: "Arshad"),
-                    const SizedBox(height: 28),
-                    SectionHeader(
-                      title: "Explore All Courses",
-                      actionText: "See All",
-                      onActionTap: () =>
-                          debugPrint("See All Courses clicked"),
-                    ),
-                    const SizedBox(height: 20),
-                    CourseList(
-                      courses: courses,
-                      onCourseTap: (course) =>
-                          _onCourseSelected(context, course),
-                    ),
-                    const SizedBox(height: 28),
-                    SectionHeader(
-                      title: "Ongoing Course",
-                      actionText: "See All",
-                      onActionTap: () =>
-                          debugPrint("See All Ongoing Courses clicked"),
-                    ),
-                    const SizedBox(height: 20),
-                    OngoingCourseCard(
-                        courseName: "Flutter Basics", progress: 0.6),
-                    const SizedBox(height: 16),
-                    OngoingCourseCard(
-                        courseName: "React Native Advanced", progress: 0.3),
-                  ],
-                ),
-              ),
-            ),
-          ),
+          _buildAppBar(context),
+          _buildBody(),
         ],
       ),
+    );
+  }
+
+  Widget _buildAppBar(BuildContext context) {
+    return SliverAppBar(
+      expandedHeight: 250,
+      backgroundColor: Colors.transparent,
+      flexibleSpace: const FlexibleSpaceBar(
+        background: DashboardHeader(
+          animationPath: 'animations/dashboard.json',
+        ),
+      ),
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.admin_panel_settings_outlined,
+              color: Colors.white),
+          onPressed: () => Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => AdminDashboardScreen(),
+            ),
+          ),
+        ),
+        IconButton(
+          icon: const Icon(Icons.notifications, color: Colors.white),
+          onPressed: () => debugPrint("Notifications clicked"),
+        ),
+        IconButton(
+          icon: const Icon(Icons.more_vert, color: Colors.white),
+          onPressed: () => debugPrint("Menu clicked"),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildBody() {
+    return SliverToBoxAdapter(
+      child: ClipRRect(
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(32),
+          topRight: Radius.circular(32),
+        ),
+        child: Container(
+          padding: const EdgeInsets.all(16.0),
+          decoration: BoxDecoration(
+            color: Colors.transparent,
+            border: Border.all(
+              color: Colors.grey.withOpacity(0.3),
+              width: 1.0,
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const GreetingSection(userName: "Arshad"),
+              const SizedBox(height: 28),
+              _buildSectionHeader(
+                title: "Explore All Courses",
+                actionText: "See All",
+                onActionTap: () => debugPrint("See All Courses clicked"),
+              ),
+              const SizedBox(height: 20),
+              _buildCoursesList(),
+              const SizedBox(height: 28),
+              _buildSectionHeader(
+                title: "Ongoing Course",
+                actionText: "See All",
+                onActionTap: () => debugPrint("See All Ongoing Courses clicked"),
+              ),
+              const SizedBox(height: 20),
+              _buildOngoingCourses(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildSectionHeader({
+    required String title,
+    required String actionText,
+    required VoidCallback onActionTap,
+  }) {
+    return SectionHeader(
+      title: title,
+      actionText: actionText,
+      onActionTap: onActionTap,
+    );
+  }
+
+  Widget _buildCoursesList() {
+    return FutureBuilder<List<Map<String, String>>>(
+      future: _fetchCourses(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(
+            child: Text("Error loading courses: ${snapshot.error}"),
+          );
+        }
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const Center(child: Text("No courses available."));
+        }
+
+        return CourseList(
+          courses: snapshot.data!,
+          onCourseTap: (course) => _onCourseSelected(context, course),
+        );
+      },
+    );
+  }
+
+  Widget _buildOngoingCourses() {
+    return Column(
+      children: const [
+        OngoingCourseCard(courseName: "Flutter Basics", progress: 0.6),
+        SizedBox(height: 16),
+        OngoingCourseCard(courseName: "React Native Advanced", progress: 0.3),
+      ],
     );
   }
 
