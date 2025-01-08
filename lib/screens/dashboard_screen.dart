@@ -176,7 +176,28 @@ class _DashboardScreenState extends State<DashboardScreen> {
       context,
       MaterialPageRoute(
         builder: (context) => CourseDetailsScreen(
-          courseName: course['name']!,
+          courseName: course['name']!, sections: [
+            {
+              'title': 'Introduction',
+              'content':
+                  'This is an introduction to ${course['name']} course.',
+            },
+            {
+              'title': 'Chapter 1',
+              'content':
+                  'This is the content of Chapter 1 of ${course['name']} course.',
+            },
+            {
+              'title': 'Chapter 2',
+              'content':
+                  'This is the content of Chapter 2 of ${course['name']} course.',
+            },
+            {
+              'title': 'Chapter 3',
+              'content':
+                  'This is the content of Chapter 3 of ${course['name']} course.',
+            },
+          ],
         ),
       ),
     );

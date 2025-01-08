@@ -4,9 +4,11 @@ import 'package:elearning/components/header_section.dart';
 
 class CourseDetailsScreen extends StatelessWidget {
   final String courseName;
+  final List<Map<String, String>> sections; // List of sections with title and content.
 
   const CourseDetailsScreen({
     required this.courseName,
+    required this.sections,
     Key? key,
   }) : super(key: key);
 
@@ -19,41 +21,27 @@ class CourseDetailsScreen extends StatelessWidget {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(16.20),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Reusable Tappable Header Sections
-              HeaderSection(
-                title: "Course Overview",
+            children: sections.map((section) {
+              return Padding(padding: const EdgeInsets.only(bottom: 20.0),
+              child: HeaderSection(
+                title: section['title']!,
                 onTap: () {
                   Navigator.push(
                     context,
                     MaterialPageRoute(
                       builder: (context) => DetailedInfoScreen(
-                        title: "Course Overview",
-                        content: "This course covers all the fundamentals of the topic with practical examples and hands-on exercises to help you master the concepts.",
+                        title: section['title']!,
+                        content: section['content']!,
                       ),
                     ),
                   );
                 },
               ),
-              const SizedBox(height: 16),
-              HeaderSection(
-                title: "Course Content",
-                onTap: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => DetailedInfoScreen(
-                        title: "Course Content",
-                        content: "1. Introduction to Basics\n2. Intermediate Concepts\n3. Advanced Topics\n4. Final Project and Practice",
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ],
+             );
+            }).toList(),
           ),
         ),
       ),
