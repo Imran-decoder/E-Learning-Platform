@@ -8,8 +8,8 @@ class ModuleContainer extends StatelessWidget {
   const ModuleContainer({
     required this.title,
     required this.onTap,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -48,8 +48,8 @@ class CourseDetailScreen extends StatelessWidget {
   const CourseDetailScreen({
     required this.courseName,
     required this.modules,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -90,8 +90,8 @@ class CourseModuleScreen extends StatelessWidget {
   const CourseModuleScreen({
     required this.moduleTitle,
     required this.moduleContent,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -117,7 +117,7 @@ void main() {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {

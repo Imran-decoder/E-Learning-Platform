@@ -57,8 +57,8 @@ class ProfileScreen extends StatelessWidget {
 
 class ProfilePic extends StatelessWidget {
   const ProfilePic({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -101,11 +101,11 @@ class ProfilePic extends StatelessWidget {
 
 class ProfileMenu extends StatelessWidget {
   const ProfileMenu({
-    Key? key,
+    super.key,
     required this.text,
     required this.icon,
     this.press,
-  }) : super(key: key);
+  });
 
   final String text, icon;
   final VoidCallback? press;

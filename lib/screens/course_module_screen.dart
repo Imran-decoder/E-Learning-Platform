@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 class CourseModulesScreen extends StatelessWidget {
   final List<Map<String, dynamic>> modules;
 
-  const CourseModulesScreen({required this.modules, Key? key}) : super(key: key);
+  const CourseModulesScreen({required this.modules, super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -45,8 +45,8 @@ class ModuleCard extends StatelessWidget {
     required this.moduleName,
     required this.description,
     required this.onTap,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -92,7 +92,7 @@ class ModuleCard extends StatelessWidget {
 class ModuleDetailScreen extends StatelessWidget {
   final Map<String, dynamic> module;
 
-  const ModuleDetailScreen({required this.module, Key? key}) : super(key: key);
+  const ModuleDetailScreen({required this.module, super.key});
 
   @override
   Widget build(BuildContext context) {

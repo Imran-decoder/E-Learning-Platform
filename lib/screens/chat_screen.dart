@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 
 class ChatScreen extends StatefulWidget {
+  const ChatScreen({super.key});
+
   @override
   _ChatScreenState createState() => _ChatScreenState();
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  TextEditingController _controller = TextEditingController();
-  List<String> _messages = [];
+  final TextEditingController _controller = TextEditingController();
+  final List<String> _messages = [];
 
   // Function to handle sending a message
   void _sendMessage() {

@@ -4,7 +4,7 @@ class OngoingCourseCard extends StatelessWidget {
   final String courseName;
   final double progress;
 
-  const OngoingCourseCard({
+  const OngoingCourseCard({super.key, 
     required this.courseName,
     required this.progress,
   });

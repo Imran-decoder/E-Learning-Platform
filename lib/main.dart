@@ -39,6 +39,8 @@ class MyApp extends StatelessWidget {
 }
 
 class BottomNavBarApp extends StatefulWidget {
+  const BottomNavBarApp({super.key});
+
   @override
   _BottomNavBarAppState createState() => _BottomNavBarAppState();
 }
@@ -176,13 +178,15 @@ class _BottomNavBarAppState extends State<BottomNavBarApp> {
 }
 
 class ChatScreen extends StatefulWidget {
+  const ChatScreen({super.key});
+
   @override
   _ChatScreenState createState() => _ChatScreenState();
 }
 
 class _ChatScreenState extends State<ChatScreen> {
-  TextEditingController _controller = TextEditingController();
-  List<String> _messages = [];
+  final TextEditingController _controller = TextEditingController();
+  final List<String> _messages = [];
 
   // Function to handle sending a message
   void _sendMessage() {
@@ -261,6 +265,8 @@ class _ChatScreenState extends State<ChatScreen> {
 // }
 
 class SearchScreen extends StatelessWidget {
+  const SearchScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Center(

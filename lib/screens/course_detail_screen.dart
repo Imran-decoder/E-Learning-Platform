@@ -222,8 +222,8 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
             await _loadCourseData();
           }
         },
-        child: const Icon(Icons.add),
         tooltip: 'Add New Chapter',
+        child: const Icon(Icons.add),
       ),
     );
   }

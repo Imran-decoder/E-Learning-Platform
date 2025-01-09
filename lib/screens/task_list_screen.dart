@@ -1,6 +1,5 @@
 import 'package:elearning/db_operations/courses.dart';
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 // Screen to display list of tasks for a course
 class TaskListScreen extends StatefulWidget {
