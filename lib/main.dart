@@ -2,6 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:elearning/screens/dashboard_screen.dart'; // Import DashboardScreen
 import 'package:elearning/screens/profile/profile_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:elearning/Onboarding/sign-up.dart';
+import 'package:elearning/Onboarding/check_stateof_login.dart';
+import 'package:elearning/Onboarding/splash.dart';
+import 'package:elearning/Onboarding/login.dart';
+import 'package:elearning/Onboarding/forgot_pass.dart';
+import 'package:elearning/Onboarding/varification.dart';
+import 'package:elearning/Onboarding/change_pass.dart';
+import 'package:elearning/Onboarding/secpage_of_signup.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,7 +41,19 @@ class MyApp extends StatelessWidget {
           hintStyle: TextStyle(color: Colors.black),
         ),
       ),
-      home: BottomNavBarApp(),
+      home: Splash(),
+      routes: {
+        '/dashboard': (context) => BottomNavBarApp(),
+        '/profile': (context) => ProfileScreen(),
+        '/signup': (context) => SignUpScreen(),
+        '/log-sign': (context) => SigninOrSignupScreen(),
+        '/login': (context) => SignInScreen(),
+        '/forgot': (context) => ForgotPasswordScreen(),
+        '/verify': (context) => VerificationScreen(),
+        '/change': (context) => ChangePasswordScreen(),
+        '/secpage': (context) => ComplateProfileScreen(),
+        
+      },
     );
   }
 }
