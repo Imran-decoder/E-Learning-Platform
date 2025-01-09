@@ -191,7 +191,7 @@ Future <void> createUserWithEmailAndPassword() async{
                   ),
                 );}
   
-              if(passwordController.text.trim() != rePasswordController.text.trim()){
+              else if(passwordController.text.trim() != rePasswordController.text.trim()){
                 passwordController.clear();
               rePasswordController.clear();
       ScaffoldMessenger.of(context).showSnackBar(
@@ -200,7 +200,7 @@ Future <void> createUserWithEmailAndPassword() async{
           backgroundColor: Colors.red,
         ),
       );
-      return;
+      
               }else{
               await createUserWithEmailAndPassword();
               emailController.clear();
