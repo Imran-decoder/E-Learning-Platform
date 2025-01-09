@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 // TODO: add flutter_svg package
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class SignUpScreen extends StatelessWidget {
   const SignUpScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -78,17 +80,43 @@ const authOutlineInputBorder = OutlineInputBorder(
   borderRadius: BorderRadius.all(Radius.circular(100)),
 );
 
-class SignUpForm extends StatelessWidget {
+class SignUpForm extends StatefulWidget {
   const SignUpForm({super.key});
 
+  @override
+  State<SignUpForm> createState() => _SignUpFormState();
+}
+
+class _SignUpFormState extends State<SignUpForm> {
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  final rePasswordController = TextEditingController();
+
+@override
+void dispose(){
+  emailController.dispose();
+  passwordController.dispose();
+  rePasswordController.dispose();
+  super.dispose();
+}
+
+Future <void> createUserWithEmailAndPassword() async{
+  try{
+    final userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+      email: emailController.text.trim(),
+      password: passwordController.text.trim(),);
+  }
+  catch(e){
+    print(e);
+  }
+}
   @override
   Widget build(BuildContext context) {
     return Form(
       child: Column(
         children: [
           TextFormField(
-            onSaved: (email) {},
-            onChanged: (email) {},
+            controller: emailController,
             textInputAction: TextInputAction.next,
             decoration: InputDecoration(
                 hintText: "Enter your email",
@@ -110,8 +138,7 @@ class SignUpForm extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 24),
             child: TextFormField(
-              onSaved: (password) {},
-              onChanged: (password) {},
+              controller: passwordController,
               obscureText: true,
               textInputAction: TextInputAction.next,
               decoration: InputDecoration(
@@ -133,8 +160,7 @@ class SignUpForm extends StatelessWidget {
             ),
           ),
           TextFormField(
-            onSaved: (password) {},
-            onChanged: (password) {},
+            controller: rePasswordController,
             obscureText: true,
             decoration: InputDecoration(
                 hintText: "Enter your password",
@@ -155,8 +181,25 @@ class SignUpForm extends StatelessWidget {
           ),
           const SizedBox(height: 32),
           ElevatedButton(
-            onPressed: () {
+            onPressed: () async{
+              if(passwordController.text.trim() != rePasswordController.text.trim()){
+                passwordController.clear();
+              rePasswordController.clear();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text("Passwords do not match!"),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+              }else{
+              await createUserWithEmailAndPassword();
+              emailController.clear();
+              passwordController.clear();
+              rePasswordController.clear();
               Navigator.pushNamed(context, '/secpage');
+              }
+              
             },
             style: ElevatedButton.styleFrom(
               elevation: 0,
