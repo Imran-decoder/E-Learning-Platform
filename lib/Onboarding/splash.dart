@@ -1,25 +1,3 @@
-// import 'package:flutter/material.dart';
-
-// class Splash extends StatelessWidget {
-//   const Splash({super.key});
-   
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       body: Center(
-//         child: Column(
-//           mainAxisAlignment: MainAxisAlignment.center,
-//           children: [
-//             Image.asset('assets/images/splash.png'),
-//             const SizedBox(height: 20),
-//             const CircularProgressIndicator(),
-            
-//           ],
-//         ),
-//       ),
-//     );
-//   }
-// }
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -37,8 +15,8 @@ class _SplashState extends State<Splash> with SingleTickerProviderStateMixin {
 
     SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
 
-    Future.delayed(const Duration(seconds: 3), () {
-      Navigator.pushReplacementNamed(context, '/dashboard'
+    Future.delayed(const Duration(seconds: 2), () {
+      Navigator.pushNamed(context, '/log-sign'
       );
     });
   }
