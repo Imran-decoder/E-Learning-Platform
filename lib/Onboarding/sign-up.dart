@@ -91,6 +91,7 @@ class _SignUpFormState extends State<SignUpForm> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final rePasswordController = TextEditingController();
+  final emailRegex = RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$");
 
 @override
 void dispose(){
@@ -182,6 +183,14 @@ Future <void> createUserWithEmailAndPassword() async{
           const SizedBox(height: 32),
           ElevatedButton(
             onPressed: () async{
+              if(emailController.text.trim().isEmpty | !emailRegex.hasMatch(emailController.text.trim())){
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text("Please enter an email address"),
+                    backgroundColor: Colors.red,
+                  ),
+                );}
+  
               if(passwordController.text.trim() != rePasswordController.text.trim()){
                 passwordController.clear();
               rePasswordController.clear();
