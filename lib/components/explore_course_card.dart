@@ -87,10 +87,10 @@ class ExploreCourseCard extends StatelessWidget {
                 child: Text(
                   courseName,
                   style: const TextStyle(
-                    fontSize: 18,
+                    fontSize: 16,
                     fontWeight: FontWeight.w700,
                     color: Colors.black87,
-                    letterSpacing: 1.5,
+                    letterSpacing: 0.1,
                   ),
                   textAlign: TextAlign.center,
                 ),

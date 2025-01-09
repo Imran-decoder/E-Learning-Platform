@@ -1,4 +1,7 @@
+// admin_dashboard_screen.dart
+
 import 'package:flutter/material.dart';
+import 'people_screen.dart';  // Import the PeopleScreen
 
 class AdminDashboardScreen extends StatefulWidget {
   @override
@@ -12,7 +15,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   final List<Widget> _screens = [
     AdminHomeScreen(),
     ManageCoursesScreen(),
-    AdminProfileScreen(),
+    PeopleScreen(), // Use the imported PeopleScreen here
   ];
 
   void _onItemTapped(int index) {
@@ -50,10 +53,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           // Tablet layout with AppBar and Drawer
           return Scaffold(
             appBar: AppBar(
-              title: const Text('Admin Dashboard',
-              style:TextStyle(color: Colors.white),
+              title: const Text(
+                'Admin Dashboard',
+                style: TextStyle(color: Colors.white),
               ),
-
               backgroundColor: Colors.grey[850],
             ),
             drawer: Drawer(
@@ -75,7 +78,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 Positioned.fill(
                   child: _screens[_selectedIndex],
                 ),
-
                 // Floating BottomNavigationBar
                 Positioned(
                   bottom: 16,
@@ -111,8 +113,8 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                             label: 'Manage Courses',
                           ),
                           BottomNavigationBarItem(
-                            icon: Icon(Icons.account_circle_outlined),
-                            label: 'Profile',
+                            icon: Icon(Icons.people),
+                            label: 'People',
                           ),
                         ],
                       ),
@@ -165,7 +167,7 @@ class Sidebar extends StatelessWidget {
         ),
         _buildMenuItem(
           index: 2,
-          icon: Icons.account_circle_outlined,
+          icon: Icons.people,
           label: 'People',
           context: context,
         ),
@@ -224,21 +226,6 @@ class ManageCoursesScreen extends StatelessWidget {
       child: const Center(
         child: Text(
           'Manage Courses Screen',
-          style: TextStyle(fontSize: 20, color: Colors.white),
-        ),
-      ),
-    );
-  }
-}
-
-class AdminProfileScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: Colors.black,
-      child: const Center(
-        child: Text(
-          'Admin Profile Screen',
           style: TextStyle(fontSize: 20, color: Colors.white),
         ),
       ),
