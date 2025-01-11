@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-// TODO: add flutter_svg package
+// TODO: add flutter_svg package to pubspec.yaml file
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 

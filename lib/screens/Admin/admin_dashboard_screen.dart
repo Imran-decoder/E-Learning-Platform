@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:elearning/screens/Admin/people_screen.dart';
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
 
@@ -13,7 +14,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   final List<Widget> _screens = [
     AdminHomeScreen(),
     ManageCoursesScreen(),
-    AdminProfileScreen(),
+    PeopleScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -113,7 +114,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                           ),
                           BottomNavigationBarItem(
                             icon: Icon(Icons.account_circle_outlined),
-                            label: 'Profile',
+                            label: 'People',
                           ),
                         ],
                       ),
@@ -202,6 +203,9 @@ class Sidebar extends StatelessWidget {
     );
   }
 }
+
+
+
 
 // Dummy Screens
 class AdminHomeScreen extends StatelessWidget {
