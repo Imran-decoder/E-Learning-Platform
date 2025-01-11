@@ -26,7 +26,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
       return snapshot.docs.map((doc) {
         return {
           'id': doc.id,
-          'logo': (doc['logo']?.toString().isNotEmpty == true && Uri.tryParse(doc['logo'].toString())?.isAbsolute == true)
+
+           'logo': (doc['logo']?.toString().isNotEmpty == true && Uri.tryParse(doc['logo'].toString())?.isAbsolute == true)
+
               ? doc['logo'].toString()
               : 'assets/images/default_logo.webp',
           'name': doc['title']?.toString() ?? 'Unnamed Course',
@@ -171,35 +173,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  void _onCourseSelected(BuildContext context, Map<String, String> course) {
+ void _onCourseSelected(BuildContext context, Map<String, String> course) {
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => CourseDetailsScreen(
-          courseName: course['name']!, sections: [
-            {
-              'title': 'Introduction',
-              'content':
-                  'This is an introduction to ${course['name']} course.',
-            },
-            {
-              'title': 'Chapter 1',
-              'content':
-                  'This is the content of Chapter 1 of ${course['name']} course.',
-            },
-            {
-              'title': 'Chapter 2',
-              'content':
-                  'This is the content of Chapter 2 of ${course['name']} course.',
-            },
-            {
-              'title': 'Chapter 3',
-              'content':
-                  'This is the content of Chapter 3 of ${course['name']} course.',
-            },
-          ],
-        ),
-      ),
+    builder: (context) => CourseDetailsScreen(courseId: 'eY5LNfkXSE1w7w0TkBoG'),
+  ),
     );
   }
 }

@@ -7,8 +7,8 @@ class DetailedInfoScreen extends StatelessWidget {
   const DetailedInfoScreen({
     required this.title,
     required this.content,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {

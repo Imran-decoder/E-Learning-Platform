@@ -1,9 +1,12 @@
-// admin_dashboard_screen.dart
-
 import 'package:flutter/material.dart';
 import 'people_screen.dart';
 
+
+
+import 'package:elearning/screens/Admin/people_screen.dart';
 class AdminDashboardScreen extends StatefulWidget {
+  const AdminDashboardScreen({super.key});
+
   @override
   _AdminDashboardScreenState createState() => _AdminDashboardScreenState();
 }
@@ -51,10 +54,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           // Tablet layout with AppBar and Drawer
           return Scaffold(
             appBar: AppBar(
-              title: const Text(
-                'Admin Dashboard',
-                style: TextStyle(color: Colors.white),
+              title: const Text('Admin Dashboard',
+              style:TextStyle(color: Colors.white),
               ),
+
               backgroundColor: Colors.grey[850],
             ),
             drawer: Drawer(
@@ -76,6 +79,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 Positioned.fill(
                   child: _screens[_selectedIndex],
                 ),
+
                 // Floating BottomNavigationBar
                 Positioned(
                   bottom: 16,
@@ -111,7 +115,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                             label: 'Manage Courses',
                           ),
                           BottomNavigationBarItem(
-                            icon: Icon(Icons.people),
+                            icon: Icon(Icons.account_circle_outlined),
                             label: 'People',
                           ),
                         ],
@@ -132,7 +136,7 @@ class Sidebar extends StatelessWidget {
   final int selectedIndex;
   final Function(int) onItemSelected;
 
-  const Sidebar({
+  const Sidebar({super.key, 
     required this.selectedIndex,
     required this.onItemSelected,
   });
@@ -165,7 +169,7 @@ class Sidebar extends StatelessWidget {
         ),
         _buildMenuItem(
           index: 2,
-          icon: Icons.people,
+          icon: Icons.account_circle_outlined,
           label: 'People',
           context: context,
         ),
@@ -192,18 +196,22 @@ class Sidebar extends StatelessWidget {
         ),
       ),
       onTap: () {
-        if(Scaffold.of(context).isDrawerOpen){
+         if(Scaffold.of(context).isDrawerOpen){
           Navigator.pop(context); // Close the drawer if open
-        }
+        } // Close the drawer if open
         onItemSelected(index);
-      },
       tileColor: selectedIndex == index ? Colors.grey[700] : Colors.transparent,
     );
   }
 }
 
+
+
+
 // Dummy Screens
 class AdminHomeScreen extends StatelessWidget {
+  const AdminHomeScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -219,6 +227,8 @@ class AdminHomeScreen extends StatelessWidget {
 }
 
 class ManageCoursesScreen extends StatelessWidget {
+  const ManageCoursesScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -226,6 +236,23 @@ class ManageCoursesScreen extends StatelessWidget {
       child: const Center(
         child: Text(
           'Manage Courses Screen',
+          style: TextStyle(fontSize: 20, color: Colors.white),
+        ),
+      ),
+    );
+  }
+}
+
+class AdminProfileScreen extends StatelessWidget {
+  const AdminProfileScreen({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.black,
+      child: const Center(
+        child: Text(
+          'Admin Profile Screen',
           style: TextStyle(fontSize: 20, color: Colors.white),
         ),
       ),

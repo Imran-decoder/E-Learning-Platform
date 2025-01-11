@@ -3,6 +3,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:elearning/components/Admin/custom_dialog.dart';
 
 class PeopleScreen extends StatelessWidget {
+  const PeopleScreen({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,6 +52,7 @@ class PeopleScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Expanded(
+
                 child: StreamBuilder<QuerySnapshot>(
                   stream: FirebaseFirestore.instance.collection('Students').snapshots(),
                   builder: (context, snapshot) {
@@ -58,6 +61,7 @@ class PeopleScreen extends StatelessWidget {
                         child: CircularProgressIndicator(),
                       );
                     }
+
 
                     if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                       return const Center(

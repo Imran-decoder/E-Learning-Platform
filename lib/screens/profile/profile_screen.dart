@@ -1,9 +1,23 @@
 import 'package:flutter/material.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
+
+  @override
+  State<ProfileScreen> createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  Future<void> _signOut() async {
+    try {
+      await FirebaseAuth.instance.signOut();
+    } on FirebaseAuthException catch (e) {
+      print(e);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,12 +47,12 @@ class ProfileScreen extends StatelessWidget {
               icon: "assets/icons/help.svg",
               press: () {},
             ),
-             ProfileMenu(
+            ProfileMenu(
               text: "Admin Login",
               icon: "assets/icons/admin-eye.svg",
               press: () {},
             ),
-               ProfileMenu(
+            ProfileMenu(
               text: "Rate Us",
               icon: "assets/icons/rate-us.svg",
               press: () {},
@@ -46,7 +60,14 @@ class ProfileScreen extends StatelessWidget {
             ProfileMenu(
               text: "Log Out",
               icon: "assets/icons/log-out.svg",
-              press: () {},
+              press: () async {
+                try {
+                  await _signOut();
+                  Navigator.pushReplacementNamed(context, '/log-sign');
+                } on FirebaseAuthException catch (e) {
+                  print(e);
+                }
+              },
             ),
           ],
         ),
@@ -57,8 +78,8 @@ class ProfileScreen extends StatelessWidget {
 
 class ProfilePic extends StatelessWidget {
   const ProfilePic({
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -70,8 +91,7 @@ class ProfilePic extends StatelessWidget {
         clipBehavior: Clip.none,
         children: [
           const CircleAvatar(
-            backgroundImage:
-                AssetImage("assets/images/boy_illustration.png"),
+            backgroundImage: AssetImage("assets/images/boy_illustration.png"),
           ),
           Positioned(
             right: -16,
@@ -101,11 +121,11 @@ class ProfilePic extends StatelessWidget {
 
 class ProfileMenu extends StatelessWidget {
   const ProfileMenu({
-    Key? key,
+    super.key,
     required this.text,
     required this.icon,
     this.press,
-  }) : super(key: key);
+  });
 
   final String text, icon;
   final VoidCallback? press;
