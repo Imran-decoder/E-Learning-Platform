@@ -193,7 +193,9 @@ class Sidebar extends StatelessWidget {
         ),
       ),
       onTap: () {
-        Navigator.pop(context); // Close the drawer if open
+        if(Scaffold.of(context).isDrawerOpen){
+          Navigator.pop(context); // Close the drawer if open
+        } // Close the drawer if open
         onItemSelected(index);
       },
       tileColor: selectedIndex == index ? Colors.grey[700] : Colors.transparent,

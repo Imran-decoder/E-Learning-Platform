@@ -26,7 +26,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
       return snapshot.docs.map((doc) {
         return {
           'id': doc.id,
-          'logo': doc['logo']?.toString().isNotEmpty == true
+           'logo': (doc['logo']?.toString().isNotEmpty == true && Uri.tryParse(doc['logo'].toString())?.isAbsolute == true)
               ? doc['logo'].toString()
               : 'assets/images/default_logo.webp',
           'name': doc['title']?.toString() ?? 'Unnamed Course',

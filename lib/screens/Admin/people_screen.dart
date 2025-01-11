@@ -38,7 +38,7 @@ class PeopleScreen extends StatelessWidget {
               const SizedBox(height: 8),
               Expanded(
                 child: ListView.builder(
-                  itemCount: 79, // Number of classmates
+                  itemCount: 70, // Number of classmates
                   itemBuilder: (context, index) {
                     final classmates = [
                       "CHAUDHARY MOHD ARSHAD",
