@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-// TODO: add flutter_svg package to pubspec.yaml file
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'dart:async';
 
 class SignUpScreen extends StatelessWidget {
   const SignUpScreen({super.key});
@@ -37,20 +37,19 @@ class SignUpScreen extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Color(0xFF757575)),
                   ),
-                  // const SizedBox(height: 16),
                   SizedBox(height: MediaQuery.of(context).size.height * 0.05),
                   const SignUpForm(),
-                  SizedBox(height: MediaQuery.of(context).size.height * 0.15),
+                  SizedBox(height: MediaQuery.of(context).size.height * 0.08),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      SocalCard(
+                      SocialCard(
                         icon: SvgPicture.string(googleIcon),
                         press: () {},
                       ),
                       Padding(
                         padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: SocalCard(
+                        child: SocialCard(
                           icon: SvgPicture.string(facebookIcon),
                           press: () {},
                         ),
@@ -59,11 +58,9 @@ class SignUpScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   const Text(
-                    "By continuing your confirm that you agree \nwith our Term and Condition",
+                    "By continuing, you confirm that you agree \nwith our Terms and Conditions",
                     textAlign: TextAlign.center,
-                    style: TextStyle(
-                      color: Color(0xFF757575),
-                    ),
+                    style: TextStyle(color: Color(0xFF757575)),
                   )
                 ],
               ),
@@ -75,11 +72,6 @@ class SignUpScreen extends StatelessWidget {
   }
 }
 
-const authOutlineInputBorder = OutlineInputBorder(
-  borderSide: BorderSide(color: Color(0xFF757575)),
-  borderRadius: BorderRadius.all(Radius.circular(100)),
-);
-
 class SignUpForm extends StatefulWidget {
   const SignUpForm({super.key});
 
@@ -88,147 +80,240 @@ class SignUpForm extends StatefulWidget {
 }
 
 class _SignUpFormState extends State<SignUpForm> {
+  final _formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final rePasswordController = TextEditingController();
-  final emailRegex = RegExp(r"^[a-zA-Z0-9.a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$");
+  
+  bool isLoading = false;
+  bool isPasswordVisible = false;
+  bool isRePasswordVisible = false;
+  
+  static final emailRegex = RegExp(
+    r"^[a-zA-Z0-9.a-zA-Z0-9.!#$%&'*+-/=?^_`{|}~]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"
+  );
+  
+  Timer? _verificationTimer;
 
-@override
-void dispose(){
-  emailController.dispose();
-  passwordController.dispose();
-  rePasswordController.dispose();
-  super.dispose();
-}
+  @override
+  void dispose() {
+    emailController.dispose();
+    passwordController.dispose();
+    rePasswordController.dispose();
+    _verificationTimer?.cancel();
+    super.dispose();
+  }
 
-Future <void> createUserWithEmailAndPassword() async{
-  try{
-    final userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
-      email: emailController.text.trim(),
-      password: passwordController.text.trim(),);
+  Future<void> _signUp() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() => isLoading = true);
+
+    try {
+      final userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: emailController.text.trim(),
+        password: passwordController.text.trim(),
+      );
+
+      await _sendVerificationEmail();
+      _startVerificationCheck();
+      
+    } on FirebaseAuthException catch (e) {
+      String message;
+      switch (e.code) {
+        case 'email-already-in-use':
+          message = 'This email is already registered';
+          break;
+        case 'weak-password':
+          message = 'Password is too weak. Use at least 6 characters';
+          break;
+        default:
+          message = 'Registration failed. Please try again';
+      }
+      _showErrorSnackBar(message);
+    } catch (e) {
+      _showErrorSnackBar('An unexpected error occurred');
+    } finally {
+      if (mounted) setState(() => isLoading = false);
+    }
   }
-  catch(e){
-    print(e);
+
+  Future<void> _sendVerificationEmail() async {
+    final user = FirebaseAuth.instance.currentUser;
+    await user?.sendEmailVerification();
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Verification email sent. Please check your inbox'),
+          backgroundColor: Colors.green,
+        ),
+      );
+    }
   }
-}
+
+  void _startVerificationCheck() {
+    _verificationTimer = Timer.periodic(
+      const Duration(seconds: 3),
+      (timer) async {
+        final user = FirebaseAuth.instance.currentUser;
+        await user?.reload();
+        
+        if (user?.emailVerified ?? false) {
+          timer.cancel();
+          if (mounted) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Email verified successfully!'),
+                backgroundColor: Colors.green,
+              ),
+            );
+            Navigator.pushReplacementNamed(context, '/login');
+          }
+        }
+      },
+    );
+  }
+
+  void _showErrorSnackBar(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Form(
+      key: _formKey,
       child: Column(
         children: [
           TextFormField(
             controller: emailController,
+            keyboardType: TextInputType.emailAddress,
             textInputAction: TextInputAction.next,
-            decoration: InputDecoration(
-                hintText: "Enter your email",
-                labelText: "Email",
-                floatingLabelBehavior: FloatingLabelBehavior.always,
-                hintStyle: const TextStyle(color: Color(0xFF757575)),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 16,
-                ),
-                suffix: SvgPicture.string(
-                  mailIcon,
-                ),
-                border: authOutlineInputBorder,
-                enabledBorder: authOutlineInputBorder,
-                focusedBorder: authOutlineInputBorder.copyWith(
-                    borderSide: const BorderSide(color: Color(0xFFFF7643)))),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 24),
-            child: TextFormField(
-              controller: passwordController,
-              obscureText: true,
-              textInputAction: TextInputAction.next,
-              decoration: InputDecoration(
-                  hintText: "Enter your password",
-                  labelText: "Password",
-                  floatingLabelBehavior: FloatingLabelBehavior.always,
-                  hintStyle: const TextStyle(color: Color(0xFF757575)),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 16,
-                  ),
-                  suffix: SvgPicture.string(
-                    lockIcon,
-                  ),
-                  border: authOutlineInputBorder,
-                  enabledBorder: authOutlineInputBorder,
-                  focusedBorder: authOutlineInputBorder.copyWith(
-                      borderSide: const BorderSide(color: Color(0xFFFF7643)))),
-            ),
-          ),
-          TextFormField(
-            controller: rePasswordController,
-            obscureText: true,
-            decoration: InputDecoration(
-                hintText: "Enter your password",
-                labelText: "Re-enter your password",
-                floatingLabelBehavior: FloatingLabelBehavior.always,
-                hintStyle: const TextStyle(color: Color(0xFF757575)),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 16,
-                ),
-                suffix: SvgPicture.string(
-                  lockIcon,
-                ),
-                border: authOutlineInputBorder,
-                enabledBorder: authOutlineInputBorder,
-                focusedBorder: authOutlineInputBorder.copyWith(
-                    borderSide: const BorderSide(color: Color(0xFFFF7643)))),
-          ),
-          const SizedBox(height: 32),
-          ElevatedButton(
-            onPressed: () async{
-              if(emailController.text.trim().isEmpty | !emailRegex.hasMatch(emailController.text.trim())){
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text("Please enter an email address"),
-                    backgroundColor: Colors.red,
-                  ),
-                );}
-  
-              else if(passwordController.text.trim() != rePasswordController.text.trim()){
-                passwordController.clear();
-              rePasswordController.clear();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text("Passwords do not match!"),
-          backgroundColor: Colors.red,
-        ),
-      );
-      
-              }else{
-              await createUserWithEmailAndPassword();
-              emailController.clear();
-              passwordController.clear();
-              rePasswordController.clear();
-              Navigator.pushNamed(context, '/secpage');
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter your email';
               }
-              
+              if (!emailRegex.hasMatch(value)) {
+                return 'Please enter a valid email';
+              }
+              return null;
             },
-            style: ElevatedButton.styleFrom(
-              elevation: 0,
-              backgroundColor: const Color(0xFFFF7643),
-              foregroundColor: Colors.white,
-              minimumSize: const Size(double.infinity, 48),
-              shape: const RoundedRectangleBorder(
-                borderRadius: BorderRadius.all(Radius.circular(16)),
+            decoration: InputDecoration(
+              labelText: 'Email',
+              hintText: 'Enter your email',
+              floatingLabelBehavior: FloatingLabelBehavior.always,
+              suffixIcon: Padding(
+                padding: const EdgeInsets.fromLTRB(0, 0, 16, 0),
+                child: SvgPicture.string(mailIcon),
+              ),
+              border: authOutlineInputBorder,
+              enabledBorder: authOutlineInputBorder,
+              focusedBorder: authOutlineInputBorder.copyWith(
+                borderSide: const BorderSide(color: Color(0xFFFF7643)),
               ),
             ),
-            child: const Text("Continue"),
-          )
+          ),
+          const SizedBox(height: 24),
+          TextFormField(
+            controller: passwordController,
+            obscureText: !isPasswordVisible,
+            textInputAction: TextInputAction.next,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter your password';
+              }
+              if (value.length < 6) {
+                return 'Password must be at least 6 characters';
+              }
+              return null;
+            },
+            decoration: InputDecoration(
+              labelText: 'Password',
+              hintText: 'Enter your password',
+              floatingLabelBehavior: FloatingLabelBehavior.always,
+              suffixIcon: IconButton(
+                icon: Icon(
+                  isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                ),
+                onPressed: () => setState(() => isPasswordVisible = !isPasswordVisible),
+              ),
+              border: authOutlineInputBorder,
+              enabledBorder: authOutlineInputBorder,
+              focusedBorder: authOutlineInputBorder.copyWith(
+                borderSide: const BorderSide(color: Color(0xFFFF7643)),
+              ),
+            ),
+          ),
+          const SizedBox(height: 24),
+          TextFormField(
+            controller: rePasswordController,
+            obscureText: !isRePasswordVisible,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please confirm your password';
+              }
+              if (value != passwordController.text) {
+                return 'Passwords do not match';
+              }
+              return null;
+            },
+            decoration: InputDecoration(
+              labelText: 'Confirm Password',
+              hintText: 'Re-enter your password',
+              floatingLabelBehavior: FloatingLabelBehavior.always,
+              suffixIcon: IconButton(
+                icon: Icon(
+                  isRePasswordVisible ? Icons.visibility : Icons.visibility_off,
+                ),
+                onPressed: () => setState(() => isRePasswordVisible = !isRePasswordVisible),
+              ),
+              border: authOutlineInputBorder,
+              enabledBorder: authOutlineInputBorder,
+              focusedBorder: authOutlineInputBorder.copyWith(
+                borderSide: const BorderSide(color: Color(0xFFFF7643)),
+              ),
+            ),
+          ),
+          const SizedBox(height: 32),
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: ElevatedButton(
+              onPressed: isLoading ? null : _signUp,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFFF7643),
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                elevation: 0,
+              ),
+              child: isLoading
+                  ? const SizedBox(
+                      height: 24,
+                      width: 24,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : const Text('Sign Up'),
+            ),
+          ),
         ],
       ),
     );
   }
 }
 
-class SocalCard extends StatelessWidget {
-  const SocalCard({
+class SocialCard extends StatelessWidget {
+  const SocialCard({
     Key? key,
     required this.icon,
     required this.press,
@@ -255,36 +340,10 @@ class SocalCard extends StatelessWidget {
   }
 }
 
-class NoAccountText extends StatelessWidget {
-  const NoAccountText({
-    Key? key,
-  }) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        const Text(
-          "Don’t have an account? ",
-          style: TextStyle(color: Color(0xFF757575)),
-        ),
-        GestureDetector(
-          onTap: () {
-            // Handle navigation to Sign Up
-          },
-          child: const Text(
-            "Sign Up",
-            style: TextStyle(
-              color: Color(0xFFFF7643),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
+const authOutlineInputBorder = OutlineInputBorder(
+  borderSide: BorderSide(color: Color(0xFF757575)),
+  borderRadius: BorderRadius.all(Radius.circular(100)),
+);
 // Icons
 const mailIcon =
     '''<svg width="18" height="13" viewBox="0 0 18 13" fill="none" xmlns="http://www.w3.org/2000/svg">

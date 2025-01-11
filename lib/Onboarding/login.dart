@@ -1,9 +1,28 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
-class SignInScreen extends StatelessWidget {
-  final _formKey = GlobalKey<FormState>();
-
+class SignInScreen extends StatefulWidget {
   SignInScreen({super.key});
+
+  @override
+  State<SignInScreen> createState() => _SignInScreenState();
+}
+
+class _SignInScreenState extends State<SignInScreen> {
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  Future<void> signInUserWithEmailAndPassword() async {
+    try {
+      final UserCredential = await FirebaseAuth.instance
+          .signInWithEmailAndPassword(
+              email: emailController.text.trim(),
+              password: passwordController.text.trim());
+    } on FirebaseAuthException catch (e) {
+      print(e);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -31,6 +50,7 @@ class SignInScreen extends StatelessWidget {
                     child: Column(
                       children: [
                         TextFormField(
+                          controller: emailController,
                           decoration: const InputDecoration(
                             hintText: 'Mail or Phone',
                             filled: true,
@@ -51,6 +71,7 @@ class SignInScreen extends StatelessWidget {
                         Padding(
                           padding: const EdgeInsets.symmetric(vertical: 16.0),
                           child: TextFormField(
+                            controller: passwordController,
                             obscureText: true,
                             decoration: const InputDecoration(
                               hintText: 'Password',
@@ -70,10 +91,26 @@ class SignInScreen extends StatelessWidget {
                           ),
                         ),
                         ElevatedButton(
-                          onPressed: () {
+                          onPressed: () async {
                             if (_formKey.currentState!.validate()) {
                               _formKey.currentState!.save();
-                              Navigator.pushNamed(context, '/dashboard');
+                              try {
+                                if (emailController.text.trim().isEmpty ||
+                                    passwordController.text.trim().isEmpty) {
+                                  throw 'Please enter email and password';
+                                } else {
+                                  await signInUserWithEmailAndPassword();
+                                  if(FirebaseAuth.instance.currentUser != null)
+                                  Navigator.pushNamed(context, '/secpage');
+                                  else {
+                                    emailController.clear();
+                                    passwordController.clear();
+                                    throw 'Invalid email or password';
+                                  }
+                                }
+                              } catch (e) {
+                                print(e);
+                              }
                             }
                           },
                           style: ElevatedButton.styleFrom(

@@ -1,5 +1,3 @@
-// people_screen.dart
-
 import 'package:flutter/material.dart';
 
 class PeopleScreen extends StatelessWidget {
