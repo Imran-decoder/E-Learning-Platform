@@ -200,7 +200,7 @@ class Sidebar extends StatelessWidget {
           Navigator.pop(context); // Close the drawer if open
         } // Close the drawer if open
         onItemSelected(index);
-      tileColor: selectedIndex == index ? Colors.grey[700] : Colors.transparent,
+      tileColor: selectedIndex == index ? Colors.grey[700] : Colors.transparent;}
     );
   }
 }
