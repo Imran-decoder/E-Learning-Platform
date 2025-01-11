@@ -2,25 +2,25 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 
 // Model class to represent our user data structure
 class User {
-  final String userId;
-  final String username;
+  final String userID;
+  final String userName;
   final List<String> enrolledCourses;
-  final UserProfile profile;
+  final UserProfile Profile;
 
   User({
-    required this.userId,
-    required this.username,
+    required this.userID,
+    required this.userName,
     required this.enrolledCourses,
-    required this.profile,
+    required this.Profile,
   });
 
   // Convert User object to a map for Firestore
   Map<String, dynamic> toMap() {
     return {
-      'userId': userId,
-      'username': username,
+      'userID': userID,
+      'userName': userName,
       'enrolledCourses': enrolledCourses,
-      'profile': profile.toMap(),
+      'Profile': Profile.toMap(),
     };
   }
 
@@ -28,10 +28,10 @@ class User {
   factory User.fromDocument(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
     return User(
-      userId: data['userId'],
-      username: data['username'],
+      userID: data['userID'],
+      userName: data['userName'],
       enrolledCourses: List<String>.from(data['enrolledCourses']),
-      profile: UserProfile.fromMap(data['profile']['main']),
+      Profile: UserProfile.fromMap(data['Profile']['main']),
     );
   }
 }
@@ -39,16 +39,16 @@ class User {
 class UserProfile {
   final String firstName;
   final String lastName;
-  final String phoneNumber;
+  final String phone;
   final String address;
-  final String profilePic;
+  final String profilePicture;
 
   UserProfile({
     required this.firstName,
     required this.lastName,
-    required this.phoneNumber,
+    required this.phone,
     required this.address,
-    required this.profilePic,
+    required this.profilePicture,
   });
 
   Map<String, dynamic> toMap() {
@@ -56,9 +56,9 @@ class UserProfile {
       'main': {
         'firstName': firstName,
         'lastName': lastName,
-        'phoneNumber': phoneNumber,
+        'phone': phone,
         'address': address,
-        'profilePic': profilePic,
+        'profilePicture': profilePicture,
       }
     };
   }
@@ -67,30 +67,30 @@ class UserProfile {
     return UserProfile(
       firstName: map['firstName'],
       lastName: map['lastName'],
-      phoneNumber: map['phoneNumber'],
+      phone: map['phone'],
       address: map['address'],
-      profilePic: map['profilePic'],
+      profilePicture: map['profilePicture'],
     );
   }
 }
 
 class FirestoreService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  final String _collection = 'users';
+  final String _collection = 'Users';
 
   // CREATE: Add a new user to Firestore
   Future<void> createUser(User user) async {
     try {
-      await _firestore.collection(_collection).doc(user.userId).set(user.toMap());
+      await _firestore.collection(_collection).doc(user.userID).set(user.toMap());
     } catch (e) {
       throw 'Failed to create user: $e';
     }
   }
 
   // READ: Get a single user by ID
-  Future<User?> getUser(String userId) async {
+  Future<User?> getUser(String userID) async {
     try {
-      DocumentSnapshot doc = await _firestore.collection(_collection).doc(userId).get();
+      DocumentSnapshot doc = await _firestore.collection(_collection).doc(userID).get();
       if (doc.exists) {
         return User.fromDocument(doc);
       }
@@ -108,18 +108,18 @@ class FirestoreService {
   }
 
   // UPDATE: Update user information
-  Future<void> updateUser(String userId, Map<String, dynamic> updates) async {
+  Future<void> updateUser(String userID, Map<String, dynamic> updates) async {
     try {
-      await _firestore.collection(_collection).doc(userId).update(updates);
+      await _firestore.collection(_collection).doc(userID).update(updates);
     } catch (e) {
       throw 'Failed to update user: $e';
     }
   }
 
   // UPDATE: Add a course to user's enrolled courses
-  Future<void> enrollInCourse(String userId, String courseId) async {
+  Future<void> enrollInCourse(String userID, String courseId) async {
     try {
-      await _firestore.collection(_collection).doc(userId).update({
+      await _firestore.collection(_collection).doc(userID).update({
         'enrolledCourses': FieldValue.arrayUnion([courseId])
       });
     } catch (e) {
@@ -128,9 +128,9 @@ class FirestoreService {
   }
 
   // UPDATE: Update user profile information
-  Future<void> updateUserProfile(String userId, UserProfile newProfile) async {
+  Future<void> updateUserProfile(String userID, UserProfile newProfile) async {
     try {
-      await _firestore.collection(_collection).doc(userId).update({
+      await _firestore.collection(_collection).doc(userID).update({
         'profile': newProfile.toMap()
       });
     } catch (e) {
@@ -139,9 +139,9 @@ class FirestoreService {
   }
 
   // DELETE: Remove a user
-  Future<void> deleteUser(String userId) async {
+  Future<void> deleteUser(String userID) async {
     try {
-      await _firestore.collection(_collection).doc(userId).delete();
+      await _firestore.collection(_collection).doc(userID).delete();
     } catch (e) {
       throw 'Failed to delete user: $e';
     }
