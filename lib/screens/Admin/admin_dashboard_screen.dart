@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'people_screen.dart';
+
 
 
 import 'package:elearning/screens/Admin/people_screen.dart';
@@ -30,12 +32,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxWidth >= 1024) {
-          // Desktop layout with sidebar
           return Scaffold(
             backgroundColor: Colors.black,
             body: Row(
               children: [
-                // Sidebar
                 Container(
                   width: 250,
                   color: Colors.grey[850],
@@ -196,11 +196,10 @@ class Sidebar extends StatelessWidget {
         ),
       ),
       onTap: () {
-        if(Scaffold.of(context).isDrawerOpen){
+         if(Scaffold.of(context).isDrawerOpen){
           Navigator.pop(context); // Close the drawer if open
         } // Close the drawer if open
         onItemSelected(index);
-      },
       tileColor: selectedIndex == index ? Colors.grey[700] : Colors.transparent,
     );
   }
