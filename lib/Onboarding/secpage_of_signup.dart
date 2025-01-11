@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 // TODO: add flutter_svg package
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:elearning/db_operations/users.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 
 class ComplateProfileScreen extends StatelessWidget {
   const ComplateProfileScreen({super.key});
@@ -10,10 +12,7 @@ class ComplateProfileScreen extends StatelessWidget {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: const Text(
-          "Sign up",
-          style: TextStyle(color: Color(0xFF757575)),
-        ),
+        
       ),
       body: SafeArea(
         child: SizedBox(
@@ -65,17 +64,106 @@ const authOutlineInputBorder = OutlineInputBorder(
   borderRadius: BorderRadius.all(Radius.circular(100)),
 );
 
-class ComplateProfileForm extends StatelessWidget {
+class ComplateProfileForm extends StatefulWidget {
   const ComplateProfileForm({super.key});
+
+  @override
+  State<ComplateProfileForm> createState() => _ComplateProfileFormState();
+}
+
+class _ComplateProfileFormState extends State<ComplateProfileForm> {
+  final _formKey = GlobalKey<FormState>();
+
+  // Create controllers for each field to manage their values
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _addressController = TextEditingController();
+
+  // Create instance of our Firestore service
+  final FirestoreService _firestoreService = FirestoreService();
+  final auth.FirebaseAuth _auth = auth.FirebaseAuth.instance;
+  // Loading state
+  bool _isLoading = false;
+
+  // Dispose controllers when the widget is disposed
+  @override
+  void dispose() {
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _usernameController.dispose();
+    _phoneController.dispose();
+    _addressController.dispose();
+    super.dispose();
+  }
+
+  // Function to handle form submission
+  Future<void> _submitForm() async {
+    if (_formKey.currentState!.validate()) {
+      setState(() {
+        _isLoading = true;
+      });
+      final currentUser = _auth.currentUser;
+
+      try {
+        // Create UserProfile object
+        final userProfile = UserProfile(
+            firstName: _firstNameController.text,
+            lastName: _lastNameController.text,
+            phone: _phoneController.text,
+            address: _addressController.text,
+            profilePicture:
+                "https://avatar.iran.liara.run/public/50" // Default profile picture
+            );
+
+        // Create User object
+        final user = User(
+          userID: currentUser!.uid,
+          userName: _usernameController.text,
+          enrolledCourses: [], // Empty list for new user
+          Profile: userProfile,
+        );
+
+        // Save to Firestore
+        await _firestoreService.createUser(user);
+
+        // Show success message
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text("Profile created successfully!")));
+          Navigator.pushNamed(context, '/dashboard');
+        }
+      } catch (e) {
+        // Show error message
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("Error creating profile: $e")));
+        }
+      } finally {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Form(
+      key: _formKey,
       child: Column(
         children: [
           TextFormField(
-            onSaved: (firstName) {},
-            onChanged: (firstName) {},
+            controller: _firstNameController,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter your first name';
+              }
+              return null;
+            },
             textInputAction: TextInputAction.next,
             decoration: InputDecoration(
                 hintText: "Enter your first name",
@@ -95,8 +183,13 @@ class ComplateProfileForm extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 24),
             child: TextFormField(
-              onSaved: (lastName) {},
-              onChanged: (lastName) {},
+              controller: _lastNameController,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter your last name';
+                }
+                return null;
+              },
               textInputAction: TextInputAction.next,
               decoration: InputDecoration(
                   hintText: "Enter your last name",
@@ -115,19 +208,24 @@ class ComplateProfileForm extends StatelessWidget {
             ),
           ),
           TextFormField(
-            onSaved: (password) {},
-            onChanged: (password) {},
-            keyboardType: TextInputType.phone,
+            controller: _usernameController,
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'Please enter your username';
+              }
+              return null;
+            },
+            textInputAction: TextInputAction.next,
             decoration: InputDecoration(
-                hintText: "Enter your phone number",
-                labelText: "Phone Number",
+                hintText: "Enter Username",
+                labelText: "Username",
                 floatingLabelBehavior: FloatingLabelBehavior.always,
                 hintStyle: const TextStyle(color: Color(0xFF757575)),
                 contentPadding: const EdgeInsets.symmetric(
                   horizontal: 24,
                   vertical: 16,
                 ),
-                suffix: SvgPicture.string(phoneIcon),
+                suffix: SvgPicture.string(userIcon),
                 border: authOutlineInputBorder,
                 enabledBorder: authOutlineInputBorder,
                 focusedBorder: authOutlineInputBorder.copyWith(
@@ -136,8 +234,40 @@ class ComplateProfileForm extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 24),
             child: TextFormField(
-              onSaved: (address) {},
-              onChanged: (address) {},
+              controller: _phoneController,
+              validator: (value) {
+                if (value == null || value.isEmpty || value.length != 10 || !RegExp(r'^\d+$').hasMatch(value)) {
+                  return 'Please enter your phone number';
+                }
+                return null;
+              },
+              keyboardType: TextInputType.phone,
+              decoration: InputDecoration(
+                  hintText: "Enter your phone number",
+                  labelText: "Phone Number",
+                  floatingLabelBehavior: FloatingLabelBehavior.always,
+                  hintStyle: const TextStyle(color: Color(0xFF757575)),
+                  contentPadding: const EdgeInsets.symmetric(
+                    horizontal: 24,
+                    vertical: 16,
+                  ),
+                  suffix: SvgPicture.string(phoneIcon),
+                  border: authOutlineInputBorder,
+                  enabledBorder: authOutlineInputBorder,
+                  focusedBorder: authOutlineInputBorder.copyWith(
+                      borderSide: const BorderSide(color: Color(0xFFFF7643)))),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 24),
+            child: TextFormField(
+              controller: _addressController,
+              validator: (value) {
+                if (value == null || value.isEmpty) {
+                  return 'Please enter your address';
+                }
+                return null;
+              },
               decoration: InputDecoration(
                   hintText: "Enter your address",
                   labelText: "Address",
@@ -156,8 +286,11 @@ class ComplateProfileForm extends StatelessWidget {
           ),
           const SizedBox(height: 8),
           ElevatedButton(
-            onPressed: () {
-              Navigator.pushNamed(context, '/dashboard');
+            onPressed: ()async {
+             try{ await _submitForm();}
+             catch(e){
+                debugPrint('Error: $e');
+             }
             },
             style: ElevatedButton.styleFrom(
               elevation: 0,
