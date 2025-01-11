@@ -1,7 +1,7 @@
 // admin_dashboard_screen.dart
 
 import 'package:flutter/material.dart';
-import 'people_screen.dart';  // Import the PeopleScreen
+import 'people_screen.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   @override
@@ -15,7 +15,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   final List<Widget> _screens = [
     AdminHomeScreen(),
     ManageCoursesScreen(),
-    PeopleScreen(), // Use the imported PeopleScreen here
+    PeopleScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -29,12 +29,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxWidth >= 1024) {
-          // Desktop layout with sidebar
           return Scaffold(
             backgroundColor: Colors.black,
             body: Row(
               children: [
-                // Sidebar
                 Container(
                   width: 250,
                   color: Colors.grey[850],
@@ -194,7 +192,9 @@ class Sidebar extends StatelessWidget {
         ),
       ),
       onTap: () {
-        Navigator.pop(context); // Close the drawer if open
+        if(Scaffold.of(context).isDrawerOpen){
+          Navigator.pop(context); // Close the drawer if open
+        }
         onItemSelected(index);
       },
       tileColor: selectedIndex == index ? Colors.grey[700] : Colors.transparent,

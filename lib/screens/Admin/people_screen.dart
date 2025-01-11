@@ -1,5 +1,3 @@
-// people_screen.dart
-
 import 'package:flutter/material.dart';
 
 class PeopleScreen extends StatelessWidget {
@@ -7,10 +5,10 @@ class PeopleScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: SafeArea(  // SafeArea added to prevent UI overlap with status bar
-        top: true,  // Ensure SafeArea takes account of the status bar area
+      body: SafeArea(
+        top: true,
         child: Padding(
-          padding: const EdgeInsets.only(top: 42.0, left: 18.0, right: 18.0),  // Increased top padding for more space
+          padding: const EdgeInsets.only(top: 42.0, left: 18.0, right: 18.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -36,7 +34,7 @@ class PeopleScreen extends StatelessWidget {
               const SizedBox(height: 8),
               Expanded(
                 child: ListView.builder(
-                  itemCount: 79, // Number of classmates
+                  itemCount: 70,
                   itemBuilder: (context, index) {
                     final classmates = [
                       "CHAUDHARY MOHD ARSHAD",
