@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:elearning/db_operations/users.dart';
 
 class SignInScreen extends StatefulWidget {
   SignInScreen({super.key});
@@ -12,14 +14,35 @@ class _SignInScreenState extends State<SignInScreen> {
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
   Future<void> signInUserWithEmailAndPassword() async {
     try {
       final UserCredential = await FirebaseAuth.instance
           .signInWithEmailAndPassword(
               email: emailController.text.trim(),
               password: passwordController.text.trim());
+      String userID = FirebaseAuth.instance.currentUser!.uid;
+      if (FirebaseAuth.instance.currentUser != null) {
+        if (await checkUserProfile(userID) == true) {
+          Navigator.pushNamed(context, '/dashboard');}
+          else {
+        Navigator.pushNamed(context, '/secpage');
+      }
+        
+      } 
     } on FirebaseAuthException catch (e) {
       print(e);
+    }
+  }
+
+  Future<bool> checkUserProfile(String userID) async {
+    try {
+      DocumentSnapshot doc =
+          await _firestore.collection('Users').doc(userID).get();
+      return doc.exists; // True if profile exists, false otherwise
+    } catch (e) {
+      throw 'Failed to check user profile: $e';
     }
   }
 
@@ -100,13 +123,6 @@ class _SignInScreenState extends State<SignInScreen> {
                                   throw 'Please enter email and password';
                                 } else {
                                   await signInUserWithEmailAndPassword();
-                                  if(FirebaseAuth.instance.currentUser != null)
-                                  Navigator.pushNamed(context, '/secpage');
-                                  else {
-                                    emailController.clear();
-                                    passwordController.clear();
-                                    throw 'Invalid email or password';
-                                  }
                                 }
                               } catch (e) {
                                 print(e);
