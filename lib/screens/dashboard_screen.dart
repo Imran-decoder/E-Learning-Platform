@@ -203,6 +203,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
+
   void _onCourseSelected(BuildContext context, Map<String, String> course) {
     final String courseId = course['id'] ?? '';
     if (courseId.isNotEmpty) {
