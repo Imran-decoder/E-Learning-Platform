@@ -25,7 +25,7 @@ class _SignInScreenState extends State<SignInScreen> {
       String userID = FirebaseAuth.instance.currentUser!.uid;
       if (FirebaseAuth.instance.currentUser != null) {
         if (await checkUserProfile(userID) == true) {
-          Navigator.pushNamed(context, '/dashboard');}
+          Navigator.pushNamed(context, '/verify');}
           else {
         Navigator.pushNamed(context, '/secpage');
       }
