@@ -49,7 +49,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
-  // Fetch courses from Firestore
   Future<List<Map<String, String>>> _fetchCourses() async {
     try {
       QuerySnapshot snapshot = await _firestore.collection('Courses').get();
@@ -69,7 +68,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
+  
+
   @override
+  
   Widget build(BuildContext context) {
     return Scaffold(
       body: CustomScrollView(
@@ -85,11 +87,31 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return SliverAppBar(
       expandedHeight: 250,
       backgroundColor: Colors.transparent,
-      flexibleSpace: const FlexibleSpaceBar(
-        background: DashboardHeader(
-          animationPath: 'animations/dashboard.json',
+      flexibleSpace: FlexibleSpaceBar(
+        title:Align(
+          alignment: Alignment.center,
+          child: Text('FIRE VALA',
+          style: TextStyle(
+                color: Colors.white,
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+            ),
+          ),
         ),
-      ),
+
+        
+        background: const DashboardHeader(
+          animationPath: 'animations/dashboard.json',
+            ),
+          ),
+
+          leading: IconButton(
+        icon: Image.asset('assets/images/splash.png'),
+        onPressed: () {
+          Navigator.pop(context);
+        },
+          ),
+          
       actions: [
         IconButton(
           icon: const Icon(Icons.admin_panel_settings_outlined,
