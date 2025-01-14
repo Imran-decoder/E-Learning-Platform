@@ -1,3 +1,4 @@
 {
-    "cmake.sourceDirectory": "D:/GitHub/E-Learning-Platform/linux"
+    "cmake.sourceDirectory": "D:/GitHub/E-Learning-Platform/linux",
+    "java.configuration.updateBuildConfiguration": "interactive"
 }
