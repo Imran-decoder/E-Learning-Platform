@@ -177,7 +177,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     Navigator.push(
       context,
       MaterialPageRoute(
-    builder: (context) => CourseDetailsScreen(courseId: 'eY5LNfkXSE1w7w0TkBoG'),
+    builder: (context) => CourseDetailsScreen(courseId: 'fsQyqdOzeLgkEue6CMtm'),
   ),
     );
   }
