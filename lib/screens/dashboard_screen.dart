@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:elearning/components/dashboard_header.dart';
 import 'package:elearning/components/ongoing_course_card.dart';
 import 'package:elearning/screens/course_detail_screen.dart';
@@ -18,6 +19,35 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   final TextEditingController _searchControl = TextEditingController();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  String _userName = "User";
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserName(); // Fetch user name on initialization
+  }
+
+  Future<void> _fetchUserName() async {
+    try {
+      final User? user = FirebaseAuth.instance.currentUser; // Get the current user
+      if (user != null) {
+        // Access the user's document in the Users collection
+        final DocumentSnapshot userDoc = await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(user.uid) // User document identified by the user's UID
+            .get(); // Get the document snapshot
+
+        // Extract the firstName from the 'Profile.main.firstName' field inside the user's document
+        final firstName = userDoc['Profile']['main']['firstName'];
+
+        setState(() {
+          _userName = firstName ?? "User"; // Default to "User" if firstName is missing
+        });
+      }
+    } catch (e) {
+      debugPrint("Error fetching user name: $e");
+    }
+  }
 
   // Fetch courses from Firestore
   Future<List<Map<String, String>>> _fetchCourses() async {
@@ -26,9 +56,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
       return snapshot.docs.map((doc) {
         return {
           'id': doc.id,
-
-           'logo': (doc['logo']?.toString().isNotEmpty == true && Uri.tryParse(doc['logo'].toString())?.isAbsolute == true)
-
+          'logo': (doc['logo']?.toString().isNotEmpty == true &&
+              Uri.tryParse(doc['logo'].toString())?.isAbsolute == true)
               ? doc['logo'].toString()
               : 'assets/images/default_logo.webp',
           'name': doc['title']?.toString() ?? 'Unnamed Course',
@@ -103,7 +132,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const GreetingSection(userName: "Arshad"),
+              GreetingSection(userName: _userName), // Use fetched user name
               const SizedBox(height: 28),
               _buildSectionHeader(
                 title: "Explore All Courses",
@@ -116,7 +145,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
               _buildSectionHeader(
                 title: "Ongoing Course",
                 actionText: "See All",
-                onActionTap: () => debugPrint("See All Ongoing Courses clicked"),
+                onActionTap: () =>
+                    debugPrint("See All Ongoing Courses clicked"),
               ),
               const SizedBox(height: 20),
               _buildOngoingCourses(),
@@ -140,7 +170,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildCoursesList() {
-    return FutureBuilder<List<Map<String, String>>>(
+    return FutureBuilder<List<Map<String, String>>>(  // Fetching courses data
       future: _fetchCourses(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
@@ -173,12 +203,17 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
- void _onCourseSelected(BuildContext context, Map<String, String> course) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-    builder: (context) => CourseDetailsScreen(courseId: 'eY5LNfkXSE1w7w0TkBoG'),
-  ),
-    );
+  void _onCourseSelected(BuildContext context, Map<String, String> course) {
+    final String courseId = course['id'] ?? '';
+    if (courseId.isNotEmpty) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => CourseDetailsScreen(courseId: courseId),
+        ),
+      );
+    } else {
+      debugPrint("Course ID is missing.");
+    }
   }
 }

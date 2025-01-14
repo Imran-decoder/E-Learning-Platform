@@ -8,7 +8,7 @@ class PeopleScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Color.fromARGB(44,44,44,1),
+      backgroundColor: Color.fromARGB(44, 44, 44, 1),
       body: SafeArea(
         top: true,
         child: Padding(
@@ -52,7 +52,6 @@ class PeopleScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Expanded(
-
                 child: StreamBuilder<QuerySnapshot>(
                   stream: FirebaseFirestore.instance.collection('Students').snapshots(),
                   builder: (context, snapshot) {
@@ -61,7 +60,6 @@ class PeopleScreen extends StatelessWidget {
                         child: CircularProgressIndicator(),
                       );
                     }
-
 
                     if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                       return const Center(
@@ -93,7 +91,7 @@ class PeopleScreen extends StatelessWidget {
     );
   }
 
-  // Function to build the "New User Requests" section
+  // Function to build the "New User Requests" section with static data
   Widget _buildNewUserRequests(BuildContext context) {
     final dummyRequests = [
       {"name": "John Doe", "user_id": "user123"},
@@ -104,7 +102,7 @@ class PeopleScreen extends StatelessWidget {
     ];
 
     return Container(
-      height: 200, // Fixed height for the scrollable area
+      height: 250, // Increased height for better visibility
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: Colors.grey[950],
@@ -114,22 +112,64 @@ class PeopleScreen extends StatelessWidget {
         itemCount: dummyRequests.length,
         itemBuilder: (context, index) {
           final request = dummyRequests[index];
-          return GestureDetector(
-            onTap: () => _showRequestDialog(context, request['name']!),
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 8.0),
-              child: _buildPersonTile(
-                request['name']!,
-                userId: request['user_id'],
-              ),
-            ),
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8.0),
+            child: _buildRequestTile(context, request['name']!, request['user_id']!),
           );
         },
       ),
     );
   }
 
-  // Function to display the custom dialog
+  // Function to build the "Request Tile" with approval/rejection buttons for static data
+  Widget _buildRequestTile(BuildContext context, String name, String userId) {
+    return Card(
+      color: Colors.grey[850],
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(12.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildPersonTile(name, userId: userId),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                // Approve Button
+                ElevatedButton(
+                  onPressed: () {
+                    // Handle approval logic here (e.g., update data or show confirmation)
+                    print("Approved $name");
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.green, // Corrected to backgroundColor
+                  ),
+                  child: const Text('Approve', style: TextStyle(color: Colors.white)),
+                ),
+                const SizedBox(width: 8),
+                // Reject Button
+                ElevatedButton(
+                  onPressed: () {
+                    // Handle rejection logic here (e.g., update data or show confirmation)
+                    print("Rejected $name");
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red, // Corrected to backgroundColor
+                  ),
+                  child: const Text('Reject', style: TextStyle(color: Colors.white)),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Function to display the custom dialog when tapping on a request
   void _showRequestDialog(BuildContext context, String name) {
     showDialog(
       context: context,
