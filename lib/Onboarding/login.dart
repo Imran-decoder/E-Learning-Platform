@@ -86,7 +86,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                   BorderRadius.all(Radius.circular(50)),
                             ),
                           ),
-                          keyboardType: TextInputType.phone,
+                          // keyboardType: TextInputType.phone,
                           onSaved: (phone) {
                             // Save it
                           },
