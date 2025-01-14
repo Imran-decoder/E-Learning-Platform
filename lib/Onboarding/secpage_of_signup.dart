@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:elearning/db_operations/users.dart';
 import 'package:firebase_auth/firebase_auth.dart' as auth;
+import 'package:elearning/Onboarding/varification.dart';
 
 class ComplateProfileScreen extends StatelessWidget {
   const ComplateProfileScreen({super.key});
@@ -39,7 +40,7 @@ class ComplateProfileScreen extends StatelessWidget {
                   ),
                   // const SizedBox(height: 16),
                   SizedBox(height: MediaQuery.of(context).size.height * 0.05),
-                  const ComplateProfileForm(),
+                  const CompleteProfileForm(),
                   SizedBox(height: MediaQuery.of(context).size.height * 0.15),
 
                   const Text(
@@ -64,30 +65,28 @@ const authOutlineInputBorder = OutlineInputBorder(
   borderRadius: BorderRadius.all(Radius.circular(100)),
 );
 
-class ComplateProfileForm extends StatefulWidget {
-  const ComplateProfileForm({super.key});
+
+class CompleteProfileForm extends StatefulWidget {
+  const CompleteProfileForm({Key? key}) : super(key: key);
 
   @override
-  State<ComplateProfileForm> createState() => _ComplateProfileFormState();
+  State<CompleteProfileForm> createState() => _CompleteProfileFormState();
 }
 
-class _ComplateProfileFormState extends State<ComplateProfileForm> {
+class _CompleteProfileFormState extends State<CompleteProfileForm> {
   final _formKey = GlobalKey<FormState>();
-
-  // Create controllers for each field to manage their values
   final TextEditingController _firstNameController = TextEditingController();
   final TextEditingController _lastNameController = TextEditingController();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _addressController = TextEditingController();
 
-  // Create instance of our Firestore service
   final FirestoreService _firestoreService = FirestoreService();
   final auth.FirebaseAuth _auth = auth.FirebaseAuth.instance;
-  // Loading state
-  bool _isLoading = false;
 
-  // Dispose controllers when the widget is disposed
+  bool _isLoading = false;
+  bool _isOtpEnabled = false; // Flag to toggle OTP verification
+
   @override
   void dispose() {
     _firstNameController.dispose();
@@ -98,56 +97,148 @@ class _ComplateProfileFormState extends State<ComplateProfileForm> {
     super.dispose();
   }
 
-  // Function to handle form submission
-  Future<void> _submitForm() async {
-    if (_formKey.currentState!.validate()) {
-      setState(() {
-        _isLoading = true;
-      });
+  Future<void> _sendOtp(String phoneNumber) async {
+    if (!phoneNumber.startsWith('+')) {
+      phoneNumber = '+91$phoneNumber';
+    }
+
+    if (!mounted) return;
+
+    final result = await Navigator.push<bool>(
+      context,
+      MaterialPageRoute(
+        builder: (_) => VerificationScreen(
+          phoneNumber: phoneNumber,
+          onVerificationSuccess: (verifiedPhone) async {
+            Navigator.pop(context, true);
+          },
+        ),
+      ),
+    );
+
+    if (result == true) {
+      await _createProfile();
+    }
+  }
+
+  Future<void> _createProfile() async {
+    try {
       final currentUser = _auth.currentUser;
+      if (currentUser == null) {
+        throw Exception('No authenticated user found');
+      }
 
-      try {
-        // Create UserProfile object
-        final userProfile = UserProfile(
-            firstName: _firstNameController.text,
-            lastName: _lastNameController.text,
-            phone: _phoneController.text,
-            address: _addressController.text,
-            profilePicture:
-                "https://avatar.iran.liara.run/public/50" // Default profile picture
-            );
+      final userProfile = UserProfile(
+        firstName: _firstNameController.text.trim(),
+        lastName: _lastNameController.text.trim(),
+        phone: _phoneController.text.trim(),
+        address: _addressController.text.trim(),
+        profilePicture: "https://avatar.iran.liara.run/public/50",
+      );
 
-        // Create User object
-        final user = User(
-          userID: currentUser!.uid,
-          userName: _usernameController.text,
-          enrolledCourses: [], // Empty list for new user
-          Profile: userProfile,
-        );
+      final user = User(
+        userID: currentUser.uid,
+        userName: _usernameController.text.trim(),
+        enrolledCourses: const [],
+        Profile: userProfile,
+      );
 
-        // Save to Firestore
-        await _firestoreService.createUser(user);
+      await _firestoreService.createUser(user);
+      if (!mounted) return;
 
-        // Show success message
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text("Profile created successfully!")));
-          Navigator.pushNamed(context, '/dashboard');
-        }
-      } catch (e) {
-        // Show error message
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text("Error creating profile: $e")));
-        }
-      } finally {
-        if (mounted) {
-          setState(() {
-            _isLoading = false;
-          });
-        }
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Profile created successfully!')),
+      );
+      Navigator.pushNamedAndRemoveUntil(context, '/dashboard', (route) => false);
+    } catch (e) {
+      _showErrorSnackBar('Error creating profile: ${_getReadableErrorMessage(e)}');
+    }
+  }
+
+  String _getReadableErrorMessage(dynamic error) {
+    if (error is auth.FirebaseAuthException) {
+      switch (error.code) {
+        case 'invalid-phone-number':
+          return 'The provided phone number is invalid';
+        case 'too-many-requests':
+          return 'Too many attempts. Please try again later';
+        default:
+          return error.message ?? 'An unknown error occurred';
       }
     }
+    return error.toString();
+  }
+
+  void _showErrorSnackBar(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
+  Future<void> _submitForm() async {
+    if (!_formKey.currentState!.validate()) return;
+    if (_isLoading) return;
+
+    setState(() => _isLoading = true);
+
+    try {
+      if (_isOtpEnabled) {
+        await _sendOtp(_phoneController.text);
+      } else {
+        await _createProfile(); // Directly create profile without OTP
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error: ${_getReadableErrorMessage(e)}')),
+      );
+    } finally {
+      if (mounted) {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required String hint,
+    required String icon,
+    String? Function(String?)? validator,
+    TextInputType? keyboardType,
+    TextInputAction? textInputAction,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 24),
+      child: TextFormField(
+        controller: controller,
+        validator: validator ?? (value) {
+          if (value == null || value.trim().isEmpty) {
+            return 'Please enter your $label';
+          }
+          return null;
+        },
+        keyboardType: keyboardType,
+        textInputAction: textInputAction ?? TextInputAction.next,
+        decoration: InputDecoration(
+          hintText: hint,
+          labelText: label,
+          floatingLabelBehavior: FloatingLabelBehavior.always,
+          hintStyle: const TextStyle(color: Color(0xFF757575)),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 24,
+            vertical: 16,
+          ),
+          suffix: SvgPicture.string(icon),
+          border: authOutlineInputBorder,
+          enabledBorder: authOutlineInputBorder,
+          focusedBorder: authOutlineInputBorder.copyWith(
+            borderSide: const BorderSide(color: Color(0xFFFF7643)),
+          ),
+        ),
+      ),
+    );
   }
 
   @override
@@ -156,142 +247,50 @@ class _ComplateProfileFormState extends State<ComplateProfileForm> {
       key: _formKey,
       child: Column(
         children: [
-          TextFormField(
+          _buildTextField(
             controller: _firstNameController,
-            validator: (value) {
-              if (value == null || value.isEmpty) {
-                return 'Please enter your first name';
-              }
-              return null;
-            },
-            textInputAction: TextInputAction.next,
-            decoration: InputDecoration(
-                hintText: "Enter your first name",
-                labelText: "First Name",
-                floatingLabelBehavior: FloatingLabelBehavior.always,
-                hintStyle: const TextStyle(color: Color(0xFF757575)),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 16,
-                ),
-                suffix: SvgPicture.string(userIcon),
-                border: authOutlineInputBorder,
-                enabledBorder: authOutlineInputBorder,
-                focusedBorder: authOutlineInputBorder.copyWith(
-                    borderSide: const BorderSide(color: Color(0xFFFF7643)))),
+            label: 'First Name',
+            hint: 'Enter your first name',
+            icon: userIcon,
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 24),
-            child: TextFormField(
-              controller: _lastNameController,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter your last name';
-                }
-                return null;
-              },
-              textInputAction: TextInputAction.next,
-              decoration: InputDecoration(
-                  hintText: "Enter your last name",
-                  labelText: "Last Name",
-                  floatingLabelBehavior: FloatingLabelBehavior.always,
-                  hintStyle: const TextStyle(color: Color(0xFF757575)),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 16,
-                  ),
-                  suffix: SvgPicture.string(userIcon),
-                  border: authOutlineInputBorder,
-                  enabledBorder: authOutlineInputBorder,
-                  focusedBorder: authOutlineInputBorder.copyWith(
-                      borderSide: const BorderSide(color: Color(0xFFFF7643)))),
-            ),
+          _buildTextField(
+            controller: _lastNameController,
+            label: 'Last Name',
+            hint: 'Enter your last name',
+            icon: userIcon,
           ),
-          TextFormField(
+          _buildTextField(
             controller: _usernameController,
+            label: 'Username',
+            hint: 'Enter Username',
+            icon: userIcon,
+          ),
+          _buildTextField(
+            controller: _phoneController,
+            label: 'Phone Number',
+            hint: 'Enter your phone number',
+            icon: phoneIcon,
+            keyboardType: TextInputType.phone,
             validator: (value) {
               if (value == null || value.isEmpty) {
-                return 'Please enter your username';
+                return 'Please enter your phone number';
+              }
+              if (!RegExp(r'^\d{10}$').hasMatch(value)) {
+                return 'Please enter a valid 10-digit phone number';
               }
               return null;
             },
-            textInputAction: TextInputAction.next,
-            decoration: InputDecoration(
-                hintText: "Enter Username",
-                labelText: "Username",
-                floatingLabelBehavior: FloatingLabelBehavior.always,
-                hintStyle: const TextStyle(color: Color(0xFF757575)),
-                contentPadding: const EdgeInsets.symmetric(
-                  horizontal: 24,
-                  vertical: 16,
-                ),
-                suffix: SvgPicture.string(userIcon),
-                border: authOutlineInputBorder,
-                enabledBorder: authOutlineInputBorder,
-                focusedBorder: authOutlineInputBorder.copyWith(
-                    borderSide: const BorderSide(color: Color(0xFFFF7643)))),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 24),
-            child: TextFormField(
-              controller: _phoneController,
-              validator: (value) {
-                if (value == null || value.isEmpty || value.length != 10 || !RegExp(r'^\d+$').hasMatch(value)) {
-                  return 'Please enter your phone number';
-                }
-                return null;
-              },
-              keyboardType: TextInputType.phone,
-              decoration: InputDecoration(
-                  hintText: "Enter your phone number",
-                  labelText: "Phone Number",
-                  floatingLabelBehavior: FloatingLabelBehavior.always,
-                  hintStyle: const TextStyle(color: Color(0xFF757575)),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 16,
-                  ),
-                  suffix: SvgPicture.string(phoneIcon),
-                  border: authOutlineInputBorder,
-                  enabledBorder: authOutlineInputBorder,
-                  focusedBorder: authOutlineInputBorder.copyWith(
-                      borderSide: const BorderSide(color: Color(0xFFFF7643)))),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 24),
-            child: TextFormField(
-              controller: _addressController,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter your address';
-                }
-                return null;
-              },
-              decoration: InputDecoration(
-                  hintText: "Enter your address",
-                  labelText: "Address",
-                  floatingLabelBehavior: FloatingLabelBehavior.always,
-                  hintStyle: const TextStyle(color: Color(0xFF757575)),
-                  contentPadding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 16,
-                  ),
-                  suffix: SvgPicture.string(locationPointIcon),
-                  border: authOutlineInputBorder,
-                  enabledBorder: authOutlineInputBorder,
-                  focusedBorder: authOutlineInputBorder.copyWith(
-                      borderSide: const BorderSide(color: Color(0xFFFF7643)))),
-            ),
+          _buildTextField(
+            controller: _addressController,
+            label: 'Address',
+            hint: 'Enter your address',
+            icon: locationPointIcon,
+            textInputAction: TextInputAction.done,
           ),
           const SizedBox(height: 8),
           ElevatedButton(
-            onPressed: ()async {
-             try{ await _submitForm();}
-             catch(e){
-                debugPrint('Error: $e');
-             }
-            },
+            onPressed: _isLoading ? null : _submitForm,
             style: ElevatedButton.styleFrom(
               elevation: 0,
               backgroundColor: const Color(0xFFFF7643),
@@ -301,8 +300,10 @@ class _ComplateProfileFormState extends State<ComplateProfileForm> {
                 borderRadius: BorderRadius.all(Radius.circular(16)),
               ),
             ),
-            child: const Text("Continue"),
-          )
+            child: _isLoading
+                ? const CircularProgressIndicator(color: Colors.white)
+                : const Text("Continue"),
+          ),
         ],
       ),
     );

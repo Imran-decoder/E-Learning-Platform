@@ -49,7 +49,7 @@ class MyApp extends StatelessWidget {
         '/log-sign': (context) => SigninOrSignupScreen(),
         '/login': (context) => SignInScreen(),
         '/forgot': (context) => ForgotPasswordScreen(),
-        '/verify': (context) => VerificationScreen(),
+        '/verify': (context) => VerificationScreen(phoneNumber: '', onVerificationSuccess: (String ) {  },),
         '/change': (context) => ChangePasswordScreen(),
         '/secpage': (context) => ComplateProfileScreen(),
         
