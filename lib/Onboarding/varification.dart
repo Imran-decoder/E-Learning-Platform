@@ -38,7 +38,7 @@ class _VerificationScreenState extends State<VerificationScreen> {
           await _handleCredential(credential);
         },
         verificationFailed: (auth.FirebaseAuthException e) {
-          _showErrorSnackBar("Verification failed: ${_getReadableErrorMessage(e)}");
+          _showErrorSnackBar("Verification failed: ${e.message}");
         },
         codeSent: (String verificationId, int? resendToken) {
           setState(() => _verificationId = verificationId);
@@ -63,13 +63,13 @@ class _VerificationScreenState extends State<VerificationScreen> {
         widget.onVerificationSuccess(widget.phoneNumber);
       }
     } catch (e) {
-      _showErrorSnackBar("Authentication failed: ${_getReadableErrorMessage(e)}");
+      _showErrorSnackBar("Authentication failed: ${e.toString()}");
     }
   }
 
   void _verifyOtp(String otp) async {
-    if (otp.length != 4) {
-      _showErrorSnackBar("Please enter a valid 4-digit OTP");
+    if (otp.length != 6) {
+      _showErrorSnackBar("Please enter a valid 6-digit OTP");
       return;
     }
 
@@ -82,30 +82,13 @@ class _VerificationScreenState extends State<VerificationScreen> {
       );
       await _handleCredential(credential);
     } catch (e) {
-      _showErrorSnackBar("Invalid OTP: ${_getReadableErrorMessage(e)}");
+      _showErrorSnackBar("Invalid OTP: ${e.toString()}");
     } finally {
       setState(() => _isLoading = false);
     }
   }
 
-  String _getReadableErrorMessage(dynamic error) {
-    if (error is auth.FirebaseAuthException) {
-      switch (error.code) {
-        case 'invalid-verification-code':
-          return 'The OTP you entered is invalid';
-        case 'code-expired':
-          return 'The OTP has expired. Please request a new one';
-        case 'too-many-requests':
-          return 'Too many attempts. Please try again later';
-        default:
-          return error.message ?? 'An unknown error occurred';
-      }
-    }
-    return error.toString();
-  }
-
   void _showErrorSnackBar(String message) {
-    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -115,7 +98,6 @@ class _VerificationScreenState extends State<VerificationScreen> {
   }
 
   void _showSuccessSnackBar(String message) {
-    if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -127,185 +109,60 @@ class _VerificationScreenState extends State<VerificationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
       appBar: AppBar(
         title: const Text('Verification'),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(),
-        ),
       ),
-      body: LogoWithTitle(
-        title: 'Verification',
-        subText: "SMS Verification code has been sent",
-        children: [
-          Text(widget.phoneNumber),
-          SizedBox(height: MediaQuery.of(context).size.height * 0.04),
-          if (_isLoading)
-            const CircularProgressIndicator()
-          else
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Text(
+              "Enter the OTP sent to ${widget.phoneNumber}",
+              style: const TextStyle(fontSize: 16),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 16),
             OtpForm(onSubmitOtp: _verifyOtp),
-          const SizedBox(height: 16),
-          TextButton(
-            onPressed: _isLoading ? null : () => _sendOtp(widget.phoneNumber),
-            child: const Text("Resend OTP"),
-          ),
-        ],
+            const SizedBox(height: 16),
+            _isLoading
+                ? const CircularProgressIndicator()
+                : TextButton(
+              onPressed: () => _sendOtp(widget.phoneNumber),
+              child: const Text("Resend OTP"),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-class OtpForm extends StatefulWidget {
+class OtpForm extends StatelessWidget {
   final ValueChanged<String> onSubmitOtp;
 
   const OtpForm({Key? key, required this.onSubmitOtp}) : super(key: key);
 
   @override
-  _OtpFormState createState() => _OtpFormState();
-}
-
-class _OtpFormState extends State<OtpForm> {
-  final _formKey = GlobalKey<FormState>();
-  final List<String> _otp = List.generate(4, (index) => "");
-
-  @override
   Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Column(
-        children: [
-          Row(
-            children: List.generate(4, (index) {
-              return Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: OtpTextFormField(
-                    onChanged: (value) {
-                      _otp[index] = value;
-                      if (value.isNotEmpty && index < 3) {
-                        FocusScope.of(context).nextFocus();
-                      }
-                    },
-                  ),
-                ),
-              );
-            }),
+    final TextEditingController _otpController = TextEditingController();
+
+    return Column(
+      children: [
+        TextFormField(
+          controller: _otpController,
+          keyboardType: TextInputType.number,
+          maxLength: 6,
+          decoration: const InputDecoration(
+            labelText: "OTP",
+            border: OutlineInputBorder(),
           ),
-          const SizedBox(height: 16.0),
-          ElevatedButton(
-            onPressed: () {
-              if (_formKey.currentState!.validate()) {
-                _formKey.currentState!.save();
-                widget.onSubmitOtp(_otp.join());
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              elevation: 0,
-              backgroundColor: const Color(0xFF00BF6D),
-              foregroundColor: Colors.white,
-              minimumSize: const Size(double.infinity, 48),
-              shape: const StadiumBorder(),
-            ),
-            child: const Text("Verify OTP"),
-          ),
-        ],
-      ),
-    );
-  }
-}
-const InputDecoration otpInputDecoration = InputDecoration(
-  filled: false,
-  border: UnderlineInputBorder(),
-  hintText: "0",
-);
-
-class OtpTextFormField extends StatelessWidget {
-  final FocusNode? focusNode;
-  final ValueChanged<String>? onChanged;
-  final FormFieldSetter<String>? onSaved;
-  final bool autofocus;
-
-  const OtpTextFormField(
-      {Key? key,
-      this.focusNode,
-      this.onChanged,
-      this.onSaved,
-      this.autofocus = false})
-      : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return TextFormField(
-      autovalidateMode: AutovalidateMode.onUserInteraction,
-      focusNode: focusNode,
-      onChanged: onChanged,
-      onSaved: onSaved,
-      autofocus: autofocus,
-      obscureText: true,
-      inputFormatters: [
-        FilteringTextInputFormatter.digitsOnly,
-        LengthLimitingTextInputFormatter(1),
+        ),
+        const SizedBox(height: 16),
+        ElevatedButton(
+          onPressed: () => onSubmitOtp(_otpController.text),
+          child: const Text("Verify"),
+        ),
       ],
-      textAlign: TextAlign.center,
-      keyboardType: TextInputType.number,
-      style: Theme.of(context).textTheme.headlineSmall,
-      decoration: otpInputDecoration,
-    );
-  }
-}
-
-class LogoWithTitle extends StatelessWidget {
-  final String title, subText;
-  final List<Widget> children;
-
-  const LogoWithTitle(
-      {Key? key,
-      required this.title,
-      this.subText = '',
-      required this.children})
-      : super(key: key);
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: LayoutBuilder(builder: (context, constraints) {
-        return SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Column(
-            children: [
-              SizedBox(height: constraints.maxHeight * 0.1),
-              Image.asset('assets/images/splash.png', height: 146),
-              SizedBox(
-                height: constraints.maxHeight * 0.1,
-                width: double.infinity,
-              ),
-              Text(
-                title,
-                style: Theme.of(context)
-                    .textTheme
-                    .headlineSmall!
-                    .copyWith(fontWeight: FontWeight.bold),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
-                child: Text(
-                  subText,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    height: 1.5,
-                    color: Theme.of(context)
-                        .textTheme
-                        .bodyLarge!
-                        .color!
-                        .withOpacity(0.64),
-                  ),
-                ),
-              ),
-              ...children,
-            ],
-          ),
-        );
-      }),
     );
   }
 }

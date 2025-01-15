@@ -1,12 +1,8 @@
 import 'package:flutter/material.dart';
 import 'people_screen.dart';
+import 'manage_course_screen.dart';
 
-
-
-import 'package:elearning/screens/Admin/people_screen.dart';
 class AdminDashboardScreen extends StatefulWidget {
-  const AdminDashboardScreen({super.key});
-
   @override
   _AdminDashboardScreenState createState() => _AdminDashboardScreenState();
 }
@@ -17,7 +13,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
   // Screens for navigation
   final List<Widget> _screens = [
     AdminHomeScreen(),
-    ManageCoursesScreen(),
+    ManageCourseScreen(),
     PeopleScreen(),
   ];
 
@@ -32,10 +28,12 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxWidth >= 1024) {
+          // Desktop layout with sidebar
           return Scaffold(
             backgroundColor: Colors.black,
             body: Row(
               children: [
+                // Sidebar
                 Container(
                   width: 250,
                   color: Colors.grey[850],
@@ -54,10 +52,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
           // Tablet layout with AppBar and Drawer
           return Scaffold(
             appBar: AppBar(
-              title: const Text('Admin Dashboard',
-              style:TextStyle(color: Colors.white),
+              title: const Text(
+                'Admin Dashboard',
+                style: TextStyle(color: Colors.white),
               ),
-
               backgroundColor: Colors.grey[850],
             ),
             drawer: Drawer(
@@ -75,12 +73,9 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             backgroundColor: Colors.black,
             body: Stack(
               children: [
-                // Main content container
                 Positioned.fill(
                   child: _screens[_selectedIndex],
                 ),
-
-                // Floating BottomNavigationBar
                 Positioned(
                   bottom: 16,
                   left: 16,
@@ -115,7 +110,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                             label: 'Manage Courses',
                           ),
                           BottomNavigationBarItem(
-                            icon: Icon(Icons.account_circle_outlined),
+                            icon: Icon(Icons.people),
                             label: 'People',
                           ),
                         ],
@@ -136,7 +131,7 @@ class Sidebar extends StatelessWidget {
   final int selectedIndex;
   final Function(int) onItemSelected;
 
-  const Sidebar({super.key, 
+  const Sidebar({
     required this.selectedIndex,
     required this.onItemSelected,
   });
@@ -159,19 +154,16 @@ class Sidebar extends StatelessWidget {
           index: 0,
           icon: Icons.dashboard,
           label: 'Dashboard',
-          context: context,
         ),
         _buildMenuItem(
           index: 1,
           icon: Icons.book,
           label: 'Manage Courses',
-          context: context,
         ),
         _buildMenuItem(
           index: 2,
-          icon: Icons.account_circle_outlined,
+          icon: Icons.people,
           label: 'People',
-          context: context,
         ),
       ],
     );
@@ -181,7 +173,6 @@ class Sidebar extends StatelessWidget {
     required int index,
     required IconData icon,
     required String label,
-    required BuildContext context,
   }) {
     return ListTile(
       leading: Icon(
@@ -196,22 +187,14 @@ class Sidebar extends StatelessWidget {
         ),
       ),
       onTap: () {
-         if(Scaffold.of(context).isDrawerOpen){
-          Navigator.pop(context); // Close the drawer if open
-        } // Close the drawer if open
-        onItemSelected(index);
-      tileColor: selectedIndex == index ? Colors.grey[700] : Colors.transparent;}
+        onItemSelected(index);  // This updates the selected screen directly
+      },
+      tileColor: selectedIndex == index ? Colors.grey[700] : Colors.transparent,
     );
   }
 }
 
-
-
-
-// Dummy Screens
 class AdminHomeScreen extends StatelessWidget {
-  const AdminHomeScreen({super.key});
-
   @override
   Widget build(BuildContext context) {
     return Container(
@@ -219,40 +202,6 @@ class AdminHomeScreen extends StatelessWidget {
       child: const Center(
         child: Text(
           'Admin Home Screen',
-          style: TextStyle(fontSize: 20, color: Colors.white),
-        ),
-      ),
-    );
-  }
-}
-
-class ManageCoursesScreen extends StatelessWidget {
-  const ManageCoursesScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: Colors.black,
-      child: const Center(
-        child: Text(
-          'Manage Courses Screen',
-          style: TextStyle(fontSize: 20, color: Colors.white),
-        ),
-      ),
-    );
-  }
-}
-
-class AdminProfileScreen extends StatelessWidget {
-  const AdminProfileScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: Colors.black,
-      child: const Center(
-        child: Text(
-          'Admin Profile Screen',
           style: TextStyle(fontSize: 20, color: Colors.white),
         ),
       ),
