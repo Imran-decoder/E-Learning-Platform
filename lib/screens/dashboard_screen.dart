@@ -9,6 +9,33 @@ import 'package:elearning/components/greeting_section.dart';
 import 'package:elearning/components/section_header.dart';
 import 'package:elearning/components/course_list.dart';
 
+class GradientText extends StatelessWidget {
+  final String text;
+  final TextStyle? style;
+  final Gradient gradient;
+
+  const GradientText(
+    this.text, {
+    required this.gradient,
+    this.style,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return ShaderMask(
+      shaderCallback: (bounds) {
+        return gradient.createShader(
+          Rect.fromLTWH(0, 0, bounds.width, bounds.height),
+        );
+      },
+      child: Text(
+        text,
+        style: style?.copyWith(color:Colors.white) ?? TextStyle(color:Colors.white),
+      ),
+    );
+  }
+}
+
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
@@ -70,6 +97,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   
 
+
+
   @override
   
   Widget build(BuildContext context) {
@@ -88,16 +117,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
       expandedHeight: 250,
       backgroundColor: Colors.transparent,
       flexibleSpace: FlexibleSpaceBar(
-        title:Align(
+        title: Align(
           alignment: Alignment.center,
-          child: Text('FIRE VALA',
-          style: TextStyle(
-                color: Colors.white,
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
+          child: GradientText(
+            'THE FIRE VALA',
+            gradient: LinearGradient(
+              colors: [Colors.blue, Colors.white, Colors.orange],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
+            style: TextStyle(
+              color:Colors.white,
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+            ),
+          ),      
           ),
-        ),
 
         
         background: const DashboardHeader(
