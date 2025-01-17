@@ -1,30 +1,78 @@
 import 'package:flutter/material.dart';
+import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 
-class DetailedInfoScreen extends StatelessWidget {
+class DetailedInfoScreen extends StatefulWidget {
   final String title;
   final String content;
+  final String duration;
+  final int number;
+  final String videoUrl;
 
   const DetailedInfoScreen({
     required this.title,
     required this.content,
+    required this.duration,
+    required this.number,
+    required this.videoUrl,
     super.key,
   });
+
+  @override
+  _DetailedInfoScreenState createState() => _DetailedInfoScreenState();
+}
+
+class _DetailedInfoScreenState extends State<DetailedInfoScreen> {
+  late YoutubePlayerController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = YoutubePlayerController.fromVideoId(
+      videoId: YoutubePlayerController.convertUrlToId(widget.videoUrl)!,
+      params: const YoutubePlayerParams(
+        mute: false,
+        showControls: false,
+        showFullscreenButton: true,
+        showVideoAnnotations: false, // Hide video annotations
+        enableCaption: false, // Disable captions if not needed
+        // modestBranding: true, // Removes the YouTube logo for modest branding
+        playsInline:  true, // Ensures video plays inline rather than fullscreen by default
+        enableKeyboard: false, // Disables keyboard controls for better UI
+        // rel: false, // Prevents showing related videos at the end
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _controller.close();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(title),
+        title: Text(widget.title),
         backgroundColor: Colors.deepOrange,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
-        child: Text(
-          content,
-          style: const TextStyle(
-            fontSize: 16,
-            color: Colors.black87,
-          ),
+        child: Column(
+          children: [
+            YoutubePlayer(
+              controller: _controller,
+              aspectRatio: 16 / 9,
+            ),
+            const SizedBox(height: 16.0),
+            Text(
+              widget.content,
+              style: const TextStyle(
+                fontSize: 16,
+                color: Colors.black87,
+              ),
+            ),
+          ],
         ),
       ),
     );
