@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'detail_info_screen.dart';
 import 'package:elearning/components/header_section.dart';
@@ -6,21 +8,32 @@ import 'package:elearning/db_operations/courses.dart';
 
 class Section {
   final String title;
+  // final String titles;
   final String content;
+  // final String maintitle;
+  final String duration;
+  final int number;
+  final String videoUrl;
 
-  Section({required this.title, required this.content});
+  Section({required this.title, required this.content,  required this.duration, required this.number, required this.videoUrl});
 
   // Helper method to convert Task to Section
   static Section fromTask(Task task) {
     return Section(
       title: task.title,
       content: task.description,
+      // maintitle: task.titles,
+      duration: task.duration,
+      number: task.number,
+      videoUrl: task.video,
+
     );
   }
 }
 
 class CourseDetailsScreen extends StatefulWidget {
   final String courseId;
+
 
   const CourseDetailsScreen({
     required this.courseId,
@@ -47,20 +60,22 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
   // Convert tasks to sections and add introduction
   List<Section> _createSectionsFromCourse(Course course) {
     List<Section> sections = [];
-    
-    // Add introduction section
-    sections.add(Section(
-      title: 'Introduction',
-      content: 'This is an introduction to ${course.title} course.',
-    ));
-    
-    // Convert tasks to sections (chapters)
+  
+    course.tasks.sort((a, b) => a.number.compareTo(b.number));
+  
     for (var i = 0; i < course.tasks.length; i++) {
+
       sections.add(Section(
-        title: 'Chapter ${i + 1}', // title: corurse.tasks[i].title,
+        title: 'Chapter ${i+1}', 
         content: course.tasks[i].description,
+        duration: course.tasks[i].duration,
+        // maintitle: course.tasks[i].titles,
+        number: course.tasks[i].number,
+        videoUrl: course.tasks[i].video,
+
       ));
     }
+    //  }
     
     return sections;
   }
@@ -174,7 +189,7 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
                       title: section.title,
                        onTap: (){
                         Navigator.push(context,
-                        MaterialPageRoute(builder:(context) => DetailedInfoScreen(title: section.title, content: section.content)));
+                        MaterialPageRoute(builder:(context) => DetailedInfoScreen(title: section.title, content: section.content , duration: section.duration, number: section.number, videoUrl: section.videoUrl)));
                        })
                   );
                 },

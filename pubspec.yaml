@@ -37,6 +37,8 @@ dependencies:
   firebase_auth: ^5.4.0
   dynamic_color: ^1.7.0
   image_picker: ^0.8.5+3
+  youtube_player_iframe: ^5.2.1
+
 
 
 
@@ -45,6 +47,7 @@ dependencies:
   cupertino_icons: ^1.0.6
   google_fonts: ^6.2.1
   percent_indicator: ^4.2.4
+  youtube_player_flutter: ^9.1.1
 
 
 dev_dependencies:
