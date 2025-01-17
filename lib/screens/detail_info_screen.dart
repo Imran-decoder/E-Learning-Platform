@@ -66,12 +66,34 @@ class _DetailedInfoScreenState extends State<DetailedInfoScreen> {
             ),
             const SizedBox(height: 16.0),
             Text(
-              widget.content,
+              'Duration: ${widget.duration} seconds',
               style: const TextStyle(
                 fontSize: 16,
                 color: Colors.black87,
               ),
             ),
+            Scrollbar(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Description: ',
+                    style: const TextStyle(
+                      fontSize: 22,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  Text(
+                    widget.content,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            
           ],
         ),
       ),
