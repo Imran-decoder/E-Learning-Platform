@@ -31,14 +31,16 @@ class _DetailedInfoScreenState extends State<DetailedInfoScreen> {
       videoId: YoutubePlayerController.convertUrlToId(widget.videoUrl)!,
       params: const YoutubePlayerParams(
         mute: false,
-        showControls: false,
+        // showControls: true, // Set to true to allow minimal controls
         showFullscreenButton: true,
+        // modestBranding: true, // Ensures YouTube branding is minimized
         showVideoAnnotations: false, // Hide video annotations
         enableCaption: false, // Disable captions if not needed
-        // modestBranding: true, // Removes the YouTube logo for modest branding
-        playsInline:  true, // Ensures video plays inline rather than fullscreen by default
+        enableJavaScript: true, // Enables JavaScript for better compatibility
+        playsInline: true, // Ensures video plays inline rather than fullscreen
         enableKeyboard: false, // Disables keyboard controls for better UI
         // rel: false, // Prevents showing related videos at the end
+        loop: true, // Loops the video once it ends
       ),
     );
   }
@@ -89,6 +91,7 @@ class _DetailedInfoScreenState extends State<DetailedInfoScreen> {
                       fontSize: 16,
                       color: Colors.black87,
                     ),
+                  
                   ),
                 ],
               ),
