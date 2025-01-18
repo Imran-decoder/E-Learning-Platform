@@ -9,19 +9,26 @@ import 'package:elearning/components/greeting_section.dart';
 import 'package:elearning/components/section_header.dart';
 import 'package:elearning/components/course_list.dart';
 
+// GradientText Widget with dynamic font scaling
 class GradientText extends StatelessWidget {
   final String text;
   final TextStyle? style;
   final Gradient gradient;
 
   const GradientText(
-    this.text, {
-    required this.gradient,
-    this.style,
-  });
+      this.text, {
+        required this.gradient,
+        this.style,
+      });
 
   @override
   Widget build(BuildContext context) {
+    // Get screen width to adjust font size dynamically
+    double screenWidth = MediaQuery.of(context).size.width;
+
+    // Adjust font size based on screen width
+    double fontSize = screenWidth < 600 ? 20 : 28; // Smaller for mobile, larger for tablets/desktops
+
     return ShaderMask(
       shaderCallback: (bounds) {
         return gradient.createShader(
@@ -30,7 +37,14 @@ class GradientText extends StatelessWidget {
       },
       child: Text(
         text,
-        style: style?.copyWith(color:Colors.white) ?? TextStyle(color:Colors.white),
+        style: style?.copyWith(
+          color: Colors.white,
+          fontSize: fontSize, // Dynamically adjusted font size
+        ) ??
+            TextStyle(
+              color: Colors.white,
+              fontSize: fontSize,
+            ),
       ),
     );
   }
@@ -51,24 +65,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
   @override
   void initState() {
     super.initState();
-    _fetchUserName(); // Fetch user name on initialization
+    _fetchUserName();
   }
 
   Future<void> _fetchUserName() async {
     try {
-      final User? user = FirebaseAuth.instance.currentUser; // Get the current user
+      final User? user = FirebaseAuth.instance.currentUser;
       if (user != null) {
-        // Access the user's document in the Users collection
         final DocumentSnapshot userDoc = await FirebaseFirestore.instance
             .collection('Users')
-            .doc(user.uid) // User document identified by the user's UID
-            .get(); // Get the document snapshot
+            .doc(user.uid)
+            .get();
 
-        // Extract the firstName from the 'Profile.main.firstName' field inside the user's document
         final firstName = userDoc['Profile']['main']['firstName'];
 
         setState(() {
-          _userName = firstName ?? "User"; // Default to "User" if firstName is missing
+          _userName = firstName ?? "User";
         });
       }
     } catch (e) {
@@ -95,12 +107,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
-  
-
-
-
   @override
-  
   Widget build(BuildContext context) {
     return Scaffold(
       body: CustomScrollView(
@@ -113,44 +120,52 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildAppBar(BuildContext context) {
+    final double screenWidth= MediaQuery.of(context).size.width;
     return SliverAppBar(
-      expandedHeight: 250,
-      backgroundColor: Colors.transparent,
-      flexibleSpace: FlexibleSpaceBar(
-        title: Align(
-          alignment: Alignment.center,
-          child: GradientText(
-            'THE FIRE VALA',
-            gradient: LinearGradient(
-              colors: [Colors.blue, Colors.white, Colors.orange],
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            ),
-            style: TextStyle(
-              color:Colors.white,
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-            ),
-          ),      
-          ),
+        pinned: false, // Allows the app bar to collapse on scroll
+        floating: false,
+        expandedHeight: 300, // Adjust height as needed
+        backgroundColor: Colors.transparent,
+        flexibleSpace: FlexibleSpaceBar(
+          background: Stack(
+            fit: StackFit.expand,
+            children: [
+              // Background animation or image
+              const DashboardHeader(
+                animationPath: 'animations/dashboard.json',
+              ),
 
-        
-        background: const DashboardHeader(
-          animationPath: 'animations/dashboard.json',
-            ),
+              // Overlay text at the top of the image
+              Align(
+                alignment: Alignment.topCenter,
+                child: Padding(
+                  padding: const EdgeInsets.only(top: 20), // Adjust padding for positioning
+                  child: GradientText(
+                    'THE FIRE VALA',
+                    gradient: LinearGradient(
+                      colors: [Colors.orange,Colors.red,Colors.white, Colors.blue],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                    ),
+                    style: TextStyle(
+                      fontSize: screenWidth < 600 ? 20 : 28, // Scale font size
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-
-          leading: IconButton(
+        ),
+      leading: IconButton(
         icon: Image.asset('assets/images/splash.png'),
         onPressed: () {
           Navigator.pop(context);
         },
-          ),
-          
+      ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.admin_panel_settings_outlined,
-              color: Colors.white),
+          icon: const Icon(Icons.admin_panel_settings_outlined, color: Colors.white),
           onPressed: () => Navigator.push(
             context,
             MaterialPageRoute(
@@ -177,37 +192,39 @@ class _DashboardScreenState extends State<DashboardScreen> {
           topLeft: Radius.circular(32),
           topRight: Radius.circular(32),
         ),
-        child: Container(
-          padding: const EdgeInsets.all(16.0),
-          decoration: BoxDecoration(
-            color: Colors.transparent,
-            border: Border.all(
-              color: Colors.grey.withOpacity(0.3),
-              width: 1.0,
+        child: SingleChildScrollView(
+          child: Container(
+            padding: const EdgeInsets.all(16.0),
+            decoration: BoxDecoration(
+              color: Colors.transparent,
+              border: Border.all(
+                color: Colors.grey.withOpacity(0.3),
+                width: 1.0,
+              ),
             ),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              GreetingSection(userName: _userName), // Use fetched user name
-              const SizedBox(height: 28),
-              _buildSectionHeader(
-                title: "Explore All Courses",
-                actionText: "See All",
-                onActionTap: () => debugPrint("See All Courses clicked"),
-              ),
-              const SizedBox(height: 20),
-              _buildCoursesList(),
-              const SizedBox(height: 28),
-              _buildSectionHeader(
-                title: "Ongoing Course",
-                actionText: "See All",
-                onActionTap: () =>
-                    debugPrint("See All Ongoing Courses clicked"),
-              ),
-              const SizedBox(height: 20),
-              _buildOngoingCourses(),
-            ],
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                GreetingSection(userName: _userName),
+                const SizedBox(height: 28),
+                _buildSectionHeader(
+                  title: "Explore All Courses",
+                  actionText: "See All",
+                  onActionTap: () => debugPrint("See All Courses clicked"),
+                ),
+                const SizedBox(height: 20),
+                _buildCoursesList(),
+                const SizedBox(height: 28),
+                _buildSectionHeader(
+                  title: "Ongoing Course",
+                  actionText: "See All",
+                  onActionTap: () =>
+                      debugPrint("See All Ongoing Courses clicked"),
+                ),
+                const SizedBox(height: 20),
+                _buildOngoingCourses(),
+              ],
+            ),
           ),
         ),
       ),
@@ -227,7 +244,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildCoursesList() {
-    return FutureBuilder<List<Map<String, String>>>(  // Fetching courses data
+    return FutureBuilder<List<Map<String, String>>>(
       future: _fetchCourses(),
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
