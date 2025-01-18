@@ -1,242 +1,168 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 
 class VerificationScreen extends StatefulWidget {
-  const VerificationScreen({super.key});
+  final String phoneNumber;
+  final Function(String) onVerificationSuccess;
+
+  const VerificationScreen({
+    Key? key,
+    required this.phoneNumber,
+    required this.onVerificationSuccess,
+  }) : super(key: key);
 
   @override
   _VerificationScreenState createState() => _VerificationScreenState();
 }
 
 class _VerificationScreenState extends State<VerificationScreen> {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Colors.white,
-      body: LogoWithTitle(
-        title: 'Verification',
-        subText: "SMS Verification code has been sent",
-        children: [
-          const Text("+1 18577 11111"),
-          SizedBox(height: MediaQuery.of(context).size.height * 0.04),
-          // OTP Form
-          const OtpForm(),
-        ],
-      ),
-    );
-  }
-}
-
-class OtpForm extends StatefulWidget {
-  const OtpForm({super.key});
-
-  @override
-  _OtpFormState createState() => _OtpFormState();
-}
-
-class _OtpFormState extends State<OtpForm> {
-  final _formKey = GlobalKey<FormState>();
-  final List<TextInputFormatter> otpTextInputFormatters = [
-    FilteringTextInputFormatter.digitsOnly,
-    LengthLimitingTextInputFormatter(1),
-  ];
-  late FocusNode _pin1Node;
-  late FocusNode _pin2Node;
-  late FocusNode _pin3Node;
-  late FocusNode _pin4Node;
+  final auth.FirebaseAuth _auth = auth.FirebaseAuth.instance;
+  String _verificationId = "";
+  bool _isLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _pin1Node = FocusNode();
-    _pin2Node = FocusNode();
-    _pin3Node = FocusNode();
-    _pin4Node = FocusNode();
+    _sendOtp(widget.phoneNumber);
   }
 
-  @override
-  void dispose() {
-    super.dispose();
-    _pin1Node.dispose();
-    _pin2Node.dispose();
-    _pin3Node.dispose();
-    _pin4Node.dispose();
+  void _sendOtp(String phoneNumber) async {
+    setState(() => _isLoading = true);
+
+    try {
+      await _auth.verifyPhoneNumber(
+        phoneNumber: phoneNumber,
+        timeout: const Duration(seconds: 60),
+        verificationCompleted: (auth.PhoneAuthCredential credential) async {
+          await _handleCredential(credential);
+        },
+        verificationFailed: (auth.FirebaseAuthException e) {
+          _showErrorSnackBar("Verification failed: ${e.message}");
+        },
+        codeSent: (String verificationId, int? resendToken) {
+          setState(() => _verificationId = verificationId);
+          _showSuccessSnackBar("OTP sent to your phone.");
+        },
+        codeAutoRetrievalTimeout: (String verificationId) {
+          setState(() => _verificationId = verificationId);
+        },
+      );
+    } catch (e) {
+      _showErrorSnackBar("Error sending OTP: ${e.toString()}");
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  Future<void> _handleCredential(auth.PhoneAuthCredential credential) async {
+    try {
+      final userCredential = await _auth.signInWithCredential(credential);
+      if (userCredential.user != null) {
+        _showSuccessSnackBar("Phone number verified successfully!");
+        widget.onVerificationSuccess(widget.phoneNumber);
+      }
+    } catch (e) {
+      _showErrorSnackBar("Authentication failed: ${e.toString()}");
+    }
+  }
+
+  void _verifyOtp(String otp) async {
+    if (otp.length != 6) {
+      _showErrorSnackBar("Please enter a valid 6-digit OTP");
+      return;
+    }
+
+    setState(() => _isLoading = true);
+
+    try {
+      final credential = auth.PhoneAuthProvider.credential(
+        verificationId: _verificationId,
+        smsCode: otp,
+      );
+      await _handleCredential(credential);
+    } catch (e) {
+      _showErrorSnackBar("Invalid OTP: ${e.toString()}");
+    } finally {
+      setState(() => _isLoading = false);
+    }
+  }
+
+  void _showErrorSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.red,
+      ),
+    );
+  }
+
+  void _showSuccessSnackBar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: Colors.green,
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: OtpTextFormField(
-                  focusNode: _pin1Node,
-                  onChanged: (value) {
-                    if (value.length == 1) _pin2Node.requestFocus();
-                  },
-                  onSaved: (pin) {
-                    // Save it
-                  },
-                  autofocus: true,
-                ),
-              ),
-              const SizedBox(width: 16.0),
-              Expanded(
-                child: OtpTextFormField(
-                  focusNode: _pin2Node,
-                  onChanged: (value) {
-                    if (value.length == 1) _pin3Node.requestFocus();
-                  },
-                  onSaved: (pin) {
-                    // Save it
-                  },
-                ),
-              ),
-              const SizedBox(width: 16.0),
-              Expanded(
-                child: OtpTextFormField(
-                  focusNode: _pin3Node,
-                  onChanged: (value) {
-                    if (value.length == 1) _pin4Node.requestFocus();
-                  },
-                  onSaved: (pin) {
-                    // Save it
-                  },
-                ),
-              ),
-              const SizedBox(width: 16.0),
-              Expanded(
-                child: OtpTextFormField(
-                  focusNode: _pin4Node,
-                  onChanged: (value) {
-                    if (value.length == 1) _pin4Node.unfocus();
-                  },
-                  onSaved: (pin) {
-                    // Save it
-                  },
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16.0),
-          ElevatedButton(
-            onPressed: () {
-              if (_formKey.currentState!.validate()) {
-                _formKey.currentState!.save();
-                // check your code
-                Navigator.pushNamed(context, '/change');
-              }
-            },
-            style: ElevatedButton.styleFrom(
-              elevation: 0,
-              backgroundColor: const Color(0xFF00BF6D),
-              foregroundColor: Colors.white,
-              minimumSize: const Size(double.infinity, 48),
-              shape: const StadiumBorder(),
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Verification'),
+      ),
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            Text(
+              "Enter the OTP sent to ${widget.phoneNumber}",
+              style: const TextStyle(fontSize: 16),
+              textAlign: TextAlign.center,
             ),
-            child: const Text("Next"),
-          ),
-        ],
+            const SizedBox(height: 16),
+            OtpForm(onSubmitOtp: _verifyOtp),
+            const SizedBox(height: 16),
+            _isLoading
+                ? const CircularProgressIndicator()
+                : TextButton(
+              onPressed: () => _sendOtp(widget.phoneNumber),
+              child: const Text("Resend OTP"),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-const InputDecoration otpInputDecoration = InputDecoration(
-  filled: false,
-  border: UnderlineInputBorder(),
-  hintText: "0",
-);
+class OtpForm extends StatelessWidget {
+  final ValueChanged<String> onSubmitOtp;
 
-class OtpTextFormField extends StatelessWidget {
-  final FocusNode? focusNode;
-  final ValueChanged<String>? onChanged;
-  final FormFieldSetter<String>? onSaved;
-  final bool autofocus;
-
-  const OtpTextFormField(
-      {Key? key,
-      this.focusNode,
-      this.onChanged,
-      this.onSaved,
-      this.autofocus = false})
-      : super(key: key);
+  const OtpForm({Key? key, required this.onSubmitOtp}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
-      autovalidateMode: AutovalidateMode.onUserInteraction,
-      focusNode: focusNode,
-      onChanged: onChanged,
-      onSaved: onSaved,
-      autofocus: autofocus,
-      obscureText: true,
-      inputFormatters: [
-        FilteringTextInputFormatter.digitsOnly,
-        LengthLimitingTextInputFormatter(1),
-      ],
-      textAlign: TextAlign.center,
-      keyboardType: TextInputType.number,
-      style: Theme.of(context).textTheme.headlineSmall,
-      decoration: otpInputDecoration,
-    );
-  }
-}
+    final TextEditingController _otpController = TextEditingController();
 
-class LogoWithTitle extends StatelessWidget {
-  final String title, subText;
-  final List<Widget> children;
-
-  const LogoWithTitle(
-      {Key? key,
-      required this.title,
-      this.subText = '',
-      required this.children})
-      : super(key: key);
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: LayoutBuilder(builder: (context, constraints) {
-        return SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 16.0),
-          child: Column(
-            children: [
-              SizedBox(height: constraints.maxHeight * 0.1),
-              Image.asset('assets/images/splash.png', height: 146),
-              SizedBox(
-                height: constraints.maxHeight * 0.1,
-                width: double.infinity,
-              ),
-              Text(
-                title,
-                style: Theme.of(context)
-                    .textTheme
-                    .headlineSmall!
-                    .copyWith(fontWeight: FontWeight.bold),
-              ),
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 16.0),
-                child: Text(
-                  subText,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    height: 1.5,
-                    color: Theme.of(context)
-                        .textTheme
-                        .bodyLarge!
-                        .color!
-                        .withOpacity(0.64),
-                  ),
-                ),
-              ),
-              ...children,
-            ],
+    return Column(
+      children: [
+        TextFormField(
+          controller: _otpController,
+          keyboardType: TextInputType.number,
+          maxLength: 6,
+          decoration: const InputDecoration(
+            labelText: "OTP",
+            border: OutlineInputBorder(),
           ),
-        );
-      }),
+        ),
+        const SizedBox(height: 16),
+        ElevatedButton(
+          onPressed: () => onSubmitOtp(_otpController.text),
+          child: const Text("Verify"),
+        ),
+      ],
     );
   }
 }

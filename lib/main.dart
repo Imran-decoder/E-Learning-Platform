@@ -10,6 +10,7 @@ import 'package:elearning/Onboarding/forgot_pass.dart';
 import 'package:elearning/Onboarding/varification.dart';
 import 'package:elearning/Onboarding/change_pass.dart';
 import 'package:elearning/Onboarding/secpage_of_signup.dart';
+import 'package:elearning/screens/chat_screen.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -49,7 +50,7 @@ class MyApp extends StatelessWidget {
         '/log-sign': (context) => SigninOrSignupScreen(),
         '/login': (context) => SignInScreen(),
         '/forgot': (context) => ForgotPasswordScreen(),
-        '/verify': (context) => VerificationScreen(),
+        '/verify': (context) => VerificationScreen(phoneNumber: '', onVerificationSuccess: (String ) {  },),
         '/change': (context) => ChangePasswordScreen(),
         '/secpage': (context) => ComplateProfileScreen(),
         
@@ -71,7 +72,6 @@ class _BottomNavBarAppState extends State<BottomNavBarApp> {
   // List of screens for navigation, including all 4 items for the tabs
   final List<Widget> _screens = [
     DashboardScreen(),  // Home Screen
-    SearchScreen(),     // Search Screen
     ChatScreen(),       // Chat Screen
     ProfileScreen(),    // Profile Screen
   ];
@@ -82,62 +82,6 @@ class _BottomNavBarAppState extends State<BottomNavBarApp> {
     });
   }
 
-  // Function to show the search popup
-  void _showSearchPopup(BuildContext context) {
-    showModalBottomSheet(
-      context: context,
-      builder: (context) => Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              decoration: BoxDecoration(
-                color: Colors.deepOrange,
-                borderRadius: BorderRadius.all(Radius.circular(30.0)),
-              ),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                      child: TextField(
-                        autofocus: true,
-                        decoration: const InputDecoration(
-                          border: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(30.0)),
-                            borderSide: BorderSide.none,
-                          ),
-                          focusedBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(30.0)),
-                            borderSide: BorderSide.none,
-                          ),
-                          enabledBorder: OutlineInputBorder(
-                            borderRadius: BorderRadius.all(Radius.circular(30.0)),
-                            borderSide: BorderSide.none,
-                          ),
-                          fillColor: Colors.deepOrange,
-                          hintText: "Search courses",
-                          hintStyle: TextStyle(color: Colors.white70, fontSize: 18.0),
-                        ),
-                        style: const TextStyle(color: Color.fromARGB(236, 255, 253, 253), fontSize: 21.0),
-                      ),
-                    ),
-                  ),
-                  const Padding(
-                    padding: EdgeInsets.only(right: 12.0),
-                    child: Icon(Icons.search, color: Colors.white70),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 20),
-          ],
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -145,11 +89,8 @@ class _BottomNavBarAppState extends State<BottomNavBarApp> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: (index) {
-          if (index == 1) {
-            _showSearchPopup(context);  // Show search popup if "Search" is tapped
-          } else {
-            _onItemTapped(index);  // Update selected index for other tabs
-          }
+          _onItemTapped(index); 
+          
         },
         items: [
           BottomNavigationBarItem(
@@ -157,11 +98,7 @@ class _BottomNavBarAppState extends State<BottomNavBarApp> {
             label: 'Home',
             backgroundColor: Colors.white,
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: 'Search',
-            backgroundColor: Colors.white,
-          ),
+         
           BottomNavigationBarItem(
             icon: Icon(Icons.chat),
             label: 'Chat',
@@ -266,34 +203,3 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 }
 
-// class ProfileScreen extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Scaffold(
-//       appBar: AppBar(
-//         title: Text('Profile'),
-//         backgroundColor: Colors.deepOrange,
-//       ),
-//       body: Center(
-//         child: Text(
-//           'This is the Profile Screen',
-//           style: TextStyle(fontSize: 20),
-//         ),
-//       ),
-//     );
-//   }
-// }
-
-class SearchScreen extends StatelessWidget {
-  const SearchScreen({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-        child: Text(
-            'This is the Search Screen',
-            style: TextStyle(fontSize: 20),
-            ),
-        );
-    }
-}

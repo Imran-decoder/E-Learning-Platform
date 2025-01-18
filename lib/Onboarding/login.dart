@@ -25,12 +25,11 @@ class _SignInScreenState extends State<SignInScreen> {
       String userID = FirebaseAuth.instance.currentUser!.uid;
       if (FirebaseAuth.instance.currentUser != null) {
         if (await checkUserProfile(userID) == true) {
-          Navigator.pushNamed(context, '/dashboard');}
-          else {
-        Navigator.pushNamed(context, '/secpage');
+          Navigator.pushNamed(context, '/dashboard');
+        } else {
+          Navigator.pushNamed(context, '/secpage');
+        }
       }
-        
-      } 
     } on FirebaseAuthException catch (e) {
       print(e);
     }
@@ -43,6 +42,22 @@ class _SignInScreenState extends State<SignInScreen> {
       return doc.exists; // True if profile exists, false otherwise
     } catch (e) {
       throw 'Failed to check user profile: $e';
+    }
+  }
+
+  Future<void> resetPassword() async {
+    try {
+      await FirebaseAuth.instance
+          .sendPasswordResetEmail(email: emailController.text.trim());
+     ScaffoldMessenger.of(context).showSnackBar( SnackBar(
+        content: Text('Password reset link sent to your email'),
+        backgroundColor: Colors.green,
+      ));
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(e.toString()),
+        backgroundColor: Colors.red,
+      ));
     }
   }
 
@@ -86,7 +101,7 @@ class _SignInScreenState extends State<SignInScreen> {
                                   BorderRadius.all(Radius.circular(50)),
                             ),
                           ),
-                          keyboardType: TextInputType.phone,
+                          // keyboardType: TextInputType.phone,
                           onSaved: (phone) {
                             // Save it
                           },
@@ -140,8 +155,15 @@ class _SignInScreenState extends State<SignInScreen> {
                         ),
                         const SizedBox(height: 16.0),
                         TextButton(
-                          onPressed: () {
-                            Navigator.pushNamed(context, '/forgot');
+                          onPressed: () async {
+                            if (emailController.text.trim().isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                                content: Text('Please enter your email'),
+                                backgroundColor: Colors.red,
+                              ));
+                            } else {
+                              await resetPassword();
+                            }
                           },
                           child: Text(
                             'Forgot Password?',
