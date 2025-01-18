@@ -16,10 +16,10 @@ class GradientText extends StatelessWidget {
   final Gradient gradient;
 
   const GradientText(
-      this.text, {
-        required this.gradient,
-        this.style,
-      });
+    this.text, {
+    required this.gradient,
+    this.style,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -27,7 +27,9 @@ class GradientText extends StatelessWidget {
     double screenWidth = MediaQuery.of(context).size.width;
 
     // Adjust font size based on screen width
-    double fontSize = screenWidth < 600 ? 20 : 28; // Smaller for mobile, larger for tablets/desktops
+    double fontSize = screenWidth < 600
+        ? 20
+        : 28; // Smaller for mobile, larger for tablets/desktops
 
     return ShaderMask(
       shaderCallback: (bounds) {
@@ -38,9 +40,9 @@ class GradientText extends StatelessWidget {
       child: Text(
         text,
         style: style?.copyWith(
-          color: Colors.white,
-          fontSize: fontSize, // Dynamically adjusted font size
-        ) ??
+              color: Colors.white,
+              fontSize: fontSize, // Dynamically adjusted font size
+            ) ??
             TextStyle(
               color: Colors.white,
               fontSize: fontSize,
@@ -95,7 +97,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         return {
           'id': doc.id,
           'logo': (doc['logo']?.toString().isNotEmpty == true &&
-              Uri.tryParse(doc['logo'].toString())?.isAbsolute == true)
+                  Uri.tryParse(doc['logo'].toString())?.isAbsolute == true)
               ? doc['logo'].toString()
               : 'assets/images/default_logo.webp',
           'name': doc['title']?.toString() ?? 'Unnamed Course',
@@ -120,43 +122,52 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildAppBar(BuildContext context) {
-    final double screenWidth= MediaQuery.of(context).size.width;
+    final double screenWidth = MediaQuery.of(context).size.width;
     return SliverAppBar(
-        pinned: false, // Allows the app bar to collapse on scroll
-        floating: false,
-        expandedHeight: 300, // Adjust height as needed
-        backgroundColor: Colors.transparent,
-        flexibleSpace: FlexibleSpaceBar(
-          background: Stack(
-            fit: StackFit.expand,
-            children: [
-              // Background animation or image
-              const DashboardHeader(
-                animationPath: 'animations/dashboard.json',
-              ),
+      pinned: false, // Allows the app bar to collapse on scroll
+      floating: false,
+      expandedHeight: 300, // Adjust height as needed
+      backgroundColor: Colors.transparent,
+      flexibleSpace: FlexibleSpaceBar(
+        background: Stack(
+          fit: StackFit.expand,
+          children: [
+            // Background animation or image
+            const DashboardHeader(
+              animationPath: 'animations/dashboard.json',
+            ),
 
-              // Overlay text at the top of the image
-              Align(
+            // Overlay text at the top of the image
+            Align(
                 alignment: Alignment.topCenter,
                 child: Padding(
-                  padding: const EdgeInsets.only(top: 20), // Adjust padding for positioning
+                  padding: EdgeInsets.only(
+                      top: MediaQuery.of(context).size.width < 600
+                          ? 50.0
+                          : 40.0),
                   child: GradientText(
                     'THE FIRE VALA',
                     gradient: LinearGradient(
-                      colors: [Colors.orange,Colors.red,Colors.white, Colors.blue],
+                      colors: [
+                        Colors.orange,
+                        Colors.red,
+                        Colors.white,
+                        Colors.blue
+                      ],
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                     ),
                     style: TextStyle(
-                      fontSize: screenWidth < 600 ? 20 : 28, // Scale font size
+                      fontSize: MediaQuery.of(context).size.width < 600
+                          ? 20
+                          : 28, // Scale font size
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                ),
-              ),
-            ],
-          ),
+                )),
+          ],
         ),
+      ),
       leading: IconButton(
         icon: Image.asset('assets/images/splash.png'),
         onPressed: () {
@@ -165,7 +176,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.admin_panel_settings_outlined, color: Colors.white),
+          icon: const Icon(Icons.admin_panel_settings_outlined,
+              color: Colors.white),
           onPressed: () => Navigator.push(
             context,
             MaterialPageRoute(
@@ -276,7 +288,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ],
     );
   }
-
 
   void _onCourseSelected(BuildContext context, Map<String, String> course) {
     final String courseId = course['id'] ?? '';
