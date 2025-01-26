@@ -18,8 +18,15 @@ class HeaderSection extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 12.0),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(10.0),
-          border: Border.all(color: Colors.black26), // Black border for the container
+          borderRadius: BorderRadius.circular(12.0),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 8.0,
+              offset: const Offset(0, 4),
+            ),
+          ], // Subtle shadow to elevate the header
+          border: Border.all(color: Colors.black12), // Lighter border for a sleek look
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -27,26 +34,26 @@ class HeaderSection extends StatelessWidget {
             // Left Section with Document Icon and Title
             Row(
               children: [
-                // Document Icon on the Left
+                // Document Icon on the Left with gradient background
                 Container(
-                  padding: const EdgeInsets.all(8.0),
+                  padding: const EdgeInsets.all(10.0),
                   decoration: BoxDecoration(
-                    color: Colors.white, // White background
+                    color: Colors.blueAccent.withOpacity(0.1), // Subtle color for the background
                     shape: BoxShape.circle,
-                    border: Border.all(color: Colors.black, width: 2), // Black border
+                    border: Border.all(color: Colors.blueAccent, width: 2), // Blue border
                   ),
                   child: const Icon(
                     Icons.description, // Document icon
-                    color: Colors.black, // Black icon color
+                    color: Colors.blueAccent, // Blue icon color
                   ),
                 ),
                 const SizedBox(width: 16), // Spacing between icon and title
-                // Title Text
+                // Title Text with improved styling
                 Text(
                   title,
                   style: const TextStyle(
-                    fontSize: 18,
-                    fontWeight: FontWeight.bold,
+                    fontSize: 20,
+                    fontWeight: FontWeight.w600, // Slightly lighter font weight
                     color: Colors.black,
                   ),
                 ),
@@ -56,7 +63,7 @@ class HeaderSection extends StatelessWidget {
             IconButton(
               icon: const Icon(
                 Icons.more_vert_sharp,
-                color: Colors.black, // Black color for the icon
+                color: Colors.black54, // Lighter color for the more icon
               ),
               onPressed: () {
                 // Optional: Add functionality for the 'more' button

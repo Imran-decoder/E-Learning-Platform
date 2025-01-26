@@ -11,13 +11,13 @@ class EditCourseScreen extends StatefulWidget {
 
 class _EditCourseScreenState extends State<EditCourseScreen> {
   final TextEditingController _courseTitleController = TextEditingController();
-  String? courseId; // Store course ID to pass to EditChapterComponent
-  String? fetchedCourseTitle; // Store course title for editing
-  Map<String, Map<String, dynamic>> chaptersData = {}; // Store tasks data
+  String? courseId;
+  String? fetchedCourseTitle;
+  Map<String, Map<String, dynamic>> chaptersData = {};
   bool isLoading = false;
 
-  // Fetch course and tasks data
-  void _fetchCourse(String courseTitle) async {
+  // Fetch course and chapters data
+  Future<void> _fetchCourse(String courseTitle) async {
     setState(() {
       isLoading = true;
     });
@@ -43,6 +43,7 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
           chaptersData = {
             for (var doc in tasksSnapshot.docs)
               doc.id: {
+                'chapter_title': doc.data()['title'] ?? '',
                 'description': doc['description'],
                 'number': doc['number'],
                 'video': doc['video'],
@@ -50,14 +51,14 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
           };
         });
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
+        ScaffoldMessenger.of(context).showSnackBar (
           const SnackBar(content: Text('No course found with that title.')),
         );
       }
     } catch (e) {
-      print("Error fetching course: $e");
+      debugPrint("Error fetching course: $e");
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to fetch course data.')),
+         SnackBar(content: Text('Failed to fetch course data.')),
       );
     } finally {
       setState(() {

@@ -22,15 +22,32 @@ class EditChapterComponent extends StatefulWidget {
 class _EditChapterComponentState extends State<EditChapterComponent> {
   final TextEditingController _courseTitleController = TextEditingController();
   late Map<String, Map<String, dynamic>> chaptersData;
+  final Map<String, TextEditingController> _controllers = {};
 
   @override
   void initState() {
     super.initState();
-    _courseTitleController.text = widget.initialCourseTitle; // Set initial title
-    chaptersData = Map.from(widget.chaptersData); // Make a local copy
+    _courseTitleController.text = widget.initialCourseTitle;
+    chaptersData = Map.from(widget.chaptersData);
+
+    // Initialize controllers for chapters
+    for (var chapterId in chaptersData.keys) {
+      _controllers[chapterId] = TextEditingController(
+        text: chaptersData[chapterId]!['chapter_title'] ?? '',
+      );
+    }
   }
 
-  // Save updated course title and chapters data to Firestore
+  @override
+  void dispose() {
+    _courseTitleController.dispose();
+    // Replace forEach with a for loop to dispose controllers
+    for (var controller in _controllers.values) {
+      controller.dispose();
+    }
+    super.dispose();
+  }
+
   void _saveChanges() async {
     try {
       // Update course title
@@ -47,10 +64,10 @@ class _EditChapterComponentState extends State<EditChapterComponent> {
             .collection('tasks')
             .doc(chapterId)
             .update({
-          'title': chaptersData[chapterId]?['title'],
-          'description': chaptersData[chapterId]?['description'],
-          'number': chaptersData[chapterId]?['number'],
-          'video': chaptersData[chapterId]?['video'],
+          'chapter_title': _controllers[chapterId]?.text,
+          'description': chaptersData[chapterId]!['description'],
+          'number': chaptersData[chapterId]!['number'],
+          'video': chaptersData[chapterId]!['video'],
         });
       }
 
@@ -59,9 +76,8 @@ class _EditChapterComponentState extends State<EditChapterComponent> {
       );
       widget.onSave();
     } catch (e) {
-      print("Error saving changes: $e");
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Failed to save changes.')),
+        SnackBar(content: Text('Failed to save changes: $e')),
       );
     }
   }
@@ -69,7 +85,7 @@ class _EditChapterComponentState extends State<EditChapterComponent> {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.black, // Set background color to black
+      color: Colors.black,
       padding: const EdgeInsets.all(16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -94,7 +110,6 @@ class _EditChapterComponentState extends State<EditChapterComponent> {
               itemCount: chaptersData.length,
               itemBuilder: (context, index) {
                 var chapterId = chaptersData.keys.elementAt(index);
-                var chapter = chaptersData[chapterId]!;
 
                 return Card(
                   color: Colors.black54,
@@ -106,10 +121,10 @@ class _EditChapterComponentState extends State<EditChapterComponent> {
                       children: [
                         // Chapter Title
                         TextField(
-                          controller: TextEditingController(text: chapter['title']),
+                          controller: _controllers[chapterId],
                           onChanged: (value) {
                             setState(() {
-                              chaptersData[chapterId]!['title'] = value;
+                              chaptersData[chapterId]!['chapter_title'] = value;
                             });
                           },
                           style: const TextStyle(color: Colors.white),
@@ -125,10 +140,14 @@ class _EditChapterComponentState extends State<EditChapterComponent> {
 
                         // Chapter Number
                         TextField(
-                          controller: TextEditingController(text: chapter['number'].toString()),
+                          controller: TextEditingController(
+                              text: chaptersData[chapterId]!['number']
+                                  ?.toString() ??
+                                  ''),
                           onChanged: (value) {
                             setState(() {
-                              chaptersData[chapterId]!['number'] = int.tryParse(value) ?? 0;
+                              chaptersData[chapterId]!['number'] =
+                                  int.tryParse(value) ?? 0;
                             });
                           },
                           style: const TextStyle(color: Colors.white),
@@ -144,13 +163,15 @@ class _EditChapterComponentState extends State<EditChapterComponent> {
 
                         // Chapter Description
                         TextField(
-                          controller: TextEditingController(text: chapter['description']),
+                          controller: TextEditingController(
+                              text: chaptersData[chapterId]!['description'] ?? ''),
                           onChanged: (value) {
                             setState(() {
                               chaptersData[chapterId]!['description'] = value;
                             });
                           },
                           style: const TextStyle(color: Colors.white),
+                          maxLines: 5,
                           decoration: const InputDecoration(
                             labelText: "Description",
                             labelStyle: TextStyle(color: Colors.white),
@@ -163,7 +184,8 @@ class _EditChapterComponentState extends State<EditChapterComponent> {
 
                         // Chapter Video URL
                         TextField(
-                          controller: TextEditingController(text: chapter['video']),
+                          controller: TextEditingController(
+                              text: chaptersData[chapterId]!['video'] ?? ''),
                           onChanged: (value) {
                             setState(() {
                               chaptersData[chapterId]!['video'] = value;

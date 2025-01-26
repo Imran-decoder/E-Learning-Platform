@@ -1,5 +1,3 @@
-import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'detail_info_screen.dart';
 import 'package:elearning/components/header_section.dart';
@@ -8,32 +6,37 @@ import 'package:elearning/db_operations/courses.dart';
 
 class Section {
   final String title;
-  // final String titles;
   final String content;
-  // final String maintitle;
   final String duration;
   final int number;
   final String videoUrl;
+  final String taskId;
 
-  Section({required this.title, required this.content,  required this.duration, required this.number, required this.videoUrl});
+
+  Section({
+    required this.title,
+    required this.content,
+    required this.duration,
+    required this.number,
+    required this.videoUrl,
+    required this.taskId,
+  });
 
   // Helper method to convert Task to Section
   static Section fromTask(Task task) {
     return Section(
       title: task.title,
       content: task.description,
-      // maintitle: task.titles,
       duration: task.duration,
       number: task.number,
       videoUrl: task.video,
-
+      taskId: task.id,
     );
   }
 }
 
 class CourseDetailsScreen extends StatefulWidget {
   final String courseId;
-
 
   const CourseDetailsScreen({
     required this.courseId,
@@ -60,23 +63,21 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
   // Convert tasks to sections and add introduction
   List<Section> _createSectionsFromCourse(Course course) {
     List<Section> sections = [];
-  
-    course.tasks.sort((a, b) => a.number.compareTo(b.number));
-  
-    for (var i = 0; i < course.tasks.length; i++) {
 
+    course.tasks.sort((a, b) => a.number.compareTo(b.number));
+
+    for (var i = 0; i < course.tasks.length; i++) {
       sections.add(Section(
-        title: 'Chapter ${i+1}', 
+        title: 'Chapter ${i + 1}',
         content: course.tasks[i].description,
         duration: course.tasks[i].duration,
-        // maintitle: course.tasks[i].titles,
         number: course.tasks[i].number,
         videoUrl: course.tasks[i].video,
-
+        taskId: course.tasks[i].id,
       ));
+     // debugPrint('Quiz URL for Section ${i + 1}: ${sections[i].quizUrl} ${sections[i].number}');
     }
-    //  }
-    
+
     return sections;
   }
 
@@ -84,7 +85,6 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
     try {
       setState(() => _isLoading = true);
       final courseData = await _repository.getCourseWithTasks(widget.courseId);
-      
       if (courseData == null) {
         setState(() {
           _error = 'Course not found';
@@ -151,7 +151,7 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
                   builder: (context) => CourseEditScreen(course: _course!),
                 ),
               );
-              
+
               if (wasUpdated == true) {
                 await _loadCourseData();
               }
@@ -178,24 +178,39 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
               const SizedBox(height: 24),
 
               // Sections/Chapters
+              // Removed Expanded, use shrinkWrap instead
               ListView.builder(
-                shrinkWrap: true,
-                physics: const NeverScrollableScrollPhysics(),
+                shrinkWrap: true, // This ensures that ListView takes only as much space as it needs
+                physics: const NeverScrollableScrollPhysics(), // Prevent scrolling within ListView
                 itemCount: _sections.length,
                 itemBuilder: (context, index) {
                   final section = _sections[index];
-                  return Padding (padding: const EdgeInsets.only(bottom:20.0),
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 20.0),
                     child: HeaderSection(
                       title: section.title,
-                       onTap: (){
-                        Navigator.push(context,
-                        MaterialPageRoute(builder:(context) => DetailedInfoScreen(title: section.title, content: section.content , duration: section.duration, number: section.number, videoUrl: section.videoUrl)));
-                       })
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => DetailedInfoScreen(
+                              title: section.title,
+                              content: section.content,
+                              duration: section.duration,
+                              number: section.number,
+                              videoUrl: section.videoUrl,
+                              taskId: section.taskId,
+                              courseId: widget.courseId,
+                            ),
+                          ),
+                        );
+                      },
+                    ),
                   );
                 },
               ),
 
-              // Task Management Section (preserved from original implementation)
+              // Task Management Section
               const SizedBox(height: 24),
               Card(
                 child: ListTile(
@@ -213,7 +228,7 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
                         ),
                       ),
                     );
-                    
+
                     if (wasModified == true) {
                       await _loadCourseData();
                     }
@@ -232,7 +247,7 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
               builder: (context) => AddTaskScreen(courseId: widget.courseId),
             ),
           );
-          
+
           if (wasAdded == true) {
             await _loadCourseData();
           }
@@ -243,7 +258,8 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
     );
   }
 }
-// Simple edit screen for the course
+
+// Course Edit Screen
 class CourseEditScreen extends StatefulWidget {
   final Course course;
 
@@ -317,9 +333,9 @@ class _CourseEditScreenState extends State<CourseEditScreen> {
                       logo: widget.course.logo,
                       tasks: widget.course.tasks,
                     );
-                    
+
                     await repository.updateCourse(updatedCourse);
-                    
+
                     Navigator.pop(context, true);
                   } catch (e) {
                     ScaffoldMessenger.of(context).showSnackBar(

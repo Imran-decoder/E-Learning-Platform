@@ -213,7 +213,7 @@ class _AddTaskScreenState extends State<AddTaskScreen> {
                           final newTask = Task(
                             id: '', // ID will be assigned by Firestore
                             title: _titleController.text,
-                            description: _descriptionController.text, number: 0, duration: '', video: '',
+                            description: _descriptionController.text, number: 0, duration: '', video: '', quiz: ''
                           );
                           
                           await repository.addTaskToCourse(
@@ -288,7 +288,7 @@ class _TaskDetailScreenState extends State<TaskDetailScreen> {
       final updatedTask = Task(
         id: widget.task.id,
         title: _titleController.text,
-        description: _descriptionController.text, number: 0, duration: '', video: '',
+        description: _descriptionController.text, number: 0, duration: '', video: '', quiz: '',
       );
       
       await repository.updateTask(widget.courseId, updatedTask);

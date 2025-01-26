@@ -19,7 +19,7 @@ class DashboardScreen extends StatefulWidget {
 class _DashboardScreenState extends State<DashboardScreen> {
   final TextEditingController _searchControl = TextEditingController();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  String _userName = "User";
+  String _userName = "";
 
   @override
   void initState() {
@@ -41,7 +41,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         final firstName = userDoc['Profile']['main']['firstName'];
 
         setState(() {
-          _userName = firstName ?? "User"; // Default to "User" if firstName is missing
+          _userName = firstName;
         });
       }
     } catch (e) {

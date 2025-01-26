@@ -45,6 +45,7 @@ class Task {
   final int number;
   final String duration;
   final String video;
+  final String? quiz;
 
   Task({
     required this.id,
@@ -53,12 +54,17 @@ class Task {
     required this.number,
     required this.duration,
     required this.video,
+    this.quiz,
   });
 
   Map<String, dynamic> toFirestore() {
     return {
       'title': title,
       'description': description,
+      'number': number,
+      'duration': duration,
+      'video': video,
+      if (quiz != null ) 'quiz':quiz,
     };
   }
 
@@ -74,6 +80,7 @@ class Task {
       number: data['number'],
       duration: data['duration'],
       video: data['video'],
+      quiz: data.containsKey('quiz') ? data['quiz']: null,
     );
   }
 }

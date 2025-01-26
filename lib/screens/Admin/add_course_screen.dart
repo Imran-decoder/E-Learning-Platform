@@ -1,13 +1,11 @@
 import 'package:flutter/material.dart';
-import 'package:image_picker/image_picker.dart'; // Import the image_picker package
-import 'dart:io'; // Import dart:io for File class
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-class AddChapter extends StatelessWidget {
+class AddChapter extends StatefulWidget {
   final TextEditingController titleController;
   final TextEditingController descriptionController;
   final TextEditingController chapterNoController;
   final TextEditingController videoLinkController;
-  final TextEditingController quizLinkController;
   final TextEditingController documentLinkController;
   final VoidCallback onRemove;
 
@@ -17,11 +15,15 @@ class AddChapter extends StatelessWidget {
     required this.descriptionController,
     required this.chapterNoController,
     required this.videoLinkController,
-    required this.quizLinkController,
     required this.documentLinkController,
     required this.onRemove,
   }) : super(key: key);
 
+  @override
+  _AddChapterState createState() => _AddChapterState();
+}
+
+class _AddChapterState extends State<AddChapter> {
   @override
   Widget build(BuildContext context) {
     return Padding(
@@ -30,7 +32,7 @@ class AddChapter extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            "Enter Chapter Details",
+            "Enter Task Details",
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -41,7 +43,7 @@ class AddChapter extends StatelessWidget {
 
           // Title Field
           TextField(
-            controller: titleController,
+            controller: widget.titleController,
             style: const TextStyle(color: Colors.white),
             decoration: const InputDecoration(
               labelText: "Title",
@@ -55,7 +57,7 @@ class AddChapter extends StatelessWidget {
 
           // Description Field
           TextField(
-            controller: descriptionController,
+            controller: widget.descriptionController,
             style: const TextStyle(color: Colors.white),
             decoration: const InputDecoration(
               labelText: "Description",
@@ -69,7 +71,7 @@ class AddChapter extends StatelessWidget {
 
           // Chapter Number Field
           TextField(
-            controller: chapterNoController,
+            controller: widget.chapterNoController,
             style: const TextStyle(color: Colors.white),
             decoration: const InputDecoration(
               labelText: "Chapter No",
@@ -83,7 +85,7 @@ class AddChapter extends StatelessWidget {
 
           // Video Link Field
           TextField(
-            controller: videoLinkController,
+            controller: widget.videoLinkController,
             style: const TextStyle(color: Colors.white),
             decoration: const InputDecoration(
               labelText: "Video Link",
@@ -95,23 +97,9 @@ class AddChapter extends StatelessWidget {
           ),
           const SizedBox(height: 20),
 
-          // Quiz Link Field
-          TextField(
-            controller: quizLinkController,
-            style: const TextStyle(color: Colors.white),
-            decoration: const InputDecoration(
-              labelText: "Quiz Link",
-              labelStyle: TextStyle(color: Colors.white),
-              border: OutlineInputBorder(),
-              filled: true,
-              fillColor: Colors.black54,
-            ),
-          ),
-          const SizedBox(height: 20),
-
           // Document Link Field
           TextField(
-            controller: documentLinkController,
+            controller: widget.documentLinkController,
             style: const TextStyle(color: Colors.white),
             decoration: const InputDecoration(
               labelText: "Document Link",
@@ -128,7 +116,7 @@ class AddChapter extends StatelessWidget {
             alignment: Alignment.centerRight,
             child: IconButton(
               icon: const Icon(Icons.remove_circle_outline, color: Colors.red),
-              onPressed: onRemove,
+              onPressed: widget.onRemove,
             ),
           ),
         ],
@@ -145,43 +133,77 @@ class AddCourseScreen extends StatefulWidget {
 }
 
 class _AddCourseScreenState extends State<AddCourseScreen> {
-  XFile? _image; // Store selected image
-
+  String? _logo;
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
-
-  // List to store each chapter's controllers
   List<Map<String, TextEditingController>> chapters = [];
+  bool _isLoading = false;
 
-  // Function to pick an image from the gallery
-  Future<void> _pickImage() async {
-    final ImagePicker _picker = ImagePicker();
-    final XFile? pickedImage = await _picker.pickImage(source: ImageSource.gallery);
-
+  void _setImageUrl() {
     setState(() {
-      _image = pickedImage;
+      _logo = "https://example.com/your-image-url.jpg"; // Example URL
     });
   }
 
-  // Function to add a new chapter
   void _addChapter() {
     setState(() {
       chapters.add({
         'title': TextEditingController(),
         'description': TextEditingController(),
-        'chapterNo': TextEditingController(),
-        'videoLink': TextEditingController(),
-        'quizLink': TextEditingController(),
-        'documentLink': TextEditingController(),
+        'number': TextEditingController(),
+        'video': TextEditingController(),
+        'document': TextEditingController(),
       });
     });
   }
 
-  // Function to remove a chapter
   void _removeChapter(int index) {
     setState(() {
       chapters.removeAt(index);
     });
+  }
+
+  void _addCourse() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    String courseTitle = _titleController.text;
+
+    // Create the course data to save in Firebase
+    Map<String, dynamic> courseData = {
+      'title': courseTitle,
+      'logo': _logo,
+    };
+
+    // Save the course to Firestore
+    DocumentReference courseRef = await FirebaseFirestore.instance.collection('Courses').add(courseData);
+
+    // Save each chapter under the 'tasks' sub-collection
+    for (var chapter in chapters) {
+      Map<String, dynamic> taskData = {
+        'title': chapter['title']!.text,
+        'description': chapter['description']!.text,
+        'number': chapter['number']!.text,
+        'video': chapter['video']!.text,
+        'document': chapter['document']!.text,
+      };
+
+      // Add task (chapter) to the specific course document in Firestore
+      await courseRef.collection('tasks').add(taskData);
+    }
+
+    // Reset the form after adding the course
+    setState(() {
+      _titleController.clear();
+      _descriptionController.clear();
+      chapters.clear();
+      _logo = null;
+      _isLoading = false;
+    });
+
+    // Show success message
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Course added successfully')));
   }
 
   @override
@@ -193,7 +215,7 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
       ),
       backgroundColor: Colors.black,
       body: SafeArea(
-        child: SingleChildScrollView( // Make the entire content scrollable
+        child: SingleChildScrollView(
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: Column(
@@ -201,34 +223,23 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
               children: [
                 const Text(
                   "Enter Course Details",
-                  style: TextStyle(
-                    fontSize: 20,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
                 ),
                 const SizedBox(height: 20),
 
-                // Image Selection Button
+                // Course Image Selection
                 GestureDetector(
-                  onTap: _pickImage,
+                  onTap: _setImageUrl,
                   child: Container(
                     width: double.infinity,
                     height: 200,
-                    decoration: BoxDecoration(
-                      color: Colors.grey[800],
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: _image == null
+                    decoration: BoxDecoration(color: Colors.grey[800], borderRadius: BorderRadius.circular(12)),
+                    child: _logo == null
                         ? const Center(
-                      child: Icon(
-                        Icons.add_a_photo,
-                        color: Colors.white,
-                        size: 40,
-                      ),
+                      child: Icon(Icons.add_a_photo, color: Colors.white, size: 40),
                     )
-                        : Image.file(
-                      File(_image!.path),
+                        : Image.network(
+                      _logo!,
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -249,44 +260,26 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
                 ),
                 const SizedBox(height: 20),
 
-                // Course Description Field
-                TextField(
-                  controller: _descriptionController,
-                  style: const TextStyle(color: Colors.white),
-                  decoration: const InputDecoration(
-                    labelText: "Course Description",
-                    labelStyle: TextStyle(color: Colors.white),
-                    border: OutlineInputBorder(),
-                    filled: true,
-                    fillColor: Colors.black54,
-                  ),
-                ),
-                const SizedBox(height: 20),
-
-                // Dynamic Chapter List
-                ListView.builder(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: chapters.length,
-                  itemBuilder: (context, index) {
+                // Chapters List
+                Column(
+                  children: List.generate(chapters.length, (index) {
                     return AddChapter(
                       titleController: chapters[index]['title']!,
                       descriptionController: chapters[index]['description']!,
-                      chapterNoController: chapters[index]['chapterNo']!,
-                      videoLinkController: chapters[index]['videoLink']!,
-                      quizLinkController: chapters[index]['quizLink']!,
-                      documentLinkController: chapters[index]['documentLink']!,
+                      chapterNoController: chapters[index]['number']!,
+                      videoLinkController: chapters[index]['video']!,
+                      documentLinkController: chapters[index]['document']!,
                       onRemove: () => _removeChapter(index),
                     );
-                  },
+                  }),
                 ),
 
-                // Add Chapter and Add Course Buttons
+                // Buttons for Adding Chapter and Adding Course
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Add Chapter Button
                     ElevatedButton(
+                      onPressed: _addChapter,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
                         padding: const EdgeInsets.symmetric(vertical: 20),
@@ -295,14 +288,13 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
                         ),
                         minimumSize: Size(MediaQuery.of(context).size.width / 2 - 24, 60),
                       ),
-                      onPressed: _addChapter,
                       child: const Text(
-                        '+ Add Chapter',
+                        'Add Chapter',
                         style: TextStyle(fontSize: 18, color: Colors.white),
                       ),
                     ),
-                    // Add Course Button
                     ElevatedButton(
+                      onPressed: _addCourse,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.green,
                         padding: const EdgeInsets.symmetric(vertical: 20),
@@ -311,10 +303,9 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
                         ),
                         minimumSize: Size(MediaQuery.of(context).size.width / 2 - 24, 60),
                       ),
-                      onPressed: () {
-                        // Add functionality to submit the form (e.g., save course details)
-                      },
-                      child: const Text(
+                      child: _isLoading
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Text(
                         'Add Course',
                         style: TextStyle(fontSize: 18, color: Colors.white),
                       ),
