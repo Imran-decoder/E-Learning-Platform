@@ -193,6 +193,34 @@ class _SignInScreenState extends State<SignInScreen> {
                                 ),
                               ],
                             ),
+                            
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium!
+                                .copyWith(
+                                  color: Theme.of(context)
+                                      .textTheme
+                                      .bodyLarge!
+                                      .color!
+                                      .withOpacity(0.64),
+                                ),
+                          ),
+                        ),
+                         TextButton(
+                          onPressed: () {
+                            Navigator.pushNamed(context, '/admin');
+                          },
+                          child: Text.rich(
+                            const TextSpan(
+                              text: "ADMIN LOGIN! ",
+                              children: [
+                                TextSpan(
+                                  text: "Click Here",
+                                  style: TextStyle(color: Color(0xFF00BF6D)),
+                                ),
+                              ],
+                            ),
+                            
                             style: Theme.of(context)
                                 .textTheme
                                 .bodyMedium!
@@ -206,6 +234,7 @@ class _SignInScreenState extends State<SignInScreen> {
                           ),
                         ),
                       ],
+                      
                     ),
                   ),
                 ],

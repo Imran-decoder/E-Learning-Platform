@@ -1,3 +1,4 @@
+import 'package:elearning/Onboarding/admin_login.dart';
 import 'package:flutter/material.dart';
 import 'package:elearning/screens/dashboard_screen.dart'; // Import DashboardScreen
 import 'package:elearning/screens/profile/profile_screen.dart';
@@ -11,6 +12,7 @@ import 'package:elearning/Onboarding/varification.dart';
 import 'package:elearning/Onboarding/change_pass.dart';
 import 'package:elearning/Onboarding/secpage_of_signup.dart';
 import 'package:elearning/screens/chat_screen.dart';
+import 'package:elearning/Onboarding/admin_login.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -53,6 +55,7 @@ class MyApp extends StatelessWidget {
         '/verify': (context) => VerificationScreen(phoneNumber: '', onVerificationSuccess: (String ) {  },),
         '/change': (context) => ChangePasswordScreen(),
         '/secpage': (context) => ComplateProfileScreen(),
+        '/admin': (context) => AdminLogin(),
         
       },
     );

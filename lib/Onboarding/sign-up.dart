@@ -12,7 +12,13 @@ class SignUpScreen extends StatelessWidget {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        title: const Text("Sign Up"),
+         centerTitle: true, 
+        title: const Text("Sign Up",
+        style: TextStyle(
+                      color: Colors.black,
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                       ),)
       ),
       body: SafeArea(
         child: SizedBox(
@@ -22,6 +28,7 @@ class SignUpScreen extends StatelessWidget {
             child: SingleChildScrollView(
               child: Column(
                 children: [
+                  
                   const SizedBox(height: 16),
                   const Text(
                     "Register Account",
