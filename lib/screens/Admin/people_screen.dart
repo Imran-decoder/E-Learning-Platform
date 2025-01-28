@@ -53,7 +53,7 @@ class PeopleScreen extends StatelessWidget {
               const SizedBox(height: 8),
               Expanded(
                 child: StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance.collection('Students').snapshots(),
+                  stream: FirebaseFirestore.instance.collection('Users').snapshots(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return const Center(
@@ -76,8 +76,8 @@ class PeopleScreen extends StatelessWidget {
                       itemCount: students.length,
                       itemBuilder: (context, index) {
                         final student = students[index];
-                        final name = student['name'] ?? "Unknown";
-                        final userId = student['user_id'];
+                        final name = student['Profile']?['main']?['firstName'] ?? "Unknown";
+                        final userId = student['userName'];
                         return _buildPersonTile(name, userId: userId);
                       },
                     );
