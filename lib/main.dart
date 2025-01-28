@@ -12,7 +12,7 @@ import 'package:elearning/Onboarding/varification.dart';
 import 'package:elearning/Onboarding/change_pass.dart';
 import 'package:elearning/Onboarding/secpage_of_signup.dart';
 import 'package:elearning/screens/chat_screen.dart';
-import 'package:elearning/Onboarding/admin_login.dart';
+// import 'package:elearning/Onboarding/admin_login.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
