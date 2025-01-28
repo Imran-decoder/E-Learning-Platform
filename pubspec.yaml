@@ -48,6 +48,7 @@ dependencies:
   google_fonts: ^6.2.1
   percent_indicator: ^4.2.4
   youtube_player_flutter: ^9.1.1
+  google_generative_ai: ^0.4.6
 
 
 dev_dependencies:
