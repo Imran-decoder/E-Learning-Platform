@@ -50,7 +50,9 @@ class _ProfileScreenState extends State<ProfileScreen> {
             ProfileMenu(
               text: "Admin Login",
               icon: "assets/icons/admin-eye.svg",
-              press: () {},
+              press: () {
+                Navigator.pushNamed(context, '/admin');
+              },
             ),
             ProfileMenu(
               text: "Rate Us",
