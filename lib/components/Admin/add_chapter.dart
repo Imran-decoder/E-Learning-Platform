@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'add_quiz.dart';
 
 class AddChapter extends StatefulWidget {
   final TextEditingController titleController;
@@ -26,24 +27,19 @@ class AddChapter extends StatefulWidget {
 }
 
 class _AddChapterState extends State<AddChapter> {
-  List<Map<String, TextEditingController>> quizzes = [];
+  List<Widget> quizScreens = []; // List to store dynamically added quiz screens
 
-  void _addQuiz() {
+  void _addQuizScreen() {
     setState(() {
-      quizzes.add({
-        'question': TextEditingController(),
-        'option1': TextEditingController(),
-        'option2': TextEditingController(),
-        'option3': TextEditingController(),
-        'option4': TextEditingController(),
-        'correctAnswer': TextEditingController(),
-      });
+      quizScreens.add(AddQuizScreen(courseId: 'courseId', taskId: 'taskId')); // Add a quiz screen dynamically
     });
   }
 
-  void _removeQuiz(int index) {
+  void _removeQuizScreen() {
     setState(() {
-      quizzes.removeAt(index);
+      if (quizScreens.isNotEmpty) {
+        quizScreens.removeLast(); // Remove the last added quiz screen
+      }
     });
   }
 
@@ -65,37 +61,14 @@ class _AddChapterState extends State<AddChapter> {
 
     DocumentReference chapterRef = await widget.courseRef.collection('chapters').add(chapterData);
 
-    // Add quiz data to the chapter
-    for (var quiz in quizzes) {
-      Map<String, dynamic> quizData = {
-        'question': quiz['question']!.text,
-        'option1': quiz['option1']!.text,
-        'option2': quiz['option2']!.text,
-        'option3': quiz['option3']!.text,
-        'option4': quiz['option4']!.text,
-        'correctAnswer': quiz['correctAnswer']!.text,
-      };
-      await chapterRef.collection('quizzes').add(quizData);
-    }
-
-    // Clear inputs and quizzes list after adding
-    setState(() {
-      quizzes.clear();
-      widget.titleController.clear();
-      widget.descriptionController.clear();
-      widget.chapterNoController.clear();
-      widget.videoLinkController.clear();
-      widget.documentLinkController.clear();
-    });
-
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Chapter and quizzes added successfully')),
+      const SnackBar(content: Text('Chapter added successfully')),
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView( // Make the whole screen scrollable
+    return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.symmetric(vertical: 16.0),
         child: Column(
@@ -110,62 +83,39 @@ class _AddChapterState extends State<AddChapter> {
               ),
             ),
             const SizedBox(height: 20),
-
-            // Chapter Details Fields
             ..._buildChapterDetailsFields(),
-
-            // Add Quiz Button
             ElevatedButton(
-              onPressed: _addQuiz,
+              onPressed: _addQuizScreen,
               style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.green,
+                backgroundColor: Colors.blue,
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(30),
                 ),
               ),
               child: const Text(
-                'Add Quiz',
+                'Add Quiz Screen',
                 style: TextStyle(color: Colors.white),
               ),
             ),
-            const SizedBox(height: 10),
-
-            // List of Quiz Questions
-            ListView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: quizzes.length,
-              itemBuilder: (context, index) {
-                return _buildQuizForm(index);
-              },
-            ),
-            const SizedBox(height: 10),
-
-            // Remove Last Quiz Button
-            Align(
-              alignment: Alignment.centerRight,
-              child: ElevatedButton(
-                onPressed: () {
-                  if (quizzes.isNotEmpty) {
-                    _removeQuiz(quizzes.length - 1);
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                ),
-                child: const Text(
-                  'Remove Last Quiz',
-                  style: TextStyle(color: Colors.white),
+            ElevatedButton(
+              onPressed: _removeQuizScreen,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
                 ),
               ),
+              child: const Text(
+                'Remove Last Quiz Screen',
+                style: TextStyle(color: Colors.white),
+              ),
             ),
-
-            // Remove Chapter Button
+            // Display the dynamically added quiz screens
+            Column(
+              children: quizScreens,
+            ),
             Align(
               alignment: Alignment.centerRight,
               child: ElevatedButton(
@@ -183,8 +133,6 @@ class _AddChapterState extends State<AddChapter> {
                 ),
               ),
             ),
-
-            // Add Chapter Button
             Align(
               alignment: Alignment.center,
               child: ElevatedButton(
@@ -225,52 +173,6 @@ class _AddChapterState extends State<AddChapter> {
       padding: const EdgeInsets.only(bottom: 20),
       child: TextField(
         controller: controller,
-        style: const TextStyle(color: Colors.white),
-        decoration: InputDecoration(
-          labelText: label,
-          labelStyle: const TextStyle(color: Colors.white),
-          border: const OutlineInputBorder(),
-          filled: true,
-          fillColor: Colors.black54,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildQuizForm(int index) {
-    return Column(
-      children: [
-        const Text(
-          "Enter Quiz Question",
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-        const SizedBox(height: 20),
-        _buildQuizTextField(index, 'Question', 'question'),
-        _buildQuizTextField(index, 'Option 1', 'option1'),
-        _buildQuizTextField(index, 'Option 2', 'option2'),
-        _buildQuizTextField(index, 'Option 3', 'option3'),
-        _buildQuizTextField(index, 'Option 4', 'option4'),
-        _buildQuizTextField(index, 'Correct Answer', 'correctAnswer'),
-        Align(
-          alignment: Alignment.centerRight,
-          child: IconButton(
-            icon: const Icon(Icons.remove_circle_outline, color: Colors.red),
-            onPressed: () => _removeQuiz(index),
-          ),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildQuizTextField(int index, String label, String key) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 20),
-      child: TextField(
-        controller: quizzes[index][key]!,
         style: const TextStyle(color: Colors.white),
         decoration: InputDecoration(
           labelText: label,

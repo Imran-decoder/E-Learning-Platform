@@ -213,7 +213,7 @@ class AddQuiz extends StatelessWidget {
               fillColor: Colors.black54,
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 10),
 
           // Option 2 Field
           TextField(
@@ -227,7 +227,7 @@ class AddQuiz extends StatelessWidget {
               fillColor: Colors.black54,
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 10),
 
           // Option 3 Field
           TextField(
@@ -241,7 +241,7 @@ class AddQuiz extends StatelessWidget {
               fillColor: Colors.black54,
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 10),
 
           // Option 4 Field
           TextField(
@@ -255,7 +255,7 @@ class AddQuiz extends StatelessWidget {
               fillColor: Colors.black54,
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 10),
 
           // Correct Answer Field
           TextField(
@@ -269,14 +269,24 @@ class AddQuiz extends StatelessWidget {
               fillColor: Colors.black54,
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 20),
 
-          // Remove Button
+          // Remove Question Button
           Align(
             alignment: Alignment.centerRight,
-            child: IconButton(
-              icon: const Icon(Icons.remove_circle_outline, color: Colors.red),
+            child: ElevatedButton(
               onPressed: onRemove,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(30),
+                ),
+              ),
+              child: const Text(
+                'Remove Question',
+                style: TextStyle(color: Colors.white),
+              ),
             ),
           ),
         ],

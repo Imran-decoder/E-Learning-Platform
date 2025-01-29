@@ -1,10 +1,100 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:image_picker/image_picker.dart';
+
+class AddQuizScreen extends StatelessWidget {
+  final TextEditingController questionController;
+  final List<TextEditingController> options;
+  final TextEditingController correctAnswerController;
+  final VoidCallback onRemove;
+
+  const AddQuizScreen({
+    Key? key,
+    required this.questionController,
+    required this.options, // List of option controllers
+    required this.correctAnswerController,
+    required this.onRemove,
+  }) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Text(
+            "Enter Quiz Details",
+            style: TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // Question Field
+          TextField(
+            controller: questionController,
+            style: const TextStyle(color: Colors.white),
+            decoration: const InputDecoration(
+              labelText: "Question",
+              labelStyle: TextStyle(color: Colors.white),
+              border: OutlineInputBorder(),
+              filled: true,
+              fillColor: Colors.black54,
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // Options Fields using List
+          for (var i = 0; i < 4; i++) ...[
+            TextField(
+              controller: options[i],
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                labelText: "Option ${i + 1}",
+                labelStyle: const TextStyle(color: Colors.white),
+                border: const OutlineInputBorder(),
+                filled: true,
+                fillColor: Colors.black54,
+              ),
+            ),
+            const SizedBox(height: 10),
+          ],
+
+          // Correct Answer Field
+          TextField(
+            controller: correctAnswerController,
+            style: const TextStyle(color: Colors.white),
+            decoration: const InputDecoration(
+              labelText: "Correct Answer",
+              labelStyle: TextStyle(color: Colors.white),
+              border: OutlineInputBorder(),
+              filled: true,
+              fillColor: Colors.black54,
+            ),
+          ),
+          const SizedBox(height: 10),
+
+          // Remove Button
+          Align(
+            alignment: Alignment.centerRight,
+            child: IconButton(
+              icon: const Icon(Icons.remove_circle_outline, color: Colors.red),
+              onPressed: onRemove,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 class AddChapter extends StatefulWidget {
   final TextEditingController titleController;
   final TextEditingController descriptionController;
-  final TextEditingController chapterNoController;
+  final TextEditingController  chapterNoController;
   final TextEditingController videoLinkController;
   final TextEditingController documentLinkController;
   final VoidCallback onRemove;
@@ -32,7 +122,7 @@ class _AddChapterState extends State<AddChapter> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            "Enter Task Details",
+            "Enter Chapter Details",
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -133,15 +223,26 @@ class AddCourseScreen extends StatefulWidget {
 }
 
 class _AddCourseScreenState extends State<AddCourseScreen> {
-  String? _logo;
+  String? _logo = "url_to_image";
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
-  List<Map<String, TextEditingController>> chapters = [];
+  List<Map<String, dynamic>> chapters = [];
   bool _isLoading = false;
 
-  void _setImageUrl() {
+  final ImagePicker _picker = ImagePicker();
+
+  // Modify to ensure that logo isn't stored as null
+  Future<void> _setImageUrl() async {
+    final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+
     setState(() {
-      _logo = "https://example.com/your-image-url.jpg"; // Example URL
+      if (pickedFile != null) {
+        // If an image is selected, store its path
+        _logo = pickedFile.path;
+      } else {
+        // If no image is selected, keep the default image URL
+        _logo = _logo ?? "url_to_image";  // Ensuring the default URL is used if logo is null
+      }
     });
   }
 
@@ -153,6 +254,7 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
         'number': TextEditingController(),
         'video': TextEditingController(),
         'document': TextEditingController(),
+        'quizzes': [],
       });
     });
   }
@@ -163,6 +265,23 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
     });
   }
 
+  void _addQuiz(int chapterIndex) {
+    setState(() {
+      chapters[chapterIndex]['quizzes'].add({
+        'question': TextEditingController(),
+        'options': List.generate(4, (index) => TextEditingController()),  // Ensure this list is initialized
+        'correctAnswer': TextEditingController(),
+      });
+    });
+  }
+
+
+  void _removeQuiz(int chapterIndex, int quizIndex) {
+    setState(() {
+      chapters[chapterIndex]['quizzes'].removeAt(quizIndex);
+    });
+  }
+
   void _addCourse() async {
     setState(() {
       _isLoading = true;
@@ -170,30 +289,75 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
 
     String courseTitle = _titleController.text;
 
-    // Create the course data to save in Firebase
+    if (courseTitle.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Course title is required')));
+      setState(() {
+        _isLoading = false;
+      });
+      return;
+    }
+
+    // Ensure that logo is not null
+    if (_logo == null || _logo!.isEmpty) {
+      _logo = "url_to_image";  // Set default image URL if no logo is selected
+    }
+
     Map<String, dynamic> courseData = {
       'title': courseTitle,
       'logo': _logo,
     };
 
-    // Save the course to Firestore
-    DocumentReference courseRef = await FirebaseFirestore.instance.collection('Courses').add(courseData);
+    try {
+      DocumentReference courseRef = await FirebaseFirestore.instance.collection('Courses').add(courseData);
 
-    // Save each chapter under the 'tasks' sub-collection
-    for (var chapter in chapters) {
-      Map<String, dynamic> taskData = {
-        'title': chapter['title']!.text,
-        'description': chapter['description']!.text,
-        'number': chapter['number']!.text,
-        'video': chapter['video']!.text,
-        'document': chapter['document']!.text,
-      };
+      for (var chapter in chapters) {
+        String chapterTitle = chapter['title']!.text;
+        String chapterDescription = chapter['description']!.text;
+        String chapterNumber = chapter['number']!.text;
+        String chapterVideo = chapter['video']!.text;
+        String chapterDocument = chapter['document']!.text;
 
-      // Add task (chapter) to the specific course document in Firestore
-      await courseRef.collection('tasks').add(taskData);
+        if (chapterTitle.isEmpty || chapterDescription.isEmpty || chapterNumber.isEmpty) {
+          continue;  // Skip this chapter if any essential fields are empty
+        }
+
+        Map<String, dynamic> taskData = {
+          'title': chapterTitle,
+          'description': chapterDescription,
+          'number': int.tryParse(chapterNumber) ?? 0,
+          'video': chapterVideo.isEmpty ? "" : chapterVideo,  // Default empty string if no video link
+          'document': chapterDocument.isEmpty ? "" : chapterDocument,  // Default empty string if no document link
+        };
+
+        DocumentReference chapterRef = await courseRef.collection('tasks').add(taskData);
+
+        for (var quiz in chapter['quizzes']) {
+          String question = quiz['question']!.text;
+          List<String> options = [
+            quiz['options'][0]!.text,
+            quiz['options'][1]!.text,
+            quiz['options'][2]!.text,
+            quiz['options'][3]!.text,
+          ];
+          String correctAnswer = quiz['correctAnswer']!.text;
+
+          if (question.isEmpty || correctAnswer.isEmpty || options.any((opt) => opt.isEmpty)) {
+            continue;  // Skip quiz if any essential field is empty
+          }
+
+          Map<String, dynamic> quizData = {
+            'question': question,
+            'options': options,  // Store the options as an array
+            'correctAnswer': correctAnswer,
+          };
+
+          await chapterRef.collection('quizQuestions').add(quizData);
+        }
+      }
+    } catch (e) {
+      print('Error adding course: $e');
     }
 
-    // Reset the form after adding the course
     setState(() {
       _titleController.clear();
       _descriptionController.clear();
@@ -202,9 +366,10 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
       _isLoading = false;
     });
 
-    // Show success message
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Course added successfully')));
   }
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -262,14 +427,53 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
 
                 // Chapters List
                 Column(
-                  children: List.generate(chapters.length, (index) {
-                    return AddChapter(
-                      titleController: chapters[index]['title']!,
-                      descriptionController: chapters[index]['description']!,
-                      chapterNoController: chapters[index]['number']!,
-                      videoLinkController: chapters[index]['video']!,
-                      documentLinkController: chapters[index]['document']!,
-                      onRemove: () => _removeChapter(index),
+                  children: List.generate(chapters.length, (chapterIndex) {
+                    return Column(
+                      children: [
+                        AddChapter(
+                          titleController: chapters[chapterIndex]['title']!,
+                          descriptionController: chapters[chapterIndex]['description']!,
+                          chapterNoController: chapters[chapterIndex]['number']!,
+                          videoLinkController: chapters[chapterIndex]['video']!,
+                          documentLinkController: chapters[chapterIndex]['document']!,
+                          onRemove: () => _removeChapter(chapterIndex),
+                        ),
+                        // Add quiz button
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 20.0),
+                          child: ElevatedButton.icon(
+                            onPressed: () => _addQuiz(chapterIndex),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blue,
+                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                              minimumSize: Size(MediaQuery.of(context).size.width - 40, 50),
+                            ),
+                            icon: const Icon(Icons.add, color: Colors.white),
+                            label: const Text(
+                                'Add Quiz',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                            ),
+                          ),
+                        ),
+                        // Render quizzes for this chapter
+                        Column(
+                          children: List.generate(chapters[chapterIndex]['quizzes']?.length ?? 0, (quizIndex) {
+                            return AddQuizScreen(
+                              questionController: chapters[chapterIndex]['quizzes'][quizIndex]['question']!,
+                              options: chapters[chapterIndex]['quizzes'][quizIndex]['options']!,
+                              correctAnswerController: chapters[chapterIndex]['quizzes'][quizIndex]['correctAnswer']!,
+                              onRemove: () => _removeQuiz(chapterIndex, quizIndex),
+                            );
+                          }),
+                        ),
+                      ],
                     );
                   }),
                 ),
