@@ -6,12 +6,14 @@ class User {
   final String userName;
   final List<String> enrolledCourses;
   final UserProfile Profile;
+  final bool isAdmin;
 
   User({
     required this.userID,
     required this.userName,
     required this.enrolledCourses,
-    required this.Profile,
+    required this.Profile, 
+    required this.isAdmin,
   });
 
   // Convert User object to a map for Firestore
@@ -21,6 +23,7 @@ class User {
       'userName': userName,
       'enrolledCourses': enrolledCourses,
       'Profile': Profile.toMap(),
+      'isAdmin': isAdmin,
     };
   }
 
@@ -32,6 +35,7 @@ class User {
       userName: data['userName'],
       enrolledCourses: List<String>.from(data['enrolledCourses']),
       Profile: UserProfile.fromMap(data['Profile']['main']),
+      isAdmin: data['isAdmin'],
     );
   }
 }

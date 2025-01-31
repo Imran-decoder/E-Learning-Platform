@@ -62,6 +62,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   String _userName = "User";
 
+  Future<bool> checkUserAdmin(String userID) async {
+    try {
+      DocumentSnapshot documentSnapshot =
+          await FirebaseFirestore.instance.collection('Users').doc(userID).get();
+
+      return documentSnapshot.exists &&
+          documentSnapshot.data() != null &&
+          documentSnapshot['isAdmin'] == true;
+    } catch (e) {
+      print("Error checking admin status: $e");
+      return false;
+    }
+  }
   @override
   void initState() {
     super.initState();
@@ -182,13 +195,20 @@ class _DashboardScreenState extends State<DashboardScreen> {
         IconButton(
           icon: const Icon(Icons.admin_panel_settings_outlined, color: Colors
               .white),
-          onPressed: () =>
+          onPressed:() async  {
+            final userID = FirebaseAuth.instance.currentUser!.uid;
+            if (await checkUserAdmin(userID)){
               Navigator.push(
                 context,
                 MaterialPageRoute(
                   builder: (context) => AdminDashboardScreen(),
                 ),
-              ),
+              );}
+              else{
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('You are not an admin')),
+                );
+              }}
         ),
         IconButton(
           icon: const Icon(Icons.notifications, color: Colors.white),

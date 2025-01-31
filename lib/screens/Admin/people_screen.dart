@@ -16,6 +16,7 @@ class PeopleScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
+              // Admin Section
               const Text(
                 "Admin",
                 style: TextStyle(
@@ -25,10 +26,39 @@ class PeopleScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              _buildPersonTile("Admin", isAdmin: true),
-              const SizedBox(height: 16),
+              Expanded(
+                child: StreamBuilder<QuerySnapshot>(
+                  stream: FirebaseFirestore.instance
+                      .collection('Users')
+                      .where('isAdmin', isEqualTo: true) // Fetch only admins
+                      .snapshots(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                      return const Center(
+                        child: Text("No admins found.", style: TextStyle(color: Colors.white)),
+                      );
+                    }
 
-              // New User Requests Section
+                    final admins = snapshot.data!.docs;
+                    return ListView.builder(
+                      itemCount: admins.length,
+                      itemBuilder: (context, index) {
+                        final admin = admins[index];
+                        final name = admin['Profile']?['main']?['firstName'] ?? "Unknown";
+                        final username = admin['userName'] ?? "No username"; // Display username
+
+                        return _buildPersonTile(name, username: username, isAdmin: true);
+                      },
+                    );
+                  },
+                ),
+              ),
+
+              const SizedBox(height: 16),
+               // New User Requests Section
               const Text(
                 "New User Requests",
                 style: TextStyle(
@@ -40,8 +70,7 @@ class PeopleScreen extends StatelessWidget {
               const SizedBox(height: 8),
               _buildNewUserRequests(context),
               const SizedBox(height: 16),
-
-              // Classmates Section
+              // Classmates Section (Non-admin users)
               const Text(
                 "Classmates",
                 style: TextStyle(
@@ -53,32 +82,33 @@ class PeopleScreen extends StatelessWidget {
               const SizedBox(height: 8),
               Expanded(
                 child: StreamBuilder<QuerySnapshot>(
-                  stream: FirebaseFirestore.instance.collection('Users').snapshots(),
+                  stream: FirebaseFirestore.instance
+                      .collection('Users')
+                      .where('isAdmin', isEqualTo: false) // Fetch only non-admins
+                      .snapshots(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(
-                        child: CircularProgressIndicator(),
-                      );
+                      return const Center(child: CircularProgressIndicator());
                     }
-
                     if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
                       return const Center(
-                        child: Text(
-                          "No classmates found.",
-                          style: TextStyle(color: Colors.white),
-                        ),
+                        child: Text("No classmates found.", style: TextStyle(color: Colors.white)),
                       );
                     }
 
                     final students = snapshot.data!.docs;
-
                     return ListView.builder(
                       itemCount: students.length,
                       itemBuilder: (context, index) {
                         final student = students[index];
                         final name = student['Profile']?['main']?['firstName'] ?? "Unknown";
-                        final userId = student['userName'];
-                        return _buildPersonTile(name, userId: userId);
+                        final username = student['userName'] ?? "No username"; // Display username
+                        final userId = student.id;
+
+                        return GestureDetector(
+                          onTap: () => _showRequestDialog(context, name, userId),
+                          child: _buildPersonTile(name, username: username),
+                        );
                       },
                     );
                   },
@@ -133,7 +163,7 @@ class PeopleScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildPersonTile(name, userId: userId),
+            _buildPersonTile(name, username: ''),
             const SizedBox(height: 8),
             Row(
               mainAxisAlignment: MainAxisAlignment.end,
@@ -170,34 +200,37 @@ class PeopleScreen extends StatelessWidget {
   }
 
   // Function to display the custom dialog when tapping on a request
-  void _showRequestDialog(BuildContext context, String name) {
+  void _showRequestDialog(BuildContext context, String name, String userId) {
     showDialog(
       context: context,
       builder: (context) => CustomDialog(
         title: 'User Request: $name',
-        content: 'Do you want to approve the request of $name?',
+        content: 'Do you want to promote $name to Admin?',
         actions: [
           TextButton(
-            onPressed: () {
-              // Handle the approval action
-              Navigator.of(context).pop();
+            onPressed:  () async{
+              await FirebaseFirestore.instance.collection('Users').doc(userId).update({
+                'isAdmin': true, // Update Firestore to make the user an admin
+              });
+              Navigator.of(context).pop(); // Close dialog
             },
-            child: const Text('Approve', style: TextStyle(color: Colors.green)),
+            child: const Text('Promote', style: TextStyle(color: Colors.green)),
           ),
           TextButton(
             onPressed: () {
               // Handle the rejection action
               Navigator.of(context).pop();
             },
-            child: const Text('Reject', style: TextStyle(color: Colors.red)),
+            child: const Text('Cancel', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
     );
   }
+  
 
-  // Widget to build the person tile
-  Widget _buildPersonTile(String name, {String? userId, bool isAdmin = false}) {
+  // Widget to build the person tile (Updated to display username)
+  Widget _buildPersonTile(String name, {required String username, bool isAdmin = false}) {
     return ListTile(
       leading: CircleAvatar(
         backgroundColor: isAdmin ? Colors.tealAccent : Colors.grey[800],
@@ -213,15 +246,13 @@ class PeopleScreen extends StatelessWidget {
           fontSize: 16,
         ),
       ),
-      subtitle: userId != null
-          ? Text(
-        userId,
+      subtitle: Text(
+        username, // Display username instead of userId
         style: const TextStyle(
           color: Colors.grey,
           fontSize: 14,
         ),
-      )
-          : null,
+      ),
     );
   }
 }
