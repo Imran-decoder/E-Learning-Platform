@@ -68,13 +68,16 @@ class _SignInScreenState extends State<SignInScreen> {
       body: SafeArea(
         child: LayoutBuilder(
           builder: (context, constraints) {
+            double buttonWidth = constraints.maxWidth > 600 
+            ? 500 // Fixed for desktop 
+            : constraints.maxWidth* 0.9;//Mobile: 90% of screen width 
             return SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Column(
                 children: [
                   SizedBox(height: constraints.maxHeight * 0.1),
                   Image.asset('assets/images/splash.png', height: 146),
-                  SizedBox(height: constraints.maxHeight * 0.1),
+                  SizedBox(height: constraints.maxHeight * 0.05),
                   Text(
                     "Sign In",
                     style: Theme.of(context)
@@ -87,14 +90,16 @@ class _SignInScreenState extends State<SignInScreen> {
                     key: _formKey,
                     child: Column(
                       children: [
-                        TextFormField(
+                        SizedBox(
+                          width: buttonWidth,
+                          child:TextFormField(
                           controller: emailController,
                           decoration: const InputDecoration(
                             hintText: 'Mail or Phone',
                             filled: true,
                             fillColor: Color(0xFFF5FCF9),
                             contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16.0 * 1.5, vertical: 16.0),
+                                horizontal: 16, vertical: 24),
                             border: const OutlineInputBorder(
                               borderSide: BorderSide.none,
                               borderRadius:
@@ -106,8 +111,13 @@ class _SignInScreenState extends State<SignInScreen> {
                             // Save it
                           },
                         ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 16.0),
+                      ),
+                          
+                          
+                          
+                        
+                        SizedBox(
+                          width:buttonWidth,
                           child: TextFormField(
                             controller: passwordController,
                             obscureText: true,
@@ -116,7 +126,7 @@ class _SignInScreenState extends State<SignInScreen> {
                               filled: true,
                               fillColor: Color(0xFFF5FCF9),
                               contentPadding: const EdgeInsets.symmetric(
-                                  horizontal: 16.0 * 1.5, vertical: 16.0),
+                                  horizontal: 16, vertical: 24),
                               border: OutlineInputBorder(
                                 borderSide: BorderSide.none,
                                 borderRadius:
@@ -128,7 +138,12 @@ class _SignInScreenState extends State<SignInScreen> {
                             },
                           ),
                         ),
-                        ElevatedButton(
+                        SizedBox(height: 16.0),
+                        Center( 
+                          child:SizedBox(
+                          width:buttonWidth,
+                          child: ElevatedButton(
+                        
                           onPressed: () async {
                             if (_formKey.currentState!.validate()) {
                               _formKey.currentState!.save();
@@ -148,11 +163,13 @@ class _SignInScreenState extends State<SignInScreen> {
                             elevation: 0,
                             backgroundColor: const Color(0xFF00BF6D),
                             foregroundColor: Colors.white,
-                            minimumSize: const Size(double.infinity, 48),
+                            minimumSize: Size(buttonWidth, 70),
                             shape: const StadiumBorder(),
                           ),
                           child: const Text("Sign in"),
+                          ),
                         ),
+                      ), 
                         const SizedBox(height: 16.0),
                         TextButton(
                           onPressed: () async {
@@ -165,6 +182,9 @@ class _SignInScreenState extends State<SignInScreen> {
                               await resetPassword();
                             }
                           },
+                          style: TextButton.styleFrom(
+                            padding: EdgeInsets.symmetric(vertical:16, horizontal: 24),
+                          ),
                           child: Text(
                             'Forgot Password?',
                             style: Theme.of(context)
