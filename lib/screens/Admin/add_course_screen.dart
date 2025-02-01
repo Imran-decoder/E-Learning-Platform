@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
 
+
 class AddQuizScreen extends StatelessWidget {
   final TextEditingController questionController;
   final List<TextEditingController> options;
@@ -47,21 +48,25 @@ class AddQuizScreen extends StatelessWidget {
           ),
           const SizedBox(height: 20),
 
-          // Options Fields using List
+          // Options Fields with consistent space between each
           for (var i = 0; i < 4; i++) ...[
-            TextField(
-              controller: options[i],
-              style: const TextStyle(color: Colors.white),
-              decoration: InputDecoration(
-                labelText: "Option ${i + 1}",
-                labelStyle: const TextStyle(color: Colors.white),
-                border: const OutlineInputBorder(),
-                filled: true,
-                fillColor: Colors.black54,
+            Padding(
+              padding: const EdgeInsets.only(bottom: 12.0), // Space between each option
+              child: TextField(
+                controller: options[i],
+                style: const TextStyle(color: Colors.white),
+                decoration: InputDecoration(
+                  labelText: "Option ${i + 1}",
+                  labelStyle: const TextStyle(color: Colors.white),
+                  border: const OutlineInputBorder(),
+                  filled: true,
+                  fillColor: Colors.black54,
+                ),
               ),
             ),
-            const SizedBox(height: 10),
           ],
+
+          const SizedBox(height: 14),
 
           // Correct Answer Field
           TextField(
@@ -96,6 +101,7 @@ class AddChapter extends StatefulWidget {
   final TextEditingController descriptionController;
   final TextEditingController  chapterNoController;
   final TextEditingController videoLinkController;
+  final TextEditingController durationController;
   final TextEditingController documentLinkController;
   final VoidCallback onRemove;
 
@@ -105,6 +111,7 @@ class AddChapter extends StatefulWidget {
     required this.descriptionController,
     required this.chapterNoController,
     required this.videoLinkController,
+    required this.durationController,
     required this.documentLinkController,
     required this.onRemove,
   }) : super(key: key);
@@ -127,6 +134,20 @@ class _AddChapterState extends State<AddChapter> {
               fontSize: 20,
               fontWeight: FontWeight.bold,
               color: Colors.white,
+            ),
+          ),
+          const SizedBox(height: 20),
+
+          // Chapter Number Field
+          TextField(
+            controller: widget.chapterNoController,
+            style: const TextStyle(color: Colors.white),
+            decoration: const InputDecoration(
+              labelText: "Chapter Number",
+              labelStyle: TextStyle(color: Colors.white),
+              border: OutlineInputBorder(),
+              filled: true,
+              fillColor: Colors.black54,
             ),
           ),
           const SizedBox(height: 20),
@@ -159,12 +180,12 @@ class _AddChapterState extends State<AddChapter> {
           ),
           const SizedBox(height: 20),
 
-          // Chapter Number Field
+          // Document Link Field
           TextField(
-            controller: widget.chapterNoController,
+            controller: widget.documentLinkController,
             style: const TextStyle(color: Colors.white),
             decoration: const InputDecoration(
-              labelText: "Chapter No",
+              labelText: "Document Link",
               labelStyle: TextStyle(color: Colors.white),
               border: OutlineInputBorder(),
               filled: true,
@@ -187,12 +208,12 @@ class _AddChapterState extends State<AddChapter> {
           ),
           const SizedBox(height: 20),
 
-          // Document Link Field
+          // Duration Field
           TextField(
-            controller: widget.documentLinkController,
+            controller: widget.durationController,
             style: const TextStyle(color: Colors.white),
             decoration: const InputDecoration(
-              labelText: "Document Link",
+              labelText: "Duration (in minutes)",
               labelStyle: TextStyle(color: Colors.white),
               border: OutlineInputBorder(),
               filled: true,
@@ -223,7 +244,7 @@ class AddCourseScreen extends StatefulWidget {
 }
 
 class _AddCourseScreenState extends State<AddCourseScreen> {
-  String? _logo = "url_to_image";
+  String? _logo = "https://example.com/default-image.png";
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   List<Map<String, dynamic>> chapters = [];
@@ -240,7 +261,6 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
         // If an image is selected, store its path
         _logo = pickedFile.path;
       } else {
-        // If no image is selected, keep the default image URL
         _logo = _logo ?? "url_to_image";  // Ensuring the default URL is used if logo is null
       }
     });
@@ -253,7 +273,8 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
         'description': TextEditingController(),
         'number': TextEditingController(),
         'video': TextEditingController(),
-        'document': TextEditingController(),
+        'duration': TextEditingController(),
+        'document' : TextEditingController(),
         'quizzes': [],
       });
     });
@@ -315,8 +336,8 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
         String chapterDescription = chapter['description']!.text;
         String chapterNumber = chapter['number']!.text;
         String chapterVideo = chapter['video']!.text;
+        String chapterDuration = chapter['duration']!.text;
         String chapterDocument = chapter['document']!.text;
-
         if (chapterTitle.isEmpty || chapterDescription.isEmpty || chapterNumber.isEmpty) {
           continue;  // Skip this chapter if any essential fields are empty
         }
@@ -326,7 +347,8 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
           'description': chapterDescription,
           'number': int.tryParse(chapterNumber) ?? 0,
           'video': chapterVideo.isEmpty ? "" : chapterVideo,  // Default empty string if no video link
-          'document': chapterDocument.isEmpty ? "" : chapterDocument,  // Default empty string if no document link
+          'duration': chapterDuration.isEmpty ? "" : chapterDuration,  // Default empty string if no duration
+          'document' : chapterDocument.isEmpty ? "" : chapterDocument,
         };
 
         DocumentReference chapterRef = await courseRef.collection('tasks').add(taskData);
@@ -347,7 +369,7 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
 
           Map<String, dynamic> quizData = {
             'question': question,
-            'options': options,  // Store the options as an array
+            'options': options,
             'correctAnswer': correctAnswer,
           };
 
@@ -435,6 +457,7 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
                           descriptionController: chapters[chapterIndex]['description']!,
                           chapterNoController: chapters[chapterIndex]['number']!,
                           videoLinkController: chapters[chapterIndex]['video']!,
+                          durationController: chapters[chapterIndex]['duration']!,
                           documentLinkController: chapters[chapterIndex]['document']!,
                           onRemove: () => _removeChapter(chapterIndex),
                         ),

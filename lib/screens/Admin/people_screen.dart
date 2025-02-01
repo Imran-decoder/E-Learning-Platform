@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:elearning/components/Admin/custom_dialog.dart';
 
 class PeopleScreen extends StatelessWidget {
   const PeopleScreen({super.key});
@@ -11,48 +10,24 @@ class PeopleScreen extends StatelessWidget {
       backgroundColor: Color.fromARGB(44, 44, 44, 1),
       body: SafeArea(
         top: true,
-        child: Padding(
-          padding: const EdgeInsets.only(top: 42.0, left: 18.0, right: 18.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                "Admin",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              _buildPersonTile("Admin", isAdmin: true),
-              const SizedBox(height: 16),
+        child: SingleChildScrollView(  // Wrap the content with SingleChildScrollView
+          padding: const EdgeInsets.only(bottom: 100), // Add padding to avoid hiding behind navbar
+          child: Padding(
+            padding: const EdgeInsets.only(top: 42.0, left: 18.0, right: 18.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildHeader('Admin'),
+                const SizedBox(height: 16),
+                _buildPersonTile("Admin", isAdmin: true),
+                const SizedBox(height: 32),
 
-              // New User Requests Section
-              const Text(
-                "New User Requests",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              _buildNewUserRequests(context),
-              const SizedBox(height: 16),
+                _buildSectionHeader('New User Requests'),
+                _buildNewUserRequests(context),
+                const SizedBox(height: 32),
 
-              // Classmates Section
-              const Text(
-                "Classmates",
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Expanded(
-                child: StreamBuilder<QuerySnapshot>(
+                _buildSectionHeader('Classmates'),
+                StreamBuilder<QuerySnapshot>(
                   stream: FirebaseFirestore.instance.collection('Users').snapshots(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
@@ -73,6 +48,8 @@ class PeopleScreen extends StatelessWidget {
                     final students = snapshot.data!.docs;
 
                     return ListView.builder(
+                      shrinkWrap: true,  // Make the listview not take up all available space
+                      physics: NeverScrollableScrollPhysics(),  // Disable scrolling on ListView
                       itemCount: students.length,
                       itemBuilder: (context, index) {
                         final student = students[index];
@@ -83,9 +60,65 @@ class PeopleScreen extends StatelessWidget {
                     );
                   },
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
+        ),
+      ),
+    );
+  }
+
+  // Function to build the header text with gradient effect
+// Function to build the header text with gradient effect
+  Widget _buildHeader(String title) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 20.0),  // Added padding for spacing
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          colors: [Colors.blueAccent, Colors.purpleAccent],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),  // Rounded corners for a softer look
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.3),
+            blurRadius: 8,
+            offset: Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Text(
+        title,
+        style: TextStyle(
+          color: Colors.white,
+          fontSize: 28,  // Larger font size for prominence
+          fontWeight: FontWeight.bold,
+          fontFamily: 'Roboto',  // Add a modern font
+          letterSpacing: 2,  // Slight spacing between letters for clarity
+          shadows: [
+            Shadow(
+              color: Colors.black.withValues(alpha: 128),
+              offset: Offset(2, 2),
+              blurRadius: 4,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+
+  // Function to build the section header text
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: Text(
+        title,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
         ),
       ),
     );
@@ -102,11 +135,18 @@ class PeopleScreen extends StatelessWidget {
     ];
 
     return Container(
-      height: 250, // Increased height for better visibility
+      height: 250,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: Colors.grey[950],
+        color: Colors.grey[850],
         borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.5),
+            blurRadius: 8,
+            offset: Offset(0, 4),
+          ),
+        ],
       ),
       child: ListView.builder(
         itemCount: dummyRequests.length,
@@ -121,7 +161,7 @@ class PeopleScreen extends StatelessWidget {
     );
   }
 
-  // Function to build the "Request Tile" with approval/rejection buttons for static data
+  // Function to build the "Request Tile" with approval/rejection buttons
   Widget _buildRequestTile(BuildContext context, String name, String userId) {
     return Card(
       color: Colors.grey[850],
@@ -139,27 +179,23 @@ class PeopleScreen extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.end,
               children: [
                 // Approve Button
-                ElevatedButton(
-                  onPressed: () {
-                    // Handle approval logic here (e.g., update data or show confirmation)
+                _buildActionButton(
+                  context,
+                  'Approve',
+                  Colors.green,
+                      () {
                     print("Approved $name");
                   },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.green, // Corrected to backgroundColor
-                  ),
-                  child: const Text('Approve', style: TextStyle(color: Colors.white)),
                 ),
                 const SizedBox(width: 8),
                 // Reject Button
-                ElevatedButton(
-                  onPressed: () {
-                    // Handle rejection logic here (e.g., update data or show confirmation)
+                _buildActionButton(
+                  context,
+                  'Reject',
+                  Colors.red,
+                      () {
                     print("Rejected $name");
                   },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red, // Corrected to backgroundColor
-                  ),
-                  child: const Text('Reject', style: TextStyle(color: Colors.white)),
                 ),
               ],
             ),
@@ -169,29 +205,21 @@ class PeopleScreen extends StatelessWidget {
     );
   }
 
-  // Function to display the custom dialog when tapping on a request
-  void _showRequestDialog(BuildContext context, String name) {
-    showDialog(
-      context: context,
-      builder: (context) => CustomDialog(
-        title: 'User Request: $name',
-        content: 'Do you want to approve the request of $name?',
-        actions: [
-          TextButton(
-            onPressed: () {
-              // Handle the approval action
-              Navigator.of(context).pop();
-            },
-            child: const Text('Approve', style: TextStyle(color: Colors.green)),
-          ),
-          TextButton(
-            onPressed: () {
-              // Handle the rejection action
-              Navigator.of(context).pop();
-            },
-            child: const Text('Reject', style: TextStyle(color: Colors.red)),
-          ),
-        ],
+  // Reusable action button
+  Widget _buildActionButton(
+      BuildContext context, String label, Color color, VoidCallback onPressed) {
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: color,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
+      ),
+      child: Text(
+        label,
+        style: const TextStyle(color: Colors.white),
       ),
     );
   }

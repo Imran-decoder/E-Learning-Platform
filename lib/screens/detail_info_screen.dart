@@ -80,7 +80,7 @@ class _DetailedInfoScreenState extends State<DetailedInfoScreen> {
         }
       }
     } catch (e) {
-      print("Error checking task completion: $e");
+      //print("Error checking task completion: $e");
     }
   }
 

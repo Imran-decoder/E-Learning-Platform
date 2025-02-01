@@ -16,7 +16,7 @@ class GradientText extends StatelessWidget {
   final Gradient gradient;
 
   const GradientText(
-      this.text, {
+      this.text, {super.key,
         required this.gradient,
         this.style,
       });
@@ -58,7 +58,6 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  final TextEditingController _searchControl = TextEditingController();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   String _userName = "User";
 

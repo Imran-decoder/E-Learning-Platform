@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:elearning/screens/dashboard_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/animation.dart';
 
 class ScoreScreen extends StatefulWidget {
   final String courseId; // Pass the courseId dynamically
@@ -69,7 +68,6 @@ class _ScoreScreenState extends State<ScoreScreen> with TickerProviderStateMixin
         });
       }
     } catch (e) {
-      debugPrint("Error fetching user name: $e");
       setState(() {
         _errorMessage = 'Error fetching user name.';
         _isLoading = false;
@@ -96,7 +94,6 @@ class _ScoreScreenState extends State<ScoreScreen> with TickerProviderStateMixin
           await scoresCollection.doc('taskScores').set({
             widget.taskId: double.parse(widget.score), // Store taskId as a field name and score as its value
           });
-          debugPrint('Scores sub-collection created and task score added.');
         } else {
           // If the sub-collection exists, update or add the score for the taskId
           final DocumentSnapshot taskScoreDoc = await scoresCollection.doc('taskScores').get();
@@ -106,18 +103,16 @@ class _ScoreScreenState extends State<ScoreScreen> with TickerProviderStateMixin
             await scoresCollection.doc('taskScores').update({
               widget.taskId: double.parse(widget.score),
             });
-            debugPrint('Score for task ${widget.taskId} updated.');
           } else {
             // If the document doesn't exist, create a new document with taskId as field name
             await scoresCollection.doc('taskScores').set({
               widget.taskId: double.parse(widget.score),
             });
-            debugPrint('New task score added to scores sub-collection.');
           }
         }
       }
     } catch (e) {
-      debugPrint("Error updating score: $e");
+     // debugPrint("Error updating score: $e");
     }
   }
 
@@ -157,7 +152,7 @@ class _ScoreScreenState extends State<ScoreScreen> with TickerProviderStateMixin
 
     // Get the screen size using MediaQuery
     final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
+    //final screenHeight = MediaQuery.of(context).size.height;
 
     // Set max font size based on screen size
     final scoreFontSize = screenWidth > 400 ? 48.0 : screenWidth * 0.1;

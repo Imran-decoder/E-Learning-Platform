@@ -19,13 +19,13 @@ class ManageCourseScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              const SizedBox(height: 50),  // Space from top
+              const SizedBox(height: 50), // Space from top
 
               // Create New Course Button
               _buildCustomButton(
                 context,
                 "Create New Course",
-                Colors.green,
+                [Colors.green, Colors.greenAccent],
                     () {
                   Navigator.push(
                     context,
@@ -34,13 +34,13 @@ class ManageCourseScreen extends StatelessWidget {
                 },
               ),
 
-              const SizedBox(height: 20),  // Space between buttons
+              const SizedBox(height: 20), // Space between buttons
 
               // Edit Courses Button
               _buildCustomButton(
                 context,
                 "Edit Courses",
-                Colors.red,
+                [Colors.red, Colors.redAccent],
                     () {
                   Navigator.push(
                     context,
@@ -55,21 +55,32 @@ class ManageCourseScreen extends StatelessWidget {
     );
   }
 
-  // Reusable custom button widget
+  // Reusable custom button widget with gradient and elevated effect
   Widget _buildCustomButton(
       BuildContext context,
       String label,
-      Color color,
+      List<Color> gradientColors,
       VoidCallback onPressed,
       ) {
     return InkWell(
       onTap: onPressed,
-      borderRadius: BorderRadius.circular(20.0),
-      splashColor: color.withOpacity(0.3),
+      borderRadius: BorderRadius.circular(30.0),
+      splashColor: gradientColors[0].withOpacity(0.3),
       child: Container(
         decoration: BoxDecoration(
-          color: color,
-          borderRadius: BorderRadius.circular(20.0),
+          gradient: LinearGradient(
+            colors: gradientColors,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(30.0),
+          boxShadow: [
+            BoxShadow(
+              color: gradientColors[0].withOpacity(0.4),
+              blurRadius: 10,
+              offset: Offset(0, 6),
+            ),
+          ],
         ),
         padding: const EdgeInsets.symmetric(vertical: 18),
         width: MediaQuery.of(context).size.width - 32,
