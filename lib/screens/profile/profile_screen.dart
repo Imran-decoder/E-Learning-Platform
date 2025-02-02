@@ -13,8 +13,8 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  String? firstName; // Holds the user's first name
-  bool isLoading = true; // Controls the loading state
+  String? firstName;
+  bool isLoading = true;
 
   @override
   void initState() {
@@ -22,18 +22,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
     _fetchUserFirstName();
   }
 
-  /// Fetch the logged-in user's first name from Firestore
   Future<void> _fetchUserFirstName() async {
     try {
       final User? user = FirebaseAuth.instance.currentUser;
-
       if (user != null) {
-        // Fetch the user's document from Firestore
         final DocumentSnapshot userDoc = await FirebaseFirestore.instance
-            .collection('Users') // Ensure this matches your Firestore structure
+            .collection('Users')
             .doc(user.uid)
             .get();
 
+<<<<<<< HEAD
         // Extract the first name from the document
         final String? fetchedFirstName =
             userDoc['Profile']['main']['firstName'];
@@ -44,28 +42,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
           isLoading = false; // Stop loading
           // img = fetchedImage;
           // img = fetchedImage != null ? Image.network(fetchedImage as String) : null;
+=======
+        final String? fetchedFirstName = userDoc['Profile']['main']['firstName'];
+
+        setState(() {
+          firstName = fetchedFirstName ?? "User";
+          isLoading = false;
+>>>>>>> 5547a72300003e1385816b1a70a94efb418e6b3d
         });
       } else {
         setState(() {
-          firstName = "User"; // Default if no user is logged in
+          firstName = "User";
           isLoading = false;
         });
       }
     } catch (e) {
       debugPrint('Error fetching user name: $e');
       setState(() {
-        firstName = "User"; // Handle errors gracefully
+        firstName = "User";
         isLoading = false;
       });
     }
   }
 
-  /// Logout function
   Future<void> _signOut() async {
     try {
       await FirebaseAuth.instance.signOut();
+<<<<<<< HEAD
       Navigator.pushReplacementNamed(
           context, '/log-sign'); // Navigate to login page
+=======
+      Navigator.pushReplacementNamed(context, '/log-sign');
+>>>>>>> 5547a72300003e1385816b1a70a94efb418e6b3d
     } catch (e) {
       debugPrint('Error signing out: $e');
     }
@@ -78,23 +86,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
       appBar: AppBar(
         backgroundColor: Colors.white,
         title: isLoading
-            ? const CircularProgressIndicator() // Show loading spinner
+            ? const CircularProgressIndicator()
             : Text(
+<<<<<<< HEAD
                 firstName ?? "User", // Show the first name in the AppBar title
                 style: const TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.bold, // Make the username bold
                 ),
               ),
+=======
+          firstName ?? "User",
+          style: const TextStyle(
+            color: Colors.black,
+            fontWeight: FontWeight.bold,
+            fontSize: 22,
+          ),
+        ),
+>>>>>>> 5547a72300003e1385816b1a70a94efb418e6b3d
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.black),
+        elevation: 1,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.symmetric(vertical: 20),
         child: Column(
           children: [
             const ProfilePic(),
-            const SizedBox(height: 20),
+            const SizedBox(height: 30),
             ProfileMenu(
               text: "My Account",
               icon: 'assets/icons/user.svg',
@@ -130,7 +149,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   await _signOut();
                   Navigator.pushReplacementNamed(context, '/log-sign');
                 } on FirebaseAuthException catch (e) {
-                  print(e);
+                  debugPrint(e.toString());
                 }
               },
             ),
@@ -141,10 +160,15 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 }
 
+<<<<<<< HEAD
 class ProfilePic extends StatefulWidget {
   const ProfilePic({
     super.key,
   });
+=======
+class ProfilePic extends StatelessWidget {
+  const ProfilePic({super.key});
+>>>>>>> 5547a72300003e1385816b1a70a94efb418e6b3d
 
   @override
   _ProfilePicState createState() => _ProfilePicState();
@@ -184,25 +208,31 @@ class _ProfilePicState extends State<ProfilePic> {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 115,
-      width: 115,
+      height: 120,
+      width: 120,
       child: Stack(
         fit: StackFit.expand,
         clipBehavior: Clip.none,
         children: [
+<<<<<<< HEAD
           CircleAvatar(
             backgroundImage: img != null
                 ? NetworkImage((img as Image).image.toString())
                 : AssetImage("assets/images/boy_illustration.png")
                     as ImageProvider, // Fallback to AssetImage
             radius: 50.0,
+=======
+          const CircleAvatar(
+            backgroundImage: AssetImage("assets/images/boy_illustration.png"),
+            radius: 60,
+>>>>>>> 5547a72300003e1385816b1a70a94efb418e6b3d
           ),
           Positioned(
-            right: -16,
-            bottom: 0,
+            right: -15,
+            bottom: -10,
             child: SizedBox(
-              height: 46,
-              width: 46,
+              height: 50,
+              width: 50,
               child: TextButton(
                 style: TextButton.styleFrom(
                   foregroundColor: Colors.white,
@@ -216,7 +246,7 @@ class _ProfilePicState extends State<ProfilePic> {
                 child: SvgPicture.string(cameraIcon),
               ),
             ),
-          )
+          ),
         ],
       ),
     );
@@ -237,22 +267,30 @@ class ProfileMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      padding: const EdgeInsets.symmetric(horizontal: 25, vertical: 12),
       child: TextButton(
         style: TextButton.styleFrom(
           foregroundColor: const Color(0xFFFF7643),
+<<<<<<< HEAD
           padding: const EdgeInsets.all(20),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+=======
+          padding: const EdgeInsets.all(15),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+          ),
+>>>>>>> 5547a72300003e1385816b1a70a94efb418e6b3d
           backgroundColor: const Color(0xFFF5F6F9),
+          side: const BorderSide(color: Colors.grey),
         ),
         onPressed: press,
         child: Row(
           children: [
             SvgPicture.asset(
               icon,
-              color: const Color(0xFFFF7643),
-              width: 22,
+              colorFilter: ColorFilter.mode(const Color(0xFFFF7643), BlendMode.srcIn),
+              width: 24,
             ),
             const SizedBox(width: 20),
             Expanded(
@@ -260,12 +298,14 @@ class ProfileMenu extends StatelessWidget {
                 text,
                 style: const TextStyle(
                   color: Color(0xFF757575),
+                  fontSize: 16,
                 ),
               ),
             ),
             const Icon(
               Icons.arrow_forward_ios,
               color: Color(0xFF757575),
+              size: 18,
             ),
           ],
         ),
