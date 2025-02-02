@@ -9,11 +9,13 @@ class ComplateProfileScreen extends StatelessWidget {
   const ComplateProfileScreen({super.key});
   @override
   Widget build(BuildContext context) {
+    // Check if the screen size is larger (desktop view)
+    bool isDesktop = MediaQuery.of(context).size.width >= 600;
+
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-        
       ),
       body: SafeArea(
         child: SizedBox(
@@ -38,13 +40,21 @@ class ComplateProfileScreen extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: TextStyle(color: Color(0xFF757575)),
                   ),
-                  // const SizedBox(height: 16),
+                  // Add a space at the top
                   SizedBox(height: MediaQuery.of(context).size.height * 0.05),
-                  const CompleteProfileForm(),
+                  // Check if it's desktop and center the form elements
+                  isDesktop
+                      ? Center( // Center the form on larger screens
+                          child: ConstrainedBox(
+                            constraints: const BoxConstraints(maxWidth: 600), // Constrain width
+                            child: const CompleteProfileForm(),
+                          ),
+                        )
+                      : const CompleteProfileForm(), // On mobile, no change
                   SizedBox(height: MediaQuery.of(context).size.height * 0.15),
 
                   const Text(
-                    "By continuing your confirm that you agree \nwith our Term and Condition",
+                    "By continuing you confirm that you agree \nwith our Terms and Conditions",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Color(0xFF757575),
@@ -64,7 +74,6 @@ const authOutlineInputBorder = OutlineInputBorder(
   borderSide: BorderSide(color: Color(0xFF757575)),
   borderRadius: BorderRadius.all(Radius.circular(100)),
 );
-
 
 class CompleteProfileForm extends StatefulWidget {
   const CompleteProfileForm({Key? key}) : super(key: key);
@@ -310,6 +319,7 @@ class _CompleteProfileFormState extends State<CompleteProfileForm> {
     );
   }
 }
+
 
 // Icons
 const userIcon =

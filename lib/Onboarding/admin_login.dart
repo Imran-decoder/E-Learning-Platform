@@ -1,30 +1,24 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-
 class AdminLogin extends StatefulWidget {
   AdminLogin({super.key});
-
   @override
   State<AdminLogin> createState() => _AdminLoginState();
 }
-
 class _AdminLoginState extends State<AdminLogin> {
   final _formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
-
   Future<void> signInUserWithEmailAndPassword() async {
     try {
       final userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
         email: emailController.text.trim(),
         password: passwordController.text.trim(),
       );
-
       String userID = userCredential.user!.uid;
-
       if (await checkUserAdmin(userID)) {
-        Navigator.pushNamed(context, '/dashboard');
+        Navigator.pushNamed(context, '/admin_dashboard');
       } else {
         FirebaseAuth.instance.signOut();
         ScaffoldMessenger.of(context).showSnackBar(
@@ -38,12 +32,10 @@ class _AdminLoginState extends State<AdminLogin> {
       );
     }
   }
-
   Future<bool> checkUserAdmin(String userID) async {
     try {
       DocumentSnapshot documentSnapshot =
           await FirebaseFirestore.instance.collection('Users').doc(userID).get();
-
       return documentSnapshot.exists &&
           documentSnapshot.data() != null &&
           documentSnapshot['isAdmin'] == true;
@@ -52,17 +44,20 @@ class _AdminLoginState extends State<AdminLogin> {
       return false;
     }
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      
       backgroundColor: Colors.white,
+      
       body: SafeArea(
+        
         child: LayoutBuilder(
           builder: (context, constraints) {
             return SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   SizedBox(height: constraints.maxHeight * 0.1),
                   Image.asset("assets/images/splash.png", height: 100),
@@ -77,53 +72,71 @@ class _AdminLoginState extends State<AdminLogin> {
                   Form(
                     key: _formKey,
                     child: Column(
+                         mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        TextFormField(
-                          controller: emailController,
-                          decoration: const InputDecoration(
-                            hintText: 'Email',
-                            filled: true,
-                            fillColor: Color(0xFFF5FCF9),
-                            contentPadding: EdgeInsets.symmetric(
-                                horizontal: 24.0, vertical: 16.0),
-                            border: OutlineInputBorder(
-                              borderSide: BorderSide.none,
-                              borderRadius: BorderRadius.all(Radius.circular(50)),
-                            ),
-                          ),
-                          keyboardType: TextInputType.emailAddress,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your email';
-                            }
-                            return null;
-                          },
+                        Container(
+                width: MediaQuery.of(context).size.width < 600
+                    ? double.infinity
+                    : 400, // Adjust width for desktop view
+                child: TextFormField(
+                  controller: emailController,
+                  decoration: const InputDecoration(
+                    hintText: 'Email',
+                    filled: true,
+                    fillColor: Color(0xFFF5FCF9),
+                    contentPadding: EdgeInsets.symmetric(
+                        horizontal: 24.0, vertical: 16.0),
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide.none,
+                      borderRadius: BorderRadius.all(Radius.circular(50)),
+                    ),
+                  ),
+                  keyboardType: TextInputType.emailAddress,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your email';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  child: Container(
+                    width: MediaQuery.of(context).size.width < 600
+                        ? double.infinity
+                        : 400, // Adjust width for desktop view
+                    child: TextFormField(
+                      controller: passwordController,
+                      obscureText: true,
+                      decoration: const InputDecoration(
+                        hintText: 'Password',
+                        filled: true,
+                        fillColor: Color(0xFFF5FCF9),
+                        contentPadding: EdgeInsets.symmetric(
+                            horizontal: 24.0, vertical: 16.0),
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide.none,
+                          borderRadius: BorderRadius.all(Radius.circular(50)),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 16.0),
-                          child: TextFormField(
-                            controller: passwordController,
-                            obscureText: true,
-                            decoration: const InputDecoration(
-                              hintText: 'Password',
-                              filled: true,
-                              fillColor: Color(0xFFF5FCF9),
-                              contentPadding:
-                                  EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-                              border: OutlineInputBorder(
-                                borderSide: BorderSide.none,
-                                borderRadius: BorderRadius.all(Radius.circular(50)),
-                              ),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter your password';
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
-                        ElevatedButton(
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your password';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                ),
+               
+               Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  child: Container(
+                    width: MediaQuery.of(context).size.width < 600
+                        ? double.infinity
+                        : 400, // Adjust width for desktop view
+                    child: ElevatedButton(
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
                               signInUserWithEmailAndPassword();
@@ -138,6 +151,8 @@ class _AdminLoginState extends State<AdminLogin> {
                           ),
                           child: const Text("Sign in"),
                         ),
+                        ),
+               ),
                         const SizedBox(height: 16.0),
                       ],
                     ),
@@ -151,3 +166,7 @@ class _AdminLoginState extends State<AdminLogin> {
     );
   }
 }
+
+// mixin mainAxisAlignment {
+//   static const center = Center();
+// }

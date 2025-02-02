@@ -12,6 +12,7 @@ import 'package:elearning/Onboarding/varification.dart';
 import 'package:elearning/Onboarding/change_pass.dart';
 import 'package:elearning/Onboarding/secpage_of_signup.dart';
 import 'package:elearning/screens/chat_screen.dart';
+import 'package:elearning/screens/Admin/admin_dashboard_screen.dart';
 // import 'package:elearning/Onboarding/admin_login.dart';
 
 void main() async {
@@ -56,7 +57,7 @@ class MyApp extends StatelessWidget {
         '/change': (context) => ChangePasswordScreen(),
         '/secpage': (context) => ComplateProfileScreen(),
         '/admin': (context) => AdminLogin(),
-        
+        "/admin_dashboard": (context) => AdminDashboardScreen(),
       },
     );
   }
