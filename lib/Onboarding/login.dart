@@ -80,7 +80,7 @@ Widget build(BuildContext context) {
           // Only change the button height for mobile
           double buttonHeight = constraints.maxWidth <= 600
               ? 50 // Reduced height for mobile screens
-              : 70; // Fixed height for desktop
+              : 50; // Fixed height for desktop
 
           return SingleChildScrollView(
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -110,7 +110,7 @@ Widget build(BuildContext context) {
                             filled: true,
                             fillColor: Color(0xFFF5FCF9),
                             contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 24),
+                                horizontal: 16, vertical: 14),
                             border: const OutlineInputBorder(
                               borderSide: BorderSide.none,
                               borderRadius:
@@ -119,6 +119,7 @@ Widget build(BuildContext context) {
                           ),
                         ),
                       ),
+                      Padding(padding:  const EdgeInsets.symmetric(vertical: 5.0),),
                       SizedBox(
                         width: fieldWidth, // This uses fieldWidth that adjusts based on screen size
                         child: TextFormField(
@@ -129,7 +130,7 @@ Widget build(BuildContext context) {
                             filled: true,
                             fillColor: Color(0xFFF5FCF9),
                             contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 24),
+                                horizontal: 16, vertical: 14),
                             border: OutlineInputBorder(
                               borderSide: BorderSide.none,
                               borderRadius:

@@ -18,7 +18,7 @@ class SigninOrSignupScreen extends StatelessWidget {
     
     // If the screen width is large (e.g., desktop), make the button height a bit bigger
     if (screenWidth > 1200) {  // Consider it a desktop if the width is larger than 1200px
-      buttonHeight = 80;  // Increase height for desktop view
+      buttonHeight = 50;  // Increase height for desktop view
     }
 
     return Scaffold(

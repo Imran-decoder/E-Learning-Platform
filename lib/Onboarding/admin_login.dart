@@ -47,13 +47,17 @@ class _AdminLoginState extends State<AdminLogin> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      
       backgroundColor: Colors.white,
+      
       body: SafeArea(
+        
         child: LayoutBuilder(
           builder: (context, constraints) {
             return SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
               child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   SizedBox(height: constraints.maxHeight * 0.1),
                   Image.asset("assets/images/splash.png", height: 100),
@@ -68,53 +72,71 @@ class _AdminLoginState extends State<AdminLogin> {
                   Form(
                     key: _formKey,
                     child: Column(
+                         mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        TextFormField(
-                          controller: emailController,
-                          decoration: const InputDecoration(
-                            hintText: 'Email',
-                            filled: true,
-                            fillColor: Color(0xFFF5FCF9),
-                            contentPadding: EdgeInsets.symmetric(
-                                horizontal: 24.0, vertical: 16.0),
-                            border: OutlineInputBorder(
-                              borderSide: BorderSide.none,
-                              borderRadius: BorderRadius.all(Radius.circular(50)),
-                            ),
-                          ),
-                          keyboardType: TextInputType.emailAddress,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter your email';
-                            }
-                            return null;
-                          },
+                        Container(
+                width: MediaQuery.of(context).size.width < 600
+                    ? double.infinity
+                    : 400, // Adjust width for desktop view
+                child: TextFormField(
+                  controller: emailController,
+                  decoration: const InputDecoration(
+                    hintText: 'Email',
+                    filled: true,
+                    fillColor: Color(0xFFF5FCF9),
+                    contentPadding: EdgeInsets.symmetric(
+                        horizontal: 24.0, vertical: 16.0),
+                    border: OutlineInputBorder(
+                      borderSide: BorderSide.none,
+                      borderRadius: BorderRadius.all(Radius.circular(50)),
+                    ),
+                  ),
+                  keyboardType: TextInputType.emailAddress,
+                  validator: (value) {
+                    if (value == null || value.isEmpty) {
+                      return 'Please enter your email';
+                    }
+                    return null;
+                  },
+                ),
+              ),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  child: Container(
+                    width: MediaQuery.of(context).size.width < 600
+                        ? double.infinity
+                        : 400, // Adjust width for desktop view
+                    child: TextFormField(
+                      controller: passwordController,
+                      obscureText: true,
+                      decoration: const InputDecoration(
+                        hintText: 'Password',
+                        filled: true,
+                        fillColor: Color(0xFFF5FCF9),
+                        contentPadding: EdgeInsets.symmetric(
+                            horizontal: 24.0, vertical: 16.0),
+                        border: OutlineInputBorder(
+                          borderSide: BorderSide.none,
+                          borderRadius: BorderRadius.all(Radius.circular(50)),
                         ),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 16.0),
-                          child: TextFormField(
-                            controller: passwordController,
-                            obscureText: true,
-                            decoration: const InputDecoration(
-                              hintText: 'Password',
-                              filled: true,
-                              fillColor: Color(0xFFF5FCF9),
-                              contentPadding:
-                                  EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-                              border: OutlineInputBorder(
-                                borderSide: BorderSide.none,
-                                borderRadius: BorderRadius.all(Radius.circular(50)),
-                              ),
-                            ),
-                            validator: (value) {
-                              if (value == null || value.isEmpty) {
-                                return 'Please enter your password';
-                              }
-                              return null;
-                            },
-                          ),
-                        ),
-                        ElevatedButton(
+                      ),
+                      validator: (value) {
+                        if (value == null || value.isEmpty) {
+                          return 'Please enter your password';
+                        }
+                        return null;
+                      },
+                    ),
+                  ),
+                ),
+               
+               Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  child: Container(
+                    width: MediaQuery.of(context).size.width < 600
+                        ? double.infinity
+                        : 400, // Adjust width for desktop view
+                    child: ElevatedButton(
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
                               signInUserWithEmailAndPassword();
@@ -129,6 +151,8 @@ class _AdminLoginState extends State<AdminLogin> {
                           ),
                           child: const Text("Sign in"),
                         ),
+                        ),
+               ),
                         const SizedBox(height: 16.0),
                       ],
                     ),
@@ -142,3 +166,7 @@ class _AdminLoginState extends State<AdminLogin> {
     );
   }
 }
+
+// mixin mainAxisAlignment {
+//   static const center = Center();
+// }

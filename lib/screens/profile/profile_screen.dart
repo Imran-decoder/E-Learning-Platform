@@ -31,7 +31,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
             .doc(user.uid)
             .get();
 
-<<<<<<< HEAD
         // Extract the first name from the document
         final String? fetchedFirstName =
             userDoc['Profile']['main']['firstName'];
@@ -42,13 +41,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
           isLoading = false; // Stop loading
           // img = fetchedImage;
           // img = fetchedImage != null ? Image.network(fetchedImage as String) : null;
-=======
-        final String? fetchedFirstName = userDoc['Profile']['main']['firstName'];
-
-        setState(() {
-          firstName = fetchedFirstName ?? "User";
-          isLoading = false;
->>>>>>> 5547a72300003e1385816b1a70a94efb418e6b3d
         });
       } else {
         setState(() {
@@ -68,12 +60,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> _signOut() async {
     try {
       await FirebaseAuth.instance.signOut();
-<<<<<<< HEAD
       Navigator.pushReplacementNamed(
           context, '/log-sign'); // Navigate to login page
-=======
-      Navigator.pushReplacementNamed(context, '/log-sign');
->>>>>>> 5547a72300003e1385816b1a70a94efb418e6b3d
     } catch (e) {
       debugPrint('Error signing out: $e');
     }
@@ -88,22 +76,12 @@ class _ProfileScreenState extends State<ProfileScreen> {
         title: isLoading
             ? const CircularProgressIndicator()
             : Text(
-<<<<<<< HEAD
                 firstName ?? "User", // Show the first name in the AppBar title
                 style: const TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.bold, // Make the username bold
                 ),
               ),
-=======
-          firstName ?? "User",
-          style: const TextStyle(
-            color: Colors.black,
-            fontWeight: FontWeight.bold,
-            fontSize: 22,
-          ),
-        ),
->>>>>>> 5547a72300003e1385816b1a70a94efb418e6b3d
         centerTitle: true,
         iconTheme: const IconThemeData(color: Colors.black),
         elevation: 1,
@@ -160,15 +138,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 }
 
-<<<<<<< HEAD
 class ProfilePic extends StatefulWidget {
   const ProfilePic({
     super.key,
   });
-=======
-class ProfilePic extends StatelessWidget {
-  const ProfilePic({super.key});
->>>>>>> 5547a72300003e1385816b1a70a94efb418e6b3d
 
   @override
   _ProfilePicState createState() => _ProfilePicState();
@@ -214,18 +187,12 @@ class _ProfilePicState extends State<ProfilePic> {
         fit: StackFit.expand,
         clipBehavior: Clip.none,
         children: [
-<<<<<<< HEAD
           CircleAvatar(
             backgroundImage: img != null
                 ? NetworkImage((img as Image).image.toString())
                 : AssetImage("assets/images/boy_illustration.png")
                     as ImageProvider, // Fallback to AssetImage
             radius: 50.0,
-=======
-          const CircleAvatar(
-            backgroundImage: AssetImage("assets/images/boy_illustration.png"),
-            radius: 60,
->>>>>>> 5547a72300003e1385816b1a70a94efb418e6b3d
           ),
           Positioned(
             right: -15,
@@ -271,18 +238,11 @@ class ProfileMenu extends StatelessWidget {
       child: TextButton(
         style: TextButton.styleFrom(
           foregroundColor: const Color(0xFFFF7643),
-<<<<<<< HEAD
           padding: const EdgeInsets.all(20),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-=======
-          padding: const EdgeInsets.all(15),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(15),
-          ),
->>>>>>> 5547a72300003e1385816b1a70a94efb418e6b3d
           backgroundColor: const Color(0xFFF5F6F9),
-          side: const BorderSide(color: Colors.grey),
+          // side: const BorderSide(color: Colors.grey),
         ),
         onPressed: press,
         child: Row(
