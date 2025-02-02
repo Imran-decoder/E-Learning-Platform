@@ -15,11 +15,20 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
   String? fetchedCourseTitle;
   Map<String, Map<String, dynamic>> chaptersData = {};
   bool isLoading = false;
+  String errorMessage = '';
 
   // Fetch course and chapters data
   Future<void> _fetchCourse(String courseTitle) async {
+    if (courseTitle.trim().isEmpty) {
+      setState(() {
+        errorMessage = 'Course title cannot be empty';
+      });
+      return;
+    }
+
     setState(() {
       isLoading = true;
+      errorMessage = '';  // Reset previous errors
     });
 
     try {
@@ -43,23 +52,25 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
           chaptersData = {
             for (var doc in tasksSnapshot.docs)
               doc.id: {
-                'chapter_title': doc.data()['title'] ?? '',
-                'description': doc['description'],
-                'number': doc['number'],
-                'video': doc['video'],
+                'title': doc.data()['title'] ?? '',
+                'description': doc.data().containsKey('description') ? doc['description'] : '',
+                'number': doc.data().containsKey('number') ? doc['number'] : 0,
+                'video': doc.data().containsKey('video') ? doc['video'] : '',
+                'document': doc.data().containsKey('document') ? doc['document'] : '',
+                'duration': doc.data().containsKey('duration') ? doc['duration'] : '',
               },
           };
         });
       } else {
-        ScaffoldMessenger.of(context).showSnackBar (
-          const SnackBar(content: Text('No course found with that title.')),
-        );
+        setState(() {
+          errorMessage = 'No course found with that title';
+        });
       }
     } catch (e) {
       debugPrint("Error fetching course: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-         SnackBar(content: Text('Failed to fetch course data.')),
-      );
+      setState(() {
+        errorMessage = 'Failed to fetch course data. Please try again.';
+      });
     } finally {
       setState(() {
         isLoading = false;
@@ -92,6 +103,11 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
               const SizedBox(height: 20),
               TextField(
                 controller: _courseTitleController,
+                onChanged: (value) {
+                  setState(() {
+                    errorMessage = ''; // Reset error message while typing
+                  });
+                },
                 style: const TextStyle(color: Colors.white),
                 decoration: const InputDecoration(
                   labelText: "Course Title",
@@ -101,26 +117,47 @@ class _EditCourseScreenState extends State<EditCourseScreen> {
                   fillColor: Colors.black54,
                 ),
               ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.red,
-                    padding: const EdgeInsets.symmetric(vertical: 15),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+              const SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  SizedBox(
+                    width: 200,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        padding: const EdgeInsets.symmetric(vertical: 15),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      onPressed: () {
+                        _fetchCourse(_courseTitleController.text);
+                      },
+                      child: const Text(
+                        "Fetch Chapters",
+                        style: TextStyle(fontSize: 18, color: Colors.white),
+                      ),
                     ),
                   ),
-                  onPressed: () {
-                    _fetchCourse(_courseTitleController.text);
-                  },
-                  child: const Text(
-                    "Fetch Chapters",
-                    style: TextStyle(fontSize: 18, color: Colors.white),
+                  IconButton(
+                    icon: const Icon(Icons.clear, color: Colors.white),
+                    onPressed: () {
+                      setState(() {
+                        _courseTitleController.clear();
+                        errorMessage = ''; // Clear any previous error
+                      });
+                    },
                   ),
-                ),
+                ],
               ),
+              const SizedBox(height: 10),
+              // Display error message if any
+              if (errorMessage.isNotEmpty)
+                Text(
+                  errorMessage,
+                  style: const TextStyle(color: Colors.red, fontSize: 14),
+                ),
               const SizedBox(height: 20),
               if (courseId != null && fetchedCourseTitle != null)
                 Expanded(
