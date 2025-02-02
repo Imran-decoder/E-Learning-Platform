@@ -1,18 +1,46 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:elearning/components/Admin/custom_dialog.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class PeopleScreen extends StatelessWidget {
   const PeopleScreen({super.key});
+  //   Future<void> _signOut() async {
+  //   try {
+  //     await FirebaseAuth.instance.signOut();
+  //     Navigator.pushReplacementNamed(
+  //         context, '/log-sign'); // Navigate to login page
+  //   } catch (e) {
+  //     debugPrint('Error signing out: $e');
+  //   }
+  // }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color.fromARGB(44, 44, 44, 1),
+    appBar: AppBar(
+      actions: [
+        ButtonTheme(
+          child: ElevatedButton.icon(
+            onPressed: () async {
+              try {
+                await FirebaseAuth.instance.signOut();
+                Navigator.pushReplacementNamed(context, '/log-sign');
+              } on FirebaseAuthException catch (e) {
+                print(e);
+              }
+            },
+            label: const Text('Exit'),
+          ),
+        ),
+      ],
+    ),
       body: SafeArea(
         top: true,
         child: Padding(
-          padding: const EdgeInsets.only(top: 42.0, left: 18.0, right: 18.0),
+          padding: const EdgeInsets.only(top: 5.0, left: 18.0, right: 18.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -24,6 +52,7 @@ class PeopleScreen extends StatelessWidget {
                   fontWeight: FontWeight.bold,
                 ),
               ),
+             
               const SizedBox(height: 8),
               _buildPersonTile("Admin", isAdmin: true),
               const SizedBox(height: 16),
