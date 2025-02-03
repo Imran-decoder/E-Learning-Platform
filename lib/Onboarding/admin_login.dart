@@ -1,15 +1,19 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+
 class AdminLogin extends StatefulWidget {
   AdminLogin({super.key});
+
   @override
   State<AdminLogin> createState() => _AdminLoginState();
 }
+
 class _AdminLoginState extends State<AdminLogin> {
   final _formKey = GlobalKey<FormState>();
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
+
   Future<void> signInUserWithEmailAndPassword() async {
     try {
       final userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
@@ -32,6 +36,7 @@ class _AdminLoginState extends State<AdminLogin> {
       );
     }
   }
+
   Future<bool> checkUserAdmin(String userID) async {
     try {
       DocumentSnapshot documentSnapshot =
@@ -44,113 +49,120 @@ class _AdminLoginState extends State<AdminLogin> {
       return false;
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      
       backgroundColor: Colors.white,
-      
       body: SafeArea(
-        
         child: LayoutBuilder(
           builder: (context, constraints) {
             return SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 16.0),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  SizedBox(height: constraints.maxHeight * 0.1),
-                  Image.asset("assets/images/splash.png", height: 100),
-                  SizedBox(height: constraints.maxHeight * 0.1),
-                  Text(
-                    "Admin Access Only!",
-                    style: Theme.of(context).textTheme.headlineSmall!.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  SizedBox(height: constraints.maxHeight * 0.05),
-                  Form(
-                    key: _formKey,
-                    child: Column(
-                         mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Container(
-                width: MediaQuery.of(context).size.width < 600
-                    ? double.infinity
-                    : 400, // Adjust width for desktop view
-                child: TextFormField(
-                  controller: emailController,
-                  decoration: const InputDecoration(
-                    hintText: 'Email',
-                    filled: true,
-                    fillColor: Color(0xFFF5FCF9),
-                    contentPadding: EdgeInsets.symmetric(
-                        horizontal: 24.0, vertical: 16.0),
-                    border: OutlineInputBorder(
-                      borderSide: BorderSide.none,
-                      borderRadius: BorderRadius.all(Radius.circular(50)),
-                    ),
-                  ),
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
-                    }
-                    return null;
-                  },
-                ),
-              ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16.0),
-                  child: Container(
-                    width: MediaQuery.of(context).size.width < 600
-                        ? double.infinity
-                        : 400, // Adjust width for desktop view
-                    child: TextFormField(
-                      controller: passwordController,
-                      obscureText: true,
-                      decoration: const InputDecoration(
-                        hintText: 'Password',
-                        filled: true,
-                        fillColor: Color(0xFFF5FCF9),
-                        contentPadding: EdgeInsets.symmetric(
-                            horizontal: 24.0, vertical: 16.0),
-                        border: OutlineInputBorder(
-                          borderSide: BorderSide.none,
-                          borderRadius: BorderRadius.all(Radius.circular(50)),
-                        ),
-                      ),
-                      validator: (value) {
-                        if (value == null || value.isEmpty) {
-                          return 'Please enter your password';
-                        }
-                        return null;
-                      },
-                    ),
-                  ),
-                ),
-               
-                 ElevatedButton(
-                          onPressed: () {
-                            if (_formKey.currentState!.validate()) {
-                              signInUserWithEmailAndPassword();
-                            }
-                          },
-                          style: ElevatedButton.styleFrom(
-                            elevation: 0,
-                            backgroundColor: const Color.fromARGB(255, 230, 11, 11),
-                            foregroundColor: Colors.white,
-                            minimumSize: const Size(double.infinity, 48),
-                            shape: const StadiumBorder(),
+              child: Center( // Center the entire form in both mobile and desktop view
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SizedBox(height: constraints.maxHeight * 0.1),
+                    Image.asset("assets/images/splash.png", height: 100),
+                    SizedBox(height: constraints.maxHeight * 0.1),
+                    Text(
+                      "Admin Access Only!",
+                      style: Theme.of(context).textTheme.headlineSmall!.copyWith(
+                            fontWeight: FontWeight.bold,
                           ),
-                          child: const Text("Sign in"),
-                        ),
-               
-                        const SizedBox(height: 16.0),
-                      ],
                     ),
-                  ),
-                ],
+                    SizedBox(height: constraints.maxHeight * 0.05),
+                    Form(
+                      key: _formKey,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // Wrapping in a container with dynamic width to center
+                          Container(
+                            width: MediaQuery.of(context).size.width < 600
+                                ? double.infinity
+                                : 400, // Adjust width for desktop view
+                            child: TextFormField(
+                              controller: emailController,
+                              decoration: const InputDecoration(
+                                hintText: 'Email',
+                                filled: true,
+                                fillColor: Color(0xFFF5FCF9),
+                                contentPadding: EdgeInsets.symmetric(
+                                    horizontal: 24.0, vertical: 16.0),
+                                border: OutlineInputBorder(
+                                  borderSide: BorderSide.none,
+                                  borderRadius: BorderRadius.all(Radius.circular(50)),
+                                ),
+                              ),
+                              keyboardType: TextInputType.emailAddress,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter your email';
+                                }
+                                return null;
+                              },
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 16.0),
+                            child: Container(
+                              width: MediaQuery.of(context).size.width < 600
+                                  ? double.infinity
+                                  : 400, // Adjust width for desktop view
+                              child: TextFormField(
+                                controller: passwordController,
+                                obscureText: true,
+                                decoration: const InputDecoration(
+                                  hintText: 'Password',
+                                  filled: true,
+                                  fillColor: Color(0xFFF5FCF9),
+                                  contentPadding: EdgeInsets.symmetric(
+                                      horizontal: 24.0, vertical: 16.0),
+                                  border: OutlineInputBorder(
+                                    borderSide: BorderSide.none,
+                                    borderRadius: BorderRadius.all(Radius.circular(50)),
+                                  ),
+                                ),
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Please enter your password';
+                                  }
+                                  return null;
+                                },
+                              ),
+                            ),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(vertical: 16.0),
+                            child: Container(
+                              width: MediaQuery.of(context).size.width < 600
+                                  ? double.infinity
+                                  : 400, // Adjust width for desktop view
+                              child: ElevatedButton(
+                                onPressed: () {
+                                  if (_formKey.currentState!.validate()) {
+                                    signInUserWithEmailAndPassword();
+                                  }
+                                },
+                                style: ElevatedButton.styleFrom(
+                                  elevation: 0,
+                                  backgroundColor: const Color.fromARGB(255, 230, 11, 11),
+                                  foregroundColor: Colors.white,
+                                  minimumSize: const Size(double.infinity, 48),
+                                  shape: const StadiumBorder(),
+                                ),
+                                child: const Text("Sign in"),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16.0),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             );
           },
