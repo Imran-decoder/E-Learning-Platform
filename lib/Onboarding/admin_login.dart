@@ -130,13 +130,7 @@ class _AdminLoginState extends State<AdminLogin> {
                   ),
                 ),
                
-               Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 16.0),
-                  child: Container(
-                    width: MediaQuery.of(context).size.width < 600
-                        ? double.infinity
-                        : 400, // Adjust width for desktop view
-                    child: ElevatedButton(
+                 ElevatedButton(
                           onPressed: () {
                             if (_formKey.currentState!.validate()) {
                               signInUserWithEmailAndPassword();
@@ -151,8 +145,7 @@ class _AdminLoginState extends State<AdminLogin> {
                           ),
                           child: const Text("Sign in"),
                         ),
-                        ),
-               ),
+               
                         const SizedBox(height: 16.0),
                       ],
                     ),
@@ -166,7 +159,3 @@ class _AdminLoginState extends State<AdminLogin> {
     );
   }
 }
-
-// mixin mainAxisAlignment {
-//   static const center = Center();
-// }
