@@ -37,9 +37,11 @@ class Section {
 
 class CourseDetailsScreen extends StatefulWidget {
   final String courseId;
+  final String userId;
 
   const CourseDetailsScreen({
     required this.courseId,
+    required this.userId,
     super.key,
   });
 
