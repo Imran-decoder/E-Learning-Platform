@@ -314,17 +314,81 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
 
-  void _onCourseSelected(BuildContext context, Map<String, String> course) {
-    final String courseId = course['id'] ?? '';
-    if (courseId.isNotEmpty) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => CourseDetailsScreen(courseId: courseId),
-        ),
+ void _onCourseSelected(BuildContext context, Map<String, String> course) async {
+  final String courseId = course['id'] ?? '';
+  final userID = FirebaseAuth.instance.currentUser!.uid;
+  final email = FirebaseAuth.instance.currentUser!.email;
+
+  if (courseId.isNotEmpty) {
+    try {
+      // Query the enrolledCourses subcollection to check enrollment.
+      final docSnapshot = await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(userID)
+          .collection('enrolledCourses')
+          .doc(courseId)
+          .get();
+
+      if (docSnapshot.exists) {
+        // The user is enrolled in the course: navigate to the course details screen.
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                CourseDetailsScreen(courseId: courseId, userId: userID),
+          ),
+        );
+      } else {
+        // The user has not enrolled in the course.
+        // Show a dialog prompting to send a request to the admin.
+        showDialog(
+          context: context,
+          builder: (context) {
+            return AlertDialog(
+              title: Text("Request Enrollment"),
+              content: Text(
+                  "You are not enrolled in this course. Would you like to send a request to the admin for enrollment?"),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop(); // Dismiss the dialog.
+                  },
+                  child: Text("Cancel"),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    // Save the request in the "requests" collection.
+                    await FirebaseFirestore.instance.collection('requests').add({
+                      'userId': userID,
+                      'courseId': courseId,
+                      'allotted': false, // initially set to false.
+                      'timestamp': FieldValue.serverTimestamp(), // optional
+                      'email': email,
+                    });
+                    Navigator.of(context).pop(); // Dismiss the dialog.
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text("Request sent to admin.")),
+                    );
+                  },
+                  child: Text("Send Request"),
+                ),
+              ],
+            );
+          },
+        );
+      }
+    } catch (e) {
+      // Handle any errors during Firestore queries.
+      debugPrint("Error checking enrollment status: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+            content: Text(
+                "An error occurred while checking enrollment status. Please try again.")),
       );
-    } else {
-      debugPrint("Course ID is missing.");
     }
+  } else {
+    debugPrint("Course ID is missing.");
   }
+}
+
 }
