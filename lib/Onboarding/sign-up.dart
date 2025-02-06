@@ -3,6 +3,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'dart:async';
 
+import 'terms_and_conditions.dart';  // IMPORTED the Terms and Conditions page
+
 class SignUpScreen extends StatelessWidget {
   const SignUpScreen({super.key});
 
@@ -12,13 +14,15 @@ class SignUpScreen extends StatelessWidget {
       backgroundColor: Colors.white,
       appBar: AppBar(
         backgroundColor: Colors.white,
-         centerTitle: true, 
-        title: const Text("Sign Up",
-        style: TextStyle(
-                      color: Colors.black,
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                       ),)
+        centerTitle: true,
+        title: const Text(
+          "Sign Up",
+          style: TextStyle(
+            color: Colors.black,
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
       ),
       body: SafeArea(
         child: SizedBox(
@@ -28,7 +32,6 @@ class SignUpScreen extends StatelessWidget {
             child: SingleChildScrollView(
               child: Column(
                 children: [
-                  
                   const SizedBox(height: 16),
                   const Text(
                     "Register Account",
@@ -64,11 +67,32 @@ class SignUpScreen extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 16),
-                  const Text(
-                    "By continuing, you confirm that you agree \nwith our Terms and Conditions",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(color: Color(0xFF757575)),
-                  )
+
+                  // **CHANGES HERE**: GestureDetector for clickable "Terms and Conditions" link
+                  GestureDetector(
+                    onTap: () {
+                      // **CHANGES HERE**: Navigate to Terms and Conditions Page when clicked
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => TermsAndConditionsPage()),
+                      );
+                    },
+                    child: RichText(  // **CHANGES HERE**: Use RichText to highlight "Terms and Conditions"
+                      text: TextSpan(
+                        text: 'By continuing, you confirm that you agree ',
+                        style: TextStyle(color: Color(0xFF757575)),
+                        children: <TextSpan>[
+                          TextSpan(
+                            text: 'with our Terms and Conditions',
+                            style: TextStyle(   // **CHANGES HERE**: Style for clickable part
+                              color: Colors.blue,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -78,6 +102,7 @@ class SignUpScreen extends StatelessWidget {
     );
   }
 }
+
 
 class SignUpForm extends StatefulWidget {
   const SignUpForm({super.key});
