@@ -1,3 +1,5 @@
+import 'package:elearning/screens/notification_screen.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -80,6 +82,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
     _fetchUserName();
   }
 
+
+
   Future<void> _fetchUserName() async {
     try {
       final User? user = FirebaseAuth.instance.currentUser;
@@ -90,6 +94,22 @@ class _DashboardScreenState extends State<DashboardScreen> {
             .get();
 
         final firstName = userDoc['Profile']['main']['firstName'];
+
+        // Retrieve FCM token
+        final fcmToken = await FirebaseMessaging.instance.getToken();
+
+        // Store user name and FCM token in Firestore
+        await FirebaseFirestore.instance.collection('Users').doc(user.uid).set(
+          {
+            'Profile': {
+              'main': {
+                'firstName': firstName ?? 'User',
+              },
+            },
+            'fcm_token': fcmToken,  // Store FCM token here
+          },
+          SetOptions(merge: true),  // Merge to update existing data
+        );
 
         setState(() {
           _userName = firstName ?? "User";
@@ -211,7 +231,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
         ),
         IconButton(
           icon: const Icon(Icons.notifications, color: Colors.white),
-          onPressed: () => debugPrint("Notifications clicked"),
+          onPressed: () {
+            Navigator.push(
+                context,
+              MaterialPageRoute(
+                  builder: (context)=> NotificationScreen(),
+              ),
+            );
+          },
         ),
         IconButton(
           icon: const Icon(Icons.more_vert, color: Colors.white),

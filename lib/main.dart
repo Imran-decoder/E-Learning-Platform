@@ -1,7 +1,10 @@
 import 'package:elearning/Onboarding/admin_login.dart';
+import 'package:elearning/firebase_api.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:elearning/screens/dashboard_screen.dart'; // Import DashboardScreen
+import 'package:elearning/screens/dashboard_screen.dart';
 import 'package:elearning/screens/profile/profile_screen.dart';
+import 'package:elearning/screens/notification_screen.dart'; // Import NotificationScreen
 import 'package:firebase_core/firebase_core.dart';
 import 'package:elearning/Onboarding/sign-up.dart';
 import 'package:elearning/Onboarding/check_stateof_login.dart';
@@ -13,13 +16,22 @@ import 'package:elearning/Onboarding/change_pass.dart';
 import 'package:elearning/Onboarding/secpage_of_signup.dart';
 import 'package:elearning/screens/chat_screen.dart';
 import 'package:elearning/screens/Admin/admin_dashboard_screen.dart';
-// import 'package:elearning/Onboarding/admin_login.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
+
+  // Ensure Firebase API is initialized properly
+  final userId = FirebaseAuth.instance.currentUser?.uid ?? '';
+  if (userId.isNotEmpty) {
+    await FirebaseApi().initNotifications(userId);
+  }
+
   runApp(MyApp());
 }
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
@@ -45,6 +57,7 @@ class MyApp extends StatelessWidget {
           hintStyle: TextStyle(color: Colors.black),
         ),
       ),
+      navigatorKey: navigatorKey,
       home: Splash(),
       routes: {
         '/dashboard': (context) => BottomNavBarApp(),
@@ -53,11 +66,12 @@ class MyApp extends StatelessWidget {
         '/log-sign': (context) => SigninOrSignupScreen(),
         '/login': (context) => SignInScreen(),
         '/forgot': (context) => ForgotPasswordScreen(),
-        '/verify': (context) => VerificationScreen(phoneNumber: '', onVerificationSuccess: (String ) {  },),
+        '/verify': (context) => VerificationScreen(phoneNumber: '', onVerificationSuccess: (String string) {}),
         '/change': (context) => ChangePasswordScreen(),
         '/secpage': (context) => ComplateProfileScreen(),
         '/admin': (context) => AdminLogin(),
-        "/admin_dashboard": (context) => AdminDashboardScreen(),
+        '/admin_dashboard': (context) => AdminDashboardScreen(),
+        '/notifications': (context) => NotificationScreen(), // Add Notification Screen Route
       },
     );
   }
@@ -73,11 +87,10 @@ class BottomNavBarApp extends StatefulWidget {
 class _BottomNavBarAppState extends State<BottomNavBarApp> {
   int _selectedIndex = 0;
 
-  // List of screens for navigation, including all 4 items for the tabs
   final List<Widget> _screens = [
-    DashboardScreen(),  // Home Screen
-    ChatScreen(),       // Chat Screen
-    ProfileScreen(),    // Profile Screen
+    DashboardScreen(),
+    ChatScreen(),
+    ProfileScreen(),
   ];
 
   void _onItemTapped(int index) {
@@ -89,32 +102,24 @@ class _BottomNavBarAppState extends State<BottomNavBarApp> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: _screens[_selectedIndex],  // Display the screen based on selected index
+      body: _screens[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
-        onTap: (index) {
-          _onItemTapped(index); 
-          
-        },
+        onTap: _onItemTapped,
         items: [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
             label: 'Home',
-            backgroundColor: Colors.white,
           ),
-         
           BottomNavigationBarItem(
             icon: Icon(Icons.chat),
             label: 'Chat',
-            backgroundColor: Colors.white,
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
             label: 'Profile',
-            backgroundColor: Colors.white,
           ),
         ],
-        backgroundColor: Colors.white,
         selectedItemColor: Colors.orangeAccent,
         unselectedItemColor: Colors.black,
         elevation: 5,
@@ -126,16 +131,8 @@ class _BottomNavBarAppState extends State<BottomNavBarApp> {
           color: Colors.black,
           size: 25,
         ),
-        selectedLabelStyle: TextStyle(
-          color: Colors.white,
-        ),
-        unselectedLabelStyle: TextStyle(
-          color: Colors.black,
-        ),
         showUnselectedLabels: true,
       ),
     );
   }
 }
-
-

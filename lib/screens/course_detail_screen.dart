@@ -12,7 +12,6 @@ class Section {
   final String videoUrl;
   final String taskId;
 
-
   Section({
     required this.title,
     required this.content,
@@ -77,7 +76,7 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
         videoUrl: course.tasks[i].video,
         taskId: course.tasks[i].id,
       ));
-     // debugPrint('Quiz URL for Section ${i + 1}: ${sections[i].quizUrl} ${sections[i].number}');
+      // debugPrint('Quiz URL for Section ${i + 1}: ${sections[i].quizUrl} ${sections[i].number}');
     }
 
     return sections;
@@ -176,14 +175,17 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              Text("This is an introductory course for Project management. It covers the basics of project management and is suitable for beginners."),
+              Text(
+                  "This is an introductory course for Project management. It covers the basics of project management and is suitable for beginners."),
               const SizedBox(height: 24),
 
               // Sections/Chapters
               // Removed Expanded, use shrinkWrap instead
               ListView.builder(
-                shrinkWrap: true, // This ensures that ListView takes only as much space as it needs
-                physics: const NeverScrollableScrollPhysics(), // Prevent scrolling within ListView
+                shrinkWrap:
+                    true, // This ensures that ListView takes only as much space as it needs
+                physics:
+                    const NeverScrollableScrollPhysics(), // Prevent scrolling within ListView
                 itemCount: _sections.length,
                 itemBuilder: (context, index) {
                   final section = _sections[index];
@@ -314,7 +316,8 @@ class _CourseEditScreenState extends State<CourseEditScreen> {
             const SizedBox(height: 16),
             TextFormField(
               controller: _descriptionController,
-              decoration: const InputDecoration(labelText: 'Course Description'),
+              decoration:
+                  const InputDecoration(labelText: 'Course Description'),
               maxLines: 3,
               validator: (value) {
                 if (value == null || value.isEmpty) {
