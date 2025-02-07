@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:elearning/screens/dashboard_screen.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+// import 'package:elearning/screens/';
 
 class ScoreScreen extends StatefulWidget {
   final String courseId; // Pass the courseId dynamically
@@ -198,12 +199,14 @@ class _ScoreScreenState extends State<ScoreScreen> with TickerProviderStateMixin
               GestureDetector(
                 onTap: () {
                   // Navigate to CourseDetailScreen
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => DashboardScreen(),
-                    ),
-                  );
+                  // Navigator.push(
+                  //   context,
+                  //   MaterialPageRoute(
+                  //     builder: (context) => DashboardScreen(),
+                  //   ),
+                  // );
+                 Navigator.pop(context);
+                 Navigator.pop(context);
                 },
                 child: AnimatedContainer(
                   duration: const Duration(milliseconds: 300),
