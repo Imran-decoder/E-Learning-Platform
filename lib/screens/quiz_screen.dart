@@ -153,7 +153,7 @@ class _QuizScreenState extends State<QuizScreen> with TickerProviderStateMixin {
                     double percentageScore = (score / widget.quizQuestions.length) * 100;
 
                     // Quiz completed, pass the score as percentage to ScoreScreen
-                    Navigator.push(
+                    Navigator.pushReplacement(
                       context,
                       MaterialPageRoute(
                         builder: (context) => ScoreScreen(

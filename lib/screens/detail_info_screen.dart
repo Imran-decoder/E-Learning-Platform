@@ -83,6 +83,38 @@ class _DetailedInfoScreenState extends State<DetailedInfoScreen> {
       //print("Error checking task completion: $e");
     }
   }
+  Future<void> _markTaskAsCompleted() async {
+    try {
+      final user = FirebaseAuth.instance.currentUser;
+      if (user != null) {
+        final taskId = widget.taskId;
+        await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(user.uid)
+            .collection('enrolledCourses')
+            .doc(widget.courseId)
+            .update({
+           'tasks.$taskId': true,
+            });
+
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Task marked as completed.'),
+          ),
+        );
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error marking task as completed: $e'),
+           
+        ),
+        
+      );
+    
+    }
+  }
+
 
   @override
   void dispose() {
@@ -183,7 +215,7 @@ class _DetailedInfoScreenState extends State<DetailedInfoScreen> {
             // "Course Completed" Button
             Center(
               child: ElevatedButton(
-                onPressed: isCourseCompleted ? () {} : null,
+                onPressed: isCourseCompleted ? _markTaskAsCompleted : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: isCourseCompleted ? Colors.deepOrangeAccent : Colors.grey,
                   padding: const EdgeInsets.symmetric(
