@@ -17,10 +17,10 @@ import 'package:elearning/Onboarding/secpage_of_signup.dart';
 import 'package:elearning/screens/chat_screen.dart';
 import 'package:elearning/screens/Admin/admin_dashboard_screen.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
-
+import 'firebase_options.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await Firebase.initializeApp();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   // Ensure Firebase API is initialized properly
   final userId = FirebaseAuth.instance.currentUser?.uid ?? '';
