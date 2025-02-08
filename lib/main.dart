@@ -1,5 +1,6 @@
 import 'package:elearning/Onboarding/admin_login.dart';
 import 'package:elearning/firebase_api.dart';
+import 'package:elearning/firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:elearning/screens/dashboard_screen.dart';
