@@ -18,10 +18,11 @@ class GradientText extends StatelessWidget {
   final Gradient gradient;
 
   const GradientText(
-      this.text, {super.key,
-        required this.gradient,
-        this.style,
-      });
+    this.text, {
+    super.key,
+    required this.gradient,
+    this.style,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -29,7 +30,9 @@ class GradientText extends StatelessWidget {
     double screenWidth = MediaQuery.of(context).size.width;
 
     // Adjust font size based on screen width
-    double fontSize = screenWidth < 600 ? 20 : 28; // Smaller for mobile, larger for tablets/desktops
+    double fontSize = screenWidth < 600
+        ? 20
+        : 28; // Smaller for mobile, larger for tablets/desktops
 
     return ShaderMask(
       shaderCallback: (bounds) {
@@ -40,9 +43,9 @@ class GradientText extends StatelessWidget {
       child: Text(
         text,
         style: style?.copyWith(
-          color: Colors.white,
-          fontSize: fontSize, // Dynamically adjusted font size
-        ) ??
+              color: Colors.white,
+              fontSize: fontSize, // Dynamically adjusted font size
+            ) ??
             TextStyle(
               color: Colors.white,
               fontSize: fontSize,
@@ -65,8 +68,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   Future<bool> checkUserAdmin(String userID) async {
     try {
-      DocumentSnapshot documentSnapshot =
-          await FirebaseFirestore.instance.collection('Users').doc(userID).get();
+      DocumentSnapshot documentSnapshot = await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(userID)
+          .get();
 
       return documentSnapshot.exists &&
           documentSnapshot.data() != null &&
@@ -76,13 +81,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
       return false;
     }
   }
+
   @override
   void initState() {
     super.initState();
     _fetchUserName();
   }
-
-
 
   Future<void> _fetchUserName() async {
     try {
@@ -106,9 +110,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 'firstName': firstName ?? 'User',
               },
             },
-            'fcm_token': fcmToken,  // Store FCM token here
+            'fcm_token': fcmToken, // Store FCM token here
           },
-          SetOptions(merge: true),  // Merge to update existing data
+          SetOptions(merge: true), // Merge to update existing data
         );
 
         setState(() {
@@ -120,18 +124,72 @@ class _DashboardScreenState extends State<DashboardScreen> {
     }
   }
 
+  Future<List<Map<String, dynamic>>> _fetchEnrolledCourses() async {
+    try {
+      final User? user = FirebaseAuth.instance.currentUser;
+
+      if (user != null) {
+        final QuerySnapshot enrolledCoursesSnapshot = await FirebaseFirestore
+            .instance
+            .collection('Users')
+            .doc(user.uid)
+            .collection('enrolledCourses')
+            .get();
+
+        List<Map<String, dynamic>> enrolledCourses = [];
+
+        for (var doc in enrolledCoursesSnapshot.docs) {
+          String courseId = doc.id;
+          Map<String, dynamic> enrolledCourseData =
+              doc.data() as Map<String, dynamic>;
+
+          // Extract tasks from user collection
+          Map<String, dynamic> tasks = enrolledCourseData['tasks'] ?? {};
+          int totalTasks = tasks.length;
+          int completedTasks =
+              tasks.values.where((value) => value == true).length;
+          double progress = totalTasks > 0 ? completedTasks / totalTasks : 0.0;
+
+          // Fetch course details from 'Courses' collection
+          DocumentSnapshot courseDoc = await FirebaseFirestore.instance
+              .collection('Courses')
+              .doc(courseId)
+              .get();
+
+          if (courseDoc.exists) {
+            Map<String, dynamic> courseData =
+                courseDoc.data() as Map<String, dynamic>;
+
+            enrolledCourses.add({
+              'courseId': courseId,
+              'courseName': courseData['title']?.toString() ?? 'Unnamed Course',
+              'progress': progress, // Calculated progress
+            });
+
+            // Debugging prints
+            // print('Course ID: $courseId');
+            // print('Tasks: $tasks');
+            // print('Total tasks: $totalTasks');
+            // print('Completed tasks: $completedTasks');
+            // print('Progress: ${progress * 100}%');
+          }
+        }
+        return enrolledCourses;
+      }
+    } catch (e) {
+      debugPrint('Error fetching enrolled courses: $e');
+    }
+    return [];
+  }
+
   Future<List<Map<String, String>>> _fetchCourses() async {
     try {
       QuerySnapshot snapshot = await _firestore.collection('Courses').get();
       return snapshot.docs.map((doc) {
         return {
           'id': doc.id,
-          'logo': (doc['logo']
-              ?.toString()
-              .isNotEmpty == true &&
-              Uri
-                  .tryParse(doc['logo'].toString())
-                  ?.isAbsolute == true)
+          'logo': (doc['logo']?.toString().isNotEmpty == true &&
+                  Uri.tryParse(doc['logo'].toString())?.isAbsolute == true)
               ? doc['logo'].toString()
               : 'assets/images/default_logo.webp',
           'name': doc['title']?.toString() ?? 'Unnamed Course',
@@ -156,10 +214,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   Widget _buildAppBar(BuildContext context) {
-    final double screenWidth = MediaQuery
-        .of(context)
-        .size
-        .width;
+    final double screenWidth = MediaQuery.of(context).size.width;
     return SliverAppBar(
       pinned: false,
       // Allows the app bar to collapse on scroll
@@ -180,8 +235,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
             Align(
               alignment: Alignment.topCenter,
               child: Padding(
-                padding: const EdgeInsets.only(top: 20),
-                // Adjust padding for positioning
+                padding: MediaQuery.of(context).size.width < 600
+                    ? const EdgeInsets.only(
+                        top: 50) // Adjust padding for mobile
+                    : const EdgeInsets.only(
+                        top: 20), // Adjust padding for larger screens
                 child: GradientText(
                   'THE FIRE VALA',
                   gradient: LinearGradient(
@@ -197,6 +255,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   style: TextStyle(
                     fontSize: screenWidth < 600 ? 20 : 28, // Scale font size
                     fontWeight: FontWeight.bold,
+                    shadows: [
+                      Shadow(
+                        blurRadius: 9.0, // Softness of the shadow
+                        color: Colors.black.withOpacity(1), // Shadow color
+                        offset: Offset(2, 2), // X and Y offset
+                      ),
+                    ],
                   ),
                 ),
               ),
@@ -212,38 +277,38 @@ class _DashboardScreenState extends State<DashboardScreen> {
       ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.admin_panel_settings_outlined, color: Colors
-              .white),
-          onPressed:() async  {
-            final userID = FirebaseAuth.instance.currentUser!.uid;
-            if (await checkUserAdmin(userID)){
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => AdminDashboardScreen(),
-                ),
-              );}
-              else{
+            icon: const Icon(Icons.admin_panel_settings_outlined,
+                color: Colors.white),
+            onPressed: () async {
+              final userID = FirebaseAuth.instance.currentUser!.uid;
+              if (await checkUserAdmin(userID)) {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => AdminDashboardScreen(),
+                  ),
+                );
+              } else {
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text('You are not an admin')),
                 );
-              }}
-        ),
+              }
+            }),
         IconButton(
           icon: const Icon(Icons.notifications, color: Colors.white),
           onPressed: () {
             Navigator.push(
-                context,
+              context,
               MaterialPageRoute(
-                  builder: (context)=> NotificationScreen(),
+                builder: (context) => NotificationScreen(),
               ),
             );
           },
         ),
-        IconButton(
-          icon: const Icon(Icons.more_vert, color: Colors.white),
-          onPressed: () => debugPrint("Menu clicked"),
-        ),
+        // IconButton(
+        //   icon: const Icon(Icons.more_vert, color: Colors.white),
+        //   onPressed: () => debugPrint("Menu clicked"),
+        // ),
       ],
     );
   }
@@ -273,7 +338,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 _buildSectionHeader(
                   title: "Explore All Courses",
                   actionText: "See All",
-                  onActionTap: () => debugPrint("See All Courses clicked"),
+                  onActionTap: () => ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(content: Text("Srcoll Right to see all courses.")),
+                  ),
                 ),
                 const SizedBox(height: 20),
                 _buildCoursesList(),
@@ -281,8 +348,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
                 _buildSectionHeader(
                   title: "Ongoing Course",
                   actionText: "See All",
-                  onActionTap: () =>
-                      debugPrint("See All Ongoing Courses clicked"),
+                  onActionTap: () => ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                        content:
+                            Text("Scroll down to see all enrolled courses.")),
+                  ),
                 ),
                 const SizedBox(height: 20),
                 _buildOngoingCourses(),
@@ -330,92 +400,127 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
+  // Widget _buildOngoingCourses() {
+
+  //   return Column(
+  //     children: const [
+  //       OngoingCourseCard(courseName: "Flutter Basics", progress: 0.6),
+  //       SizedBox(height: 16),
+  //       OngoingCourseCard(courseName: "React Native Advanced", progress: 0.3),
+  //     ],
+  //   );
+  // }
+
   Widget _buildOngoingCourses() {
-    return Column(
-      children: const [
-        OngoingCourseCard(courseName: "Flutter Basics", progress: 0.6),
-        SizedBox(height: 16),
-        OngoingCourseCard(courseName: "React Native Advanced", progress: 0.3),
-      ],
+    return FutureBuilder<List<Map<String, dynamic>>>(
+      future: _fetchEnrolledCourses(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+        if (snapshot.hasError) {
+          return Center(
+            child: Text("Error loading ongoing courses: ${snapshot.error}"),
+          );
+        }
+        if (!snapshot.hasData || snapshot.data!.isEmpty) {
+          return const Center(child: Text("No ongoing courses available."));
+        }
+
+        return Column(
+          children: snapshot.data!.map((course) {
+            return Column(
+              children: [
+                OngoingCourseCard(
+                  courseName: course['courseName'],
+                  progress: course['progress'],
+                ),
+                const SizedBox(height: 16),
+              ],
+            );
+          }).toList(),
+        );
+      },
     );
   }
 
+  void _onCourseSelected(
+      BuildContext context, Map<String, String> course) async {
+    final String courseId = course['id'] ?? '';
+    final userID = FirebaseAuth.instance.currentUser!.uid;
+    final email = FirebaseAuth.instance.currentUser!.email;
 
- void _onCourseSelected(BuildContext context, Map<String, String> course) async {
-  final String courseId = course['id'] ?? '';
-  final userID = FirebaseAuth.instance.currentUser!.uid;
-  final email = FirebaseAuth.instance.currentUser!.email;
+    if (courseId.isNotEmpty) {
+      try {
+        // Query the enrolledCourses subcollection to check enrollment.
+        final docSnapshot = await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(userID)
+            .collection('enrolledCourses')
+            .doc(courseId)
+            .get();
 
-  if (courseId.isNotEmpty) {
-    try {
-      // Query the enrolledCourses subcollection to check enrollment.
-      final docSnapshot = await FirebaseFirestore.instance
-          .collection('Users')
-          .doc(userID)
-          .collection('enrolledCourses')
-          .doc(courseId)
-          .get();
-
-      if (docSnapshot.exists) {
-        // The user is enrolled in the course: navigate to the course details screen.
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) =>
-                CourseDetailsScreen(courseId: courseId, userId: userID),
-          ),
-        );
-      } else {
-        // The user has not enrolled in the course.
-        // Show a dialog prompting to send a request to the admin.
-        showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              title: Text("Request Enrollment"),
+        if (docSnapshot.exists) {
+          // The user is enrolled in the course: navigate to the course details screen.
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  CourseDetailsScreen(courseId: courseId, userId: userID),
+            ),
+          );
+        } else {
+          // The user has not enrolled in the course.
+          // Show a dialog prompting to send a request to the admin.
+          showDialog(
+            context: context,
+            builder: (context) {
+              return AlertDialog(
+                title: Text("Request Enrollment"),
+                content: Text(
+                    "You are not enrolled in this course. Would you like to send a request to the admin for enrollment?"),
+                actions: [
+                  TextButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(); // Dismiss the dialog.
+                    },
+                    child: Text("Cancel"),
+                  ),
+                  TextButton(
+                    onPressed: () async {
+                      // Save the request in the "requests" collection.
+                      await FirebaseFirestore.instance
+                          .collection('requests')
+                          .add({
+                        'userId': userID,
+                        'courseId': courseId,
+                        'allotted': false, // initially set to false.
+                        'timestamp': FieldValue.serverTimestamp(), // optional
+                        'email': email,
+                      });
+                      Navigator.of(context).pop(); // Dismiss the dialog.
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text("Request sent to admin.")),
+                      );
+                    },
+                    child: Text("Send Request"),
+                  ),
+                ],
+              );
+            },
+          );
+        }
+      } catch (e) {
+        // Handle any errors during Firestore queries.
+        debugPrint("Error checking enrollment status: $e");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
               content: Text(
-                  "You are not enrolled in this course. Would you like to send a request to the admin for enrollment?"),
-              actions: [
-                TextButton(
-                  onPressed: () {
-                    Navigator.of(context).pop(); // Dismiss the dialog.
-                  },
-                  child: Text("Cancel"),
-                ),
-                TextButton(
-                  onPressed: () async {
-                    // Save the request in the "requests" collection.
-                    await FirebaseFirestore.instance.collection('requests').add({
-                      'userId': userID,
-                      'courseId': courseId,
-                      'allotted': false, // initially set to false.
-                      'timestamp': FieldValue.serverTimestamp(), // optional
-                      'email': email,
-                    });
-                    Navigator.of(context).pop(); // Dismiss the dialog.
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text("Request sent to admin.")),
-                    );
-                  },
-                  child: Text("Send Request"),
-                ),
-              ],
-            );
-          },
+                  "An error occurred while checking enrollment status. Please try again.")),
         );
       }
-    } catch (e) {
-      // Handle any errors during Firestore queries.
-      debugPrint("Error checking enrollment status: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-            content: Text(
-                "An error occurred while checking enrollment status. Please try again.")),
-      );
+    } else {
+      debugPrint("Course ID is missing.");
     }
-  } else {
-    debugPrint("Course ID is missing.");
   }
-}
-
 }
