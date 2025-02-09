@@ -383,9 +383,11 @@ class TermsAndConditionsPage extends StatelessWidget {
                         Text(
                           "In order to resolve a complaint regarding the Services or to receive further information regarding use of the Services, please contact us at:\n\n"),
 
-                         Text( "The fire vala\n"
+                         Text( 
+                          style: TextStyle(fontWeight: FontWeight.bold),
+                          "THE FIRE WALA\n"
 
-                          "India"
+                          "INDIA"
 
                                                     // You can continue to add the rest of your Terms and Conditions here...
                 
