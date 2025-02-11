@@ -6,24 +6,27 @@ class Course {
   final String title;
   final String logo;
   final List<Task> tasks;
+  final String? document; // Add this field
 
   Course({
     required this.id,
     required this.title,
     required this.logo,
     required this.tasks,
+    this.document, // Add this parameter
   });
 
-  // Convert to Firestore document
+  // Update toFirestore method
   Map<String, dynamic> toFirestore() {
     return {
       'title': title,
       'logo': logo,
+      'document': document, // Add this line
       // We don't include tasks here as they'll be in a subcollection
     };
   }
 
-  // Create from Firestore document
+  // Update fromFirestore factory
   factory Course.fromFirestore(
     DocumentSnapshot<Map<String, dynamic>> snapshot,
     SnapshotOptions? options,
@@ -33,6 +36,7 @@ class Course {
       id: snapshot.id,
       title: data['title'],
       logo: data['logo'],
+      document: data['document'], // Add this line
       tasks: [], // Tasks are loaded separately from subcollection
     );
   }
@@ -46,6 +50,7 @@ class Task {
   final String duration;
   final String video;
   final String? quiz;
+  final String? document; // Add this field
 
   Task({
     required this.id,
@@ -55,8 +60,10 @@ class Task {
     required this.duration,
     required this.video,
     this.quiz,
+    this.document, // Add this parameter
   });
 
+  // Update toFirestore method
   Map<String, dynamic> toFirestore() {
     return {
       'title': title,
@@ -64,10 +71,12 @@ class Task {
       'number': number,
       'duration': duration,
       'video': video,
-      if (quiz != null ) 'quiz':quiz,
+      if (quiz != null) 'quiz': quiz,
+      if (document != null) 'document': document, // Add this line
     };
   }
 
+  // Update fromFirestore factory
   factory Task.fromFirestore(
     DocumentSnapshot<Map<String, dynamic>> snapshot,
     SnapshotOptions? options,
@@ -80,7 +89,8 @@ class Task {
       number: data['number'],
       duration: data['duration'],
       video: data['video'],
-      quiz: data.containsKey('quiz') ? data['quiz']: null,
+      quiz: data.containsKey('quiz') ? data['quiz'] : null,
+      document: data.containsKey('document') ? data['document'] : null, // Add this line
     );
   }
 }
