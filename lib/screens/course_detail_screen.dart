@@ -212,6 +212,7 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
               // Task Management Section
               const SizedBox(height: 24),
               
+              
             ],
           ),
         ),
