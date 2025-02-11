@@ -4,6 +4,7 @@ import 'package:elearning/components/header_section.dart';
 import 'package:elearning/screens/task_list_screen.dart';
 import 'package:elearning/db_operations/courses.dart';
 
+
 class Section {
   final String title;
   final String content;
@@ -11,6 +12,7 @@ class Section {
   final int number;
   final String videoUrl;
   final String taskId;
+  final String document;
 
 
   Section({
@@ -20,6 +22,8 @@ class Section {
     required this.number,
     required this.videoUrl,
     required this.taskId,
+    required this.document,
+
   });
 
   // Helper method to convert Task to Section
@@ -31,6 +35,8 @@ class Section {
       number: task.number,
       videoUrl: task.video,
       taskId: task.id,
+      document: task.document ?? '',  // ✅ Fetch from Task
+
     );
   }
 }
@@ -38,10 +44,7 @@ class Section {
 class CourseDetailsScreen extends StatefulWidget {
   final String courseId;
 
-  const CourseDetailsScreen({
-    required this.courseId,
-    super.key,
-  });
+  const CourseDetailsScreen({required this.courseId, super.key});
 
   @override
   State<CourseDetailsScreen> createState() => _CourseDetailsScreenState();
@@ -60,22 +63,22 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
     _loadCourseData();
   }
 
-  // Convert tasks to sections and add introduction
   List<Section> _createSectionsFromCourse(Course course) {
     List<Section> sections = [];
-
     course.tasks.sort((a, b) => a.number.compareTo(b.number));
 
     for (var i = 0; i < course.tasks.length; i++) {
+      var task = course.tasks[i];
+
       sections.add(Section(
         title: 'Chapter ${i + 1}',
-        content: course.tasks[i].description,
-        duration: course.tasks[i].duration,
-        number: course.tasks[i].number,
-        videoUrl: course.tasks[i].video,
-        taskId: course.tasks[i].id,
+        content: task.description,
+        duration: task.duration,
+        number: task.number,
+        videoUrl: task.video,
+        taskId: task.id,
+        document: task.document ?? '', // Use task's document if available
       ));
-     // debugPrint('Quiz URL for Section ${i + 1}: ${sections[i].quizUrl} ${sections[i].number}');
     }
 
     return sections;
@@ -83,8 +86,10 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
 
   Future<void> _loadCourseData() async {
     try {
+      if (!mounted) return;
       setState(() => _isLoading = true);
       final courseData = await _repository.getCourseWithTasks(widget.courseId);
+      if (!mounted) return;
       if (courseData == null) {
         setState(() {
           _error = 'Course not found';
@@ -141,23 +146,6 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
       appBar: AppBar(
         title: Text(_course!.title),
         backgroundColor: Colors.deepOrange,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.edit),
-            onPressed: () async {
-              final wasUpdated = await Navigator.push<bool>(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => CourseEditScreen(course: _course!),
-                ),
-              );
-
-              if (wasUpdated == true) {
-                await _loadCourseData();
-              }
-            },
-          ),
-        ],
       ),
       body: SafeArea(
         child: SingleChildScrollView(
@@ -165,7 +153,6 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Course Overview
               const Text(
                 'Course Overview',
                 style: TextStyle(
@@ -176,39 +163,51 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
               const SizedBox(height: 16),
               Text("This is an introductory course for Project management. It covers the basics of project management and is suitable for beginners."),
               const SizedBox(height: 24),
-
-              // Sections/Chapters
-              // Removed Expanded, use shrinkWrap instead
+              
+              // List of Sections
               ListView.builder(
-                shrinkWrap: true, // This ensures that ListView takes only as much space as it needs
-                physics: const NeverScrollableScrollPhysics(), // Prevent scrolling within ListView
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
                 itemCount: _sections.length,
                 itemBuilder: (context, index) {
                   final section = _sections[index];
+
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 20.0),
-                    child: HeaderSection(
-                      title: section.title,
-                      onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => DetailedInfoScreen(
-                              title: section.title,
-                              content: section.content,
-                              duration: section.duration,
-                              number: section.number,
-                              videoUrl: section.videoUrl,
-                              taskId: section.taskId,
-                              courseId: widget.courseId,
-                            ),
-                          ),
-                        );
-                      },
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        HeaderSection(
+                          title: section.title,
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => DetailedInfoScreen(
+                                  title: section.title,
+                                  content: section.content,
+                                  duration: section.duration,
+                                  number: section.number,
+                                  videoUrl: section.videoUrl,
+                                  taskId: section.taskId,
+                                  courseId: widget.courseId,
+                                  document: section.document, // Pass the document URL
+                                ),
+                              ),
+                            );
+                          },
+                        ),
+                        // Display the document link if available
+                        
+                      ],
                     ),
                   );
                 },
               ),
+           
+    
+  
+
 
               // Task Management Section
               const SizedBox(height: 24),
