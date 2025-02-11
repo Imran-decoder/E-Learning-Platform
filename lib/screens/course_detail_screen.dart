@@ -43,8 +43,9 @@ class Section {
 
 class CourseDetailsScreen extends StatefulWidget {
   final String courseId;
+  final String  userId;
 
-  const CourseDetailsScreen({required this.courseId, super.key});
+  const CourseDetailsScreen({required this.courseId, required this.userId, super.key});
 
   @override
   State<CourseDetailsScreen> createState() => _CourseDetailsScreenState();
@@ -161,7 +162,6 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
                 ),
               ),
               const SizedBox(height: 16),
-              Text("This is an introductory course for Project management. It covers the basics of project management and is suitable for beginners."),
               const SizedBox(height: 24),
               
               // List of Sections
@@ -211,29 +211,7 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
 
               // Task Management Section
               const SizedBox(height: 24),
-              Card(
-                child: ListTile(
-                  title: const Text('Manage Tasks'),
-                  subtitle: const Text('Add, edit, or remove course tasks'),
-                  leading: const Icon(Icons.task),
-                  trailing: const Icon(Icons.arrow_forward_ios),
-                  onTap: () async {
-                    final wasModified = await Navigator.push<bool>(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => TaskListScreen(
-                          courseId: widget.courseId,
-                          tasks: _course!.tasks,
-                        ),
-                      ),
-                    );
-
-                    if (wasModified == true) {
-                      await _loadCourseData();
-                    }
-                  },
-                ),
-              ),
+              
             ],
           ),
         ),

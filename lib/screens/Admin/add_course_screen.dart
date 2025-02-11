@@ -1,7 +1,9 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:image_picker/image_picker.dart';
-
+import 'package:http/http.dart' as http;
 
 class AddQuizScreen extends StatelessWidget {
   final TextEditingController questionController;
@@ -10,12 +12,12 @@ class AddQuizScreen extends StatelessWidget {
   final VoidCallback onRemove;
 
   const AddQuizScreen({
-    Key? key,
+    super.key,
     required this.questionController,
     required this.options, // List of option controllers
     required this.correctAnswerController,
     required this.onRemove,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -106,7 +108,7 @@ class AddChapter extends StatefulWidget {
   final VoidCallback onRemove;
 
   const AddChapter({
-    Key? key,
+    super.key,
     required this.titleController,
     required this.descriptionController,
     required this.chapterNoController,
@@ -114,7 +116,7 @@ class AddChapter extends StatefulWidget {
     required this.durationController,
     required this.documentLinkController,
     required this.onRemove,
-  }) : super(key: key);
+  });
 
   @override
   _AddChapterState createState() => _AddChapterState();
@@ -376,6 +378,9 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
           await chapterRef.collection('quizQuestions').add(quizData);
         }
       }
+      // Send Notification (Message) after adding course
+      await sendCourseAddedNotification(courseTitle);
+
     } catch (e) {
       print('Error adding course: $e');
     }
@@ -391,8 +396,66 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Course added successfully')));
   }
 
+Future<void> sendCourseAddedNotification(String courseTitle) async {
+    try{
+      String notificationTitle = "New Course Added";
+      String notificationBody = "New course $courseTitle has been added to the platform.";
+
+      // ✅ Step 1: Store notification in Firestore (for in-app notification screen)
+      await FirebaseFirestore.instance.collection('notifications').add({
+        'title': notificationTitle,
+        'body': notificationBody,
+        'timestamp': FieldValue.serverTimestamp(),
+        'expiry': DateTime.now().add(Duration(hours: 24)), // 24 hours expiry
+      });
+
+      // ✅ Step 2: Send push notification to users via FCM
+      await sendPushNotification(notificationTitle, notificationBody);
+    } catch (e){
+     print('Error sending Notification $e');
+    }
+}
+
+// Function to send FCM Push Notification
+  Future<void> sendPushNotification(String title, String body) async {
+    try {
+      String serverKey = '7412734dc7727d8078ae52dd2d6f956e26815c14';
 
 
+      // Step 1: Fetch user FCM tokens from Firestore
+      QuerySnapshot usersSnapshot = await FirebaseFirestore.instance.collection('Users').get();
+
+      // Step 2: Collect FCM tokens from users
+      List<String> userTokens = usersSnapshot.docs.map((doc) => doc['fcm_token'] as String).toList();
+
+      // Step 3: Send the notification to all users (if tokens exist)
+      if (userTokens.isNotEmpty) {
+        for (String token in userTokens) {
+          var response = await http.post(
+            Uri.parse('https://fcm.googleapis.com/fcm/send'),
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'key=$serverKey', // Auth with FCM
+            },
+            body: jsonEncode({
+              'to': token,  // Send notification to each user individually
+              'notification': {
+                'title': title,
+                'body': body,
+              },
+              'data': {
+                'screen': '/screen/notification_screen',  // Used for navigation when tapped
+              },
+            }),
+          );
+          print("Sending notification to user: $token");
+          print("FCM Response: ${response.body}");
+        }
+      }
+    } catch (e) {
+      print("Error sending FCM push notification: $e");
+    }
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(

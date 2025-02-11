@@ -148,7 +148,6 @@ class _CompleteProfileFormState extends State<CompleteProfileForm> {
       final user = User(
         userID: currentUser.uid,
         userName: _usernameController.text.trim(),
-        enrolledCourses: const [],
         Profile: userProfile,
         isAdmin: false,
       );
