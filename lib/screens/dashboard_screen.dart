@@ -168,10 +168,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
             // Debugging prints
             // print('Course ID: $courseId');
-            // print('Tasks: $tasks');
+           //  print('Tasks: $tasks');
             // print('Total tasks: $totalTasks');
             // print('Completed tasks: $completedTasks');
-            // print('Progress: ${progress * 100}%');
+            //print('Progress: ${progress * 100}%');
           }
         }
         return enrolledCourses;
@@ -444,34 +444,51 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  void _onCourseSelected(
-      BuildContext context, Map<String, String> course) async {
-    final String courseId = course['id'] ?? '';
-    final userID = FirebaseAuth.instance.currentUser!.uid;
-    final email = FirebaseAuth.instance.currentUser!.email;
+  void _onCourseSelected(BuildContext context, Map<String, String> course) async {
+  final String courseId = course['id'] ?? '';
+  final userID = FirebaseAuth.instance.currentUser!.uid;
+  final email = FirebaseAuth.instance.currentUser!.email;
 
-    if (courseId.isNotEmpty) {
-      try {
-        // Query the enrolledCourses subcollection to check enrollment.
-        final docSnapshot = await FirebaseFirestore.instance
-            .collection('Users')
-            .doc(userID)
-            .collection('enrolledCourses')
-            .doc(courseId)
+  if (courseId.isNotEmpty) {
+    try {
+      // Check if the user is enrolled in the course.
+      final enrollmentSnapshot = await FirebaseFirestore.instance
+          .collection('Users')
+          .doc(userID)
+          .collection('enrolledCourses')
+          .doc(courseId)
+          .get();
+
+      if (enrollmentSnapshot.exists) {
+        // User is enrolled: navigate to the course details screen.
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) =>
+                CourseDetailsScreen(courseId: courseId, userId: userID),
+          ),
+        );
+      } else {
+        // Check if a request for this course already exists.
+        final requestSnapshot = await FirebaseFirestore.instance
+            .collection('requests')
+            .where('userId', isEqualTo: userID)
+            .where('courseId', isEqualTo: courseId)
             .get();
 
-        if (docSnapshot.exists) {
-          // The user is enrolled in the course: navigate to the course details screen.
-          Navigator.push(
-            context,
-            MaterialPageRoute(
-              builder: (context) =>
-                  CourseDetailsScreen(courseId: courseId, userId: userID),
+        if (requestSnapshot.docs.isNotEmpty) {
+          // A request already exists.
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              backgroundColor: Colors.redAccent,
+              content: Text(
+                "You have already sent a request for this course. Please wait for admin response.",
+                style: TextStyle(color: Colors.black),
+              ),
             ),
           );
         } else {
-          // The user has not enrolled in the course.
-          // Show a dialog prompting to send a request to the admin.
+          // No enrollment and no existing request: prompt to send a new request.
           showDialog(
             context: context,
             builder: (context) {
@@ -488,14 +505,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   ),
                   TextButton(
                     onPressed: () async {
-                      // Save the request in the "requests" collection.
-                      await FirebaseFirestore.instance
-                          .collection('requests')
-                          .add({
+                      // Save the enrollment request.
+                      await FirebaseFirestore.instance.collection('requests').add({
                         'userId': userID,
                         'courseId': courseId,
                         'allotted': false, // initially set to false.
-                        'timestamp': FieldValue.serverTimestamp(), // optional
+                        'timestamp': FieldValue.serverTimestamp(),
                         'email': email,
                       });
                       Navigator.of(context).pop(); // Dismiss the dialog.
@@ -510,17 +525,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
             },
           );
         }
-      } catch (e) {
-        // Handle any errors during Firestore queries.
-        debugPrint("Error checking enrollment status: $e");
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-              content: Text(
-                  "An error occurred while checking enrollment status. Please try again.")),
-        );
       }
-    } else {
-      debugPrint("Course ID is missing.");
+    } catch (e) {
+      debugPrint("Error checking enrollment status: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+              "An error occurred while checking enrollment status. Please try again."),
+        ),
+      );
     }
+  } else {
+    debugPrint("Course ID is missing.");
   }
+}
+
 }

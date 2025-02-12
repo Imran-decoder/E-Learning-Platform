@@ -1,4 +1,5 @@
 {
     "cmake.sourceDirectory": "D:/GitHub/E-Learning-Platform/linux",
-    "java.configuration.updateBuildConfiguration": "interactive"
+    "java.configuration.updateBuildConfiguration": "interactive",
+    "cmake.ignoreCMakeListsMissing": true
 }
