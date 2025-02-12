@@ -474,6 +474,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
             .collection('requests')
             .where('userId', isEqualTo: userID)
             .where('courseId', isEqualTo: courseId)
+            .where('allotted', isEqualTo: false)
             .get();
 
         if (requestSnapshot.docs.isNotEmpty) {
