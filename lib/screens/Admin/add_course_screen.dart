@@ -246,7 +246,7 @@ class AddCourseScreen extends StatefulWidget {
 }
 
 class _AddCourseScreenState extends State<AddCourseScreen> {
-  String? _logo = "https://example.com/default-image.png";
+  String? _logo = "https://upload.wikimedia.org/wikipedia/commons/0/0e/DefaultImage.png";
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
   List<Map<String, dynamic>> chapters = [];
