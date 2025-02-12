@@ -2,7 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:youtube_player_iframe/youtube_player_iframe.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-
+import 'package:webview_flutter/webview_flutter.dart'; // Add the import for WebView
 import 'quiz_screen.dart';
 
 class DetailedInfoScreen extends StatefulWidget {
@@ -13,6 +13,7 @@ class DetailedInfoScreen extends StatefulWidget {
   final String duration;
   final int number;
   final String videoUrl;
+  final String document; // Document URL parameter
 
   const DetailedInfoScreen({
     required this.courseId,
@@ -22,6 +23,7 @@ class DetailedInfoScreen extends StatefulWidget {
     required this.duration,
     required this.number,
     required this.videoUrl,
+    required this.document, // Pass the document URL here
     super.key,
   });
 
@@ -31,7 +33,6 @@ class DetailedInfoScreen extends StatefulWidget {
 
 class _DetailedInfoScreenState extends State<DetailedInfoScreen> {
   late YoutubePlayerController _controller;
-
   bool isCourseCompleted = false;
 
   @override
@@ -53,6 +54,7 @@ class _DetailedInfoScreenState extends State<DetailedInfoScreen> {
     _checkTaskCompletion();
   }
 
+  // Method to check if the task is completed (same as before)
   Future<void> _checkTaskCompletion() async {
     try {
       final user = FirebaseAuth.instance.currentUser;
@@ -66,15 +68,12 @@ class _DetailedInfoScreenState extends State<DetailedInfoScreen> {
 
         if (taskScoresDoc.exists) {
           final taskScores = taskScoresDoc.data();
-
-          if (taskScores != null) {
-            if (taskScores.containsKey(widget.taskId)) {
-              final score = taskScores[widget.taskId];
-              if (score != null && score >= 70.0) {
-                setState(() {
-                  isCourseCompleted = true;
-                });
-              }
+          if (taskScores != null && taskScores.containsKey(widget.taskId)) {
+            final score = taskScores[widget.taskId];
+            if (score != null && score >= 70.0) {
+              setState(() {
+                isCourseCompleted = true;
+              });
             }
           }
         }
@@ -115,6 +114,22 @@ class _DetailedInfoScreenState extends State<DetailedInfoScreen> {
     }
   }
 
+
+  // Navigate to the document viewer screen
+  void _viewDocument() {
+    if (widget.document.isNotEmpty) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => DocumentViewerScreen(docUrl: widget.document),
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No document available for this course.')),
+      );
+    }
+  }
 
   @override
   void dispose() {
@@ -159,8 +174,8 @@ class _DetailedInfoScreenState extends State<DetailedInfoScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
-        backgroundColor: Colors.deepOrangeAccent, // Use green for a fresh look
-        elevation: 0, // Remove shadow for a flat design
+        backgroundColor: Colors.deepOrangeAccent,
+        elevation: 0,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
@@ -168,7 +183,7 @@ class _DetailedInfoScreenState extends State<DetailedInfoScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             ClipRRect(
-              borderRadius: BorderRadius.circular(12), // Rounded corners for the video player
+              borderRadius: BorderRadius.circular(12),
               child: YoutubePlayer(
                 controller: _controller,
                 aspectRatio: 16 / 9,
@@ -178,83 +193,63 @@ class _DetailedInfoScreenState extends State<DetailedInfoScreen> {
             Row(
               children: [
                 const Icon(
-                  Icons.timer, // Icon for duration
+                  Icons.timer,
                   color: Colors.deepOrangeAccent,
                   size: 20,
                 ),
                 const SizedBox(width: 8.0),
                 Text(
                   'Duration: ${widget.duration} seconds',
-                  style: const TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black87,
-                  ),
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                 ),
               ],
             ),
             const SizedBox(height: 16.0),
             Text(
               'Description: ',
-              style: const TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.black87,
-              ),
+              style: const TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 8.0),
             Text(
               widget.content,
-              style: const TextStyle(
-                fontSize: 16,
-                color: Colors.black87,
-              ),
+              style: const TextStyle(fontSize: 16),
             ),
             const SizedBox(height: 24.0),
-
-            // "Course Completed" Button
             Center(
               child: ElevatedButton(
                 onPressed: isCourseCompleted ? _markTaskAsCompleted : null,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: isCourseCompleted ? Colors.deepOrangeAccent : Colors.grey,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30), // Rounded button
-                  ),
-                  shadowColor: Colors.green.withOpacity(0.4), // Button shadow
-                  elevation: 8, // Elevated button for a modern look
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                  elevation: 8,
                 ),
-                child: const Text(
-                  'Course Completed',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
+                child: const Text('Course Completed', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
               ),
             ),
-
+            const SizedBox(height: 10),
+            Center(
+              child: ElevatedButton(
+                onPressed: _viewDocument,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.blue,
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                  elevation: 8,
+                ),
+                child: const Text('View Document', style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold)),
+              ),
+            ),
             const SizedBox(height: 24.0),
-
-            // Take Quiz Button
             Center(
               child: ElevatedButton.icon(
                 onPressed: _navigateToQuizScreen,
                 icon: const Icon(Icons.quiz, size: 24),
-                label: const Text(
-                  'Take Quiz',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                ),
+                label: const Text('Take Quiz', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.orangeAccent,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 24,
-                    vertical: 12,
-                  ),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
+                  padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                   elevation: 8,
                 ),
               ),
@@ -262,6 +257,51 @@ class _DetailedInfoScreenState extends State<DetailedInfoScreen> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class DocumentViewerScreen extends StatefulWidget {
+  final String docUrl;
+
+  DocumentViewerScreen({required this.docUrl});
+
+  @override
+  _DocumentViewerScreenState createState() => _DocumentViewerScreenState();
+}
+
+class _DocumentViewerScreenState extends State<DocumentViewerScreen> {
+  late final WebViewController controller;
+
+  @override
+  void initState() {
+    super.initState();
+    String docId = extractDocId(widget.docUrl);
+    String viewerUrl =
+        "https://docs.google.com/gview?embedded=true&url=https://docs.google.com/document/d/$docId/export?format=pdf";
+
+    controller = WebViewController()
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..loadRequest(Uri.parse(viewerUrl));
+  }
+
+  // Extract document ID from Google Docs URL
+  String extractDocId(String url) {
+    RegExp regex = RegExp(r"/d/([a-zA-Z0-9-_]+)/");
+    Match? match = regex.firstMatch(url);
+    return match != null ? match.group(1)! : "";
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('Document Viewer',style: TextStyle(fontWeight:FontWeight.bold,fontSize:24,)),
+        backgroundColor: Colors.redAccent,
+        centerTitle: true,
+        foregroundColor: Colors.white,
+      ),
+      body: WebViewWidget(controller: controller),
     );
   }
 }
