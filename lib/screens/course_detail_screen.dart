@@ -217,22 +217,22 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
           ),
         ),
       ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          final wasAdded = await Navigator.push<bool>(
-            context,
-            MaterialPageRoute(
-              builder: (context) => AddTaskScreen(courseId: widget.courseId),
-            ),
-          );
+      // floatingActionButton: FloatingActionButton(
+      //   onPressed: () async {
+      //     final wasAdded = await Navigator.push<bool>(
+      //       context,
+      //       MaterialPageRoute(
+      //         builder: (context) => AddTaskScreen(courseId: widget.courseId),
+      //       ),
+      //     );
 
-          if (wasAdded == true) {
-            await _loadCourseData();
-          }
-        },
-        tooltip: 'Add New Chapter',
-        child: const Icon(Icons.add),
-      ),
+      //     if (wasAdded == true) {
+      //       await _loadCourseData();
+      //     }
+      //   },
+      //   tooltip: 'Add New Chapter',
+      //   child: const Icon(Icons.add),
+      // ),
     );
   }
 }
