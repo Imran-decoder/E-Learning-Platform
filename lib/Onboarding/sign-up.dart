@@ -79,11 +79,11 @@ class SignUpScreen extends StatelessWidget {
                     },
                     child: RichText(  // **CHANGES HERE**: Use RichText to highlight "Terms and Conditions"
                       text: TextSpan(
-                        text: 'By continuing, you confirm that you agree ',
+                        text: 'By continuing, you confirm that you agree with our ',
                         style: TextStyle(color: Color(0xFF757575)),
                         children: <TextSpan>[
                           TextSpan(
-                            text: 'with our Terms and Conditions',
+                            text: 'Terms and Conditions',
                             style: TextStyle(   // **CHANGES HERE**: Style for clickable part
                               color: Colors.blue,
                               fontWeight: FontWeight.bold,

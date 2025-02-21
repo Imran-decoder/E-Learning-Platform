@@ -241,7 +241,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                     : const EdgeInsets.only(
                         top: 20), // Adjust padding for larger screens
                 child: GradientText(
-                  'THE FIRE VALA',
+                  'THE FIRE WALA',
                   gradient: LinearGradient(
                     colors: [
                       Colors.orange,
