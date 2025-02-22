@@ -158,7 +158,7 @@ class _ChatScreenState extends State<ChatScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.orange,
+        backgroundColor: const Color(0xFFFF9800),
         title: const Text('Gemini Chat', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
         centerTitle: true,
         elevation: 4,

@@ -173,7 +173,11 @@ class _DetailedInfoScreenState extends State<DetailedInfoScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.title),
+        title: Text(widget.title,
+        style: TextStyle(
+          fontWeight: FontWeight.bold,
+          color: Colors.white,),
+          ),
         backgroundColor: Colors.deepOrangeAccent,
         elevation: 0,
       ),
