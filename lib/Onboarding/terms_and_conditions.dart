@@ -45,7 +45,7 @@ class TermsAndConditionsPage extends StatelessWidget {
                           style: TextStyle(fontWeight: FontWeight.bold),
                            ),
                         Text(
-                          "We are The fire vala (\"Company,\" \"we,\" \"us,\" \"our\"), a company registered in India at Raipur, Chattisgarh.\n\n"
+                          "We are The Fire Wala (\"Company,\" \"we,\" \"us,\" \"our\"), a company registered in India at Raipur, Chattisgarh.\n\n"
                           "We operate the website https://thefirewala.com/ (the \"Site\"), the mobile application 'The Fire Wala' (the \"App\"), as well as any other related products and services that refer or link to these legal terms (the \"Legal Terms\") (collectively, the \"Services\").\n\n"
                           "You can contact us by email at (msdengineering4@gmail.com) or by mail to (Office No: 1222 Ekta Nagar Behind Jeevan Auto Near Swami Vivekananda Stadium Kota Raipur, Chattisgarh, India).\n\n"
                           "These Legal Terms constitute a legally binding agreement made between you, whether personally or on behalf of an entity (\"you\"), and The fire vala, concerning your access to and use of the Services. You agree that by accessing the Services, you have read, understood, and agreed to be bound by all of these Legal Terms. IF YOU DO NOT AGREE WITH ALL OF THESE LEGAL TERMS, THEN YOU ARE EXPRESSLY PROHIBITED FROM USING THE SERVICES AND YOU MUST DISCONTINUE USE IMMEDIATELY.\n\n"
