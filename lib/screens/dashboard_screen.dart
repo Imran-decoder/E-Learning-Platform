@@ -6,6 +6,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:elearning/components/dashboard_header.dart';
 import 'package:elearning/components/ongoing_course_card.dart';
 import 'package:elearning/screens/course_detail_screen.dart';
+import 'package:elearning/screens/chat_screen.dart';
+import 'package:elearning/screens/profile/profile_screen.dart';
 import 'package:elearning/screens/Admin/admin_dashboard_screen.dart';
 import 'package:elearning/components/greeting_section.dart';
 import 'package:elearning/components/section_header.dart';
@@ -19,20 +21,15 @@ class GradientText extends StatelessWidget {
 
   const GradientText(
     this.text, {
-    super.key,
+    Key? key,
     required this.gradient,
     this.style,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
-    // Get screen width to adjust font size dynamically
     double screenWidth = MediaQuery.of(context).size.width;
-
-    // Adjust font size based on screen width
-    double fontSize = screenWidth < 600
-        ? 20
-        : 28; // Smaller for mobile, larger for tablets/desktops
+    double fontSize = screenWidth < 600 ? 20 : 28;
 
     return ShaderMask(
       shaderCallback: (bounds) {
@@ -44,7 +41,7 @@ class GradientText extends StatelessWidget {
         text,
         style: style?.copyWith(
               color: Colors.white,
-              fontSize: fontSize, // Dynamically adjusted font size
+              fontSize: fontSize,
             ) ??
             TextStyle(
               color: Colors.white,
@@ -56,15 +53,126 @@ class GradientText extends StatelessWidget {
 }
 
 class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({super.key});
+  const DashboardScreen({Key? key}) : super(key: key);
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  String _userName = "User";
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey();
+  String _userName = "User  ";
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchUserName();
+  }
+
+  Future<void> _fetchUserName() async {
+  
+    try {
+      final User? user = FirebaseAuth.instance.currentUser ;
+      if (user != null) {
+        final DocumentSnapshot userDoc = await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(user.uid)
+            .get();
+        final firstName = userDoc['Profile']['main']['firstName'];
+
+        // Store FCM token
+        final fcmToken = await FirebaseMessaging.instance.getToken();
+
+        await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(user.uid)
+            .set({
+          'Profile': {
+            'main': {
+              'firstName': firstName ?? 'User  ',
+            },
+          },
+          'fcm_token': fcmToken,
+        }, SetOptions(merge: true));
+
+        setState(() {
+          _userName = firstName ?? "User  ";
+        });
+      }
+    } catch (e) {
+      debugPrint("Error fetching user name: $e");
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> _fetchEnrolledCourses() async {
+  try {
+    final User? user = FirebaseAuth.instance.currentUser ;
+
+    if (user != null) {
+      final QuerySnapshot enrolledCoursesSnapshot = await FirebaseFirestore
+          .instance
+          .collection('Users')
+          .doc(user.uid)
+          .collection('enrolledCourses')
+          .get();
+
+      List<Map<String, dynamic>> enrolledCourses = [];
+
+      for (var doc in enrolledCoursesSnapshot.docs) {
+        String courseId = doc.id;
+        Map<String, dynamic> enrolledCourseData =
+            doc.data() as Map<String, dynamic>;
+
+        // Extract tasks from user collection
+        Map<String, dynamic> tasks = enrolledCourseData['tasks'] ?? {};
+        int totalTasks = tasks.length;
+        int completedTasks =
+            tasks.values.where((value) => value == true).length;
+        double progress = totalTasks > 0 ? completedTasks / totalTasks : 0.0;
+
+        // Fetch course details from 'Courses' collection
+        DocumentSnapshot courseDoc = await FirebaseFirestore.instance
+            .collection('Courses')
+            .doc(courseId)
+            .get();
+
+        if (courseDoc.exists) {
+          Map<String, dynamic> courseData =
+              courseDoc.data() as Map<String, dynamic>;
+
+          enrolledCourses.add({
+            'courseId': courseId,
+            'courseName': courseData['title']?.toString() ?? 'Unnamed Course',
+            'progress': progress, // Calculated progress
+          });
+        }
+      }
+      return enrolledCourses;
+    }
+  } catch (e) {
+    debugPrint('Error fetching enrolled courses: $e');
+  }
+  return [];
+}
+
+  Future<List<Map<String, String>>> _fetchCourses() async {
+    try {
+      QuerySnapshot snapshot = await FirebaseFirestore.instance.collection('Courses').get();
+      return snapshot.docs.map((doc) {
+        return {
+          'id': doc.id,
+          'logo': (doc['logo']?.toString().isNotEmpty == true &&
+                  Uri.tryParse(doc['logo'].toString())?.isAbsolute == true)
+              ? doc['logo'].toString()
+              : 'assets/images/default_logo.webp',
+          'name': doc['title']?.toString() ?? 'Unnamed Course',
+        };
+      }).toList();
+    } catch (e) {
+      debugPrint('Error fetching courses: $e');
+      return [];
+    }
+  }
 
   Future<bool> checkUserAdmin(String userID) async {
     try {
@@ -83,163 +191,197 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    _fetchUserName();
-  }
-
-  Future<void> _fetchUserName() async {
-    try {
-      final User? user = FirebaseAuth.instance.currentUser;
-      if (user != null) {
-        final DocumentSnapshot userDoc = await FirebaseFirestore.instance
-            .collection('Users')
-            .doc(user.uid)
-            .get();
-
-        final firstName = userDoc['Profile']['main']['firstName'];
-
-        // Retrieve FCM token
-        final fcmToken = await FirebaseMessaging.instance.getToken();
-
-        // Store user name and FCM token in Firestore
-        await FirebaseFirestore.instance.collection('Users').doc(user.uid).set(
-          {
-            'Profile': {
-              'main': {
-                'firstName': firstName ?? 'User',
-              },
-            },
-            'fcm_token': fcmToken, // Store FCM token here
-          },
-          SetOptions(merge: true), // Merge to update existing data
-        );
-
-        setState(() {
-          _userName = firstName ?? "User";
-        });
-      }
-    } catch (e) {
-      debugPrint("Error fetching user name: $e");
-    }
-  }
-
-  Future<List<Map<String, dynamic>>> _fetchEnrolledCourses() async {
-    try {
-      final User? user = FirebaseAuth.instance.currentUser;
-
-      if (user != null) {
-        final QuerySnapshot enrolledCoursesSnapshot = await FirebaseFirestore
-            .instance
-            .collection('Users')
-            .doc(user.uid)
-            .collection('enrolledCourses')
-            .get();
-
-        List<Map<String, dynamic>> enrolledCourses = [];
-
-        for (var doc in enrolledCoursesSnapshot.docs) {
-          String courseId = doc.id;
-          Map<String, dynamic> enrolledCourseData =
-              doc.data() as Map<String, dynamic>;
-
-          // Extract tasks from user collection
-          Map<String, dynamic> tasks = enrolledCourseData['tasks'] ?? {};
-          int totalTasks = tasks.length;
-          int completedTasks =
-              tasks.values.where((value) => value == true).length;
-          double progress = totalTasks > 0 ? completedTasks / totalTasks : 0.0;
-
-          // Fetch course details from 'Courses' collection
-          DocumentSnapshot courseDoc = await FirebaseFirestore.instance
-              .collection('Courses')
-              .doc(courseId)
-              .get();
-
-          if (courseDoc.exists) {
-            Map<String, dynamic> courseData =
-                courseDoc.data() as Map<String, dynamic>;
-
-            enrolledCourses.add({
-              'courseId': courseId,
-              'courseName': courseData['title']?.toString() ?? 'Unnamed Course',
-              'progress': progress, // Calculated progress
-            });
-
-            // Debugging prints
-            // print('Course ID: $courseId');
-           //  print('Tasks: $tasks');
-            // print('Total tasks: $totalTasks');
-            // print('Completed tasks: $completedTasks');
-            //print('Progress: ${progress * 100}%');
-          }
-        }
-        return enrolledCourses;
-      }
-    } catch (e) {
-      debugPrint('Error fetching enrolled courses: $e');
-    }
-    return [];
-  }
-
-  Future<List<Map<String, String>>> _fetchCourses() async {
-    try {
-      QuerySnapshot snapshot = await _firestore.collection('Courses').get();
-      return snapshot.docs.map((doc) {
-        return {
-          'id': doc.id,
-          'logo': (doc['logo']?.toString().isNotEmpty == true &&
-                  Uri.tryParse(doc['logo'].toString())?.isAbsolute == true)
-              ? doc['logo'].toString()
-              : 'assets/images/default_logo.webp',
-          'name': doc['title']?.toString() ?? 'Unnamed Course',
-        };
-      }).toList();
-    } catch (e) {
-      debugPrint('Error fetching courses: $e');
-      return [];
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
+    final bool isWebLayout = Responsive.isWebLayout(context);
+
     return Scaffold(
-      body: CustomScrollView(
-        slivers: [
-          _buildAppBar(context),
-          _buildBody(),
-        ],
+      
+      key: _scaffoldKey,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          if (isWebLayout) {
+            return Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Fixed Sidebar
+                Container(
+                  width: 280,
+                  decoration: BoxDecoration(
+                    border: Border(
+                      right: BorderSide(color: Colors.grey.shade200),
+                    ),
+                  ),
+                  child: Column(
+                    children: [
+                      // Header
+                      Padding(
+                        padding: const EdgeInsets.all(16.0),
+                        child: Text(
+                          'Dashboard',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+                      // Navigation Items
+                      Expanded(
+                        child: SingleChildScrollView(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              
+                              
+                              
+
+                              // _buildNavButton(
+                              //   Icons.home,
+                              //   'Home',
+                              //   () => Navigator.pushReplacement(
+                              //     context,
+                              //     MaterialPageRoute(
+                              //       builder: (context) => const DashboardScreen(),
+                              //     ),
+                              //   ),
+                              // ),
+
+
+                              _buildNavButton(
+                                Icons.chat,
+                                'Chat',
+                                () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const ChatScreen(),
+                                  ),
+                                ),
+                              ),
+
+                              _buildNavButton(
+                                Icons.person,
+                                'Profile',
+                                () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const ProfileScreen(),
+                                  ),
+                                ),
+                              ),
+
+                              
+                              
+                              
+                              _buildNavButton(
+                                Icons.notifications,
+                                'Notifications',
+                                () => Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const NotificationScreen(),
+                                  ),
+                                ),
+                              ),
+
+                              _buildNavButton(
+                                Icons.admin_panel_settings_outlined,
+                                'Admin Panel',
+                                () async {
+                                  final userID = FirebaseAuth.instance.currentUser !.uid;
+                                  if (await checkUserAdmin(userID)) {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>  AdminDashboardScreen(),
+                                      ),
+                                    );
+                                  } else {
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      const SnackBar(content: Text('You are not an admin')),
+                                    );
+                                  }
+                                },
+                              ),
+
+                              // _buildNavButton(
+                              //       Icons.arrow_back,
+                              //       'Exit',
+                              //       () => Navigator.pop(context),
+                              //       ),
+
+
+                            ],
+                          ),
+                        ),
+                      ),
+                      
+                    ],
+                  ),
+                ),
+                // Main Content
+                Expanded(
+                  child: CustomScrollView(
+                    slivers: [
+                      _buildAppBar(context),
+                      _buildBody(),
+                    ],
+                  ),
+                ),
+              ],
+            );
+          } else {
+            return CustomScrollView(
+              slivers: [
+                _buildAppBar(context),
+                _buildBody(),
+              ],
+            );
+          }
+        },
       ),
     );
   }
 
+  Widget _buildNavButton(IconData icon, String label, VoidCallback onPressed) {
+    return Padding(
+      padding: const EdgeInsets.all(12.0),
+      child: TextButton(
+        style: TextButton.styleFrom(
+          padding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        ),
+        onPressed: onPressed,
+        child: Row(
+          children: [
+            Icon(icon, color: Colors.blue),
+            SizedBox(width: 16),
+            Text(label),
+          ],
+        ),
+      ),
+    );
+  }
+
+  
   Widget _buildAppBar(BuildContext context) {
-    final double screenWidth = MediaQuery.of(context).size.width;
+    final bool isWebLayout = Responsive.isWebLayout(context);
+    
     return SliverAppBar(
       pinned: false,
-      // Allows the app bar to collapse on scroll
       floating: false,
       expandedHeight: 300,
-      // Adjust height as needed
       backgroundColor: Colors.transparent,
       flexibleSpace: FlexibleSpaceBar(
         background: Stack(
           fit: StackFit.expand,
           children: [
-            // Background animation or image
             const DashboardHeader(
               animationPath: 'animations/dashboard.json',
             ),
-
-            // Overlay text at the top of the image
             Align(
               alignment: Alignment.topCenter,
               child: Padding(
-                padding: MediaQuery.of(context).size.width < 600
-                    ? const EdgeInsets.only(
-                        top: 50) // Adjust padding for mobile
-                    : const EdgeInsets.only(
-                        top: 20), // Adjust padding for larger screens
+                padding: EdgeInsets.only(
+                  top: isWebLayout ? 20 : 50,
+                ),
                 child: GradientText(
                   'THE FIRE WALA',
                   gradient: LinearGradient(
@@ -247,19 +389,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
                       Colors.orange,
                       Colors.red,
                       Colors.white,
-                      Colors.blue
+                      Colors.blue,
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
                   style: TextStyle(
-                    fontSize: screenWidth < 600 ? 20 : 28, // Scale font size
+                    fontSize: isWebLayout ? 28 : 20,
                     fontWeight: FontWeight.bold,
                     shadows: [
                       Shadow(
-                        blurRadius: 9.0, // Softness of the shadow
-                        color: Colors.black.withOpacity(1), // Shadow color
-                        offset: Offset(2, 2), // X and Y offset
+                        blurRadius: 9.0,
+                        color: Colors.black.withOpacity(1),
+                        offset: Offset(2, 2),
                       ),
                     ],
                   ),
@@ -269,46 +411,41 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ],
         ),
       ),
-      leading: IconButton(
+
+      leading : IconButton(
         icon: Image.asset('assets/images/splash.png'),
-        onPressed: () {
-          Navigator.pop(context);
-        },
+        onPressed: () => Navigator.pop(context),
       ),
-      actions: [
+      actions: isWebLayout ? [] : [
         IconButton(
-            icon: const Icon(Icons.admin_panel_settings_outlined,
-                color: Colors.white),
-            onPressed: () async {
-              final userID = FirebaseAuth.instance.currentUser!.uid;
-              if (await checkUserAdmin(userID)) {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => AdminDashboardScreen(),
-                  ),
-                );
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('You are not an admin')),
-                );
-              }
-            }),
+          icon: const Icon(Icons.admin_panel_settings_outlined, color: Colors.white),
+          onPressed: () async {
+            final userID = FirebaseAuth.instance.currentUser !.uid;
+            if (await checkUserAdmin(userID)) {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) =>  AdminDashboardScreen(),
+                ),
+              );
+            } else {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('You are not an admin')),
+              );
+            }
+          },
+        ),
         IconButton(
           icon: const Icon(Icons.notifications, color: Colors.white),
           onPressed: () {
             Navigator.push(
               context,
               MaterialPageRoute(
-                builder: (context) => NotificationScreen(),
+                builder: (context) => const NotificationScreen(),
               ),
             );
           },
         ),
-        // IconButton(
-        //   icon: const Icon(Icons.more_vert, color: Colors.white),
-        //   onPressed: () => debugPrint("Menu clicked"),
-        // ),
       ],
     );
   }
@@ -339,7 +476,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   title: "Explore All Courses",
                   actionText: "See All",
                   onActionTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text("Srcoll Right to see all courses.")),
+                    SnackBar(content: Text("Scroll Right to see all courses.")),
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -400,17 +537,6 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  // Widget _buildOngoingCourses() {
-
-  //   return Column(
-  //     children: const [
-  //       OngoingCourseCard(courseName: "Flutter Basics", progress: 0.6),
-  //       SizedBox(height: 16),
-  //       OngoingCourseCard(courseName: "React Native Advanced", progress: 0.3),
-  //     ],
-  //   );
-  // }
-
   Widget _buildOngoingCourses() {
     return FutureBuilder<List<Map<String, dynamic>>>(
       future: _fetchEnrolledCourses(),
@@ -445,100 +571,99 @@ class _DashboardScreenState extends State<DashboardScreen> {
   }
 
   void _onCourseSelected(BuildContext context, Map<String, String> course) async {
-  final String courseId = course['id'] ?? '';
-  final userID = FirebaseAuth.instance.currentUser!.uid;
-  final email = FirebaseAuth.instance.currentUser!.email;
+    final String courseId = course['id'] ?? '';
+    final userID = FirebaseAuth.instance.currentUser !.uid;
+    final email = FirebaseAuth.instance.currentUser !.email;
 
-  if (courseId.isNotEmpty) {
-    try {
-      // Check if the user is enrolled in the course.
-      final enrollmentSnapshot = await FirebaseFirestore.instance
-          .collection('Users')
-          .doc(userID)
-          .collection('enrolledCourses')
-          .doc(courseId)
-          .get();
-
-      if (enrollmentSnapshot.exists) {
-        // User is enrolled: navigate to the course details screen.
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) =>
-                CourseDetailsScreen(courseId: courseId, userId: userID),
-          ),
-        );
-      } else {
-        // Check if a request for this course already exists.
-        final requestSnapshot = await FirebaseFirestore.instance
-            .collection('requests')
-            .where('userId', isEqualTo: userID)
-            .where('courseId', isEqualTo: courseId)
-            .where('allotted', isEqualTo: false)
+    if (courseId.isNotEmpty) {
+      try {
+        final enrollmentSnapshot = await FirebaseFirestore.instance
+            .collection('Users')
+            .doc(userID)
+            .collection('enrolledCourses')
+            .doc(courseId)
             .get();
 
-        if (requestSnapshot.docs.isNotEmpty) {
-          // A request already exists.
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              backgroundColor: Colors.redAccent,
-              content: Text(
-                "You have already sent a request for this course. Please wait for admin response.",
-                style: TextStyle(color: Colors.black),
-              ),
+        if (enrollmentSnapshot.exists) {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) =>
+                  CourseDetailsScreen(courseId: courseId, userId: userID),
             ),
           );
         } else {
-          // No enrollment and no existing request: prompt to send a new request.
-          showDialog(
-            context: context,
-            builder: (context) {
-              return AlertDialog(
-                title: Text("Request Enrollment"),
+          final requestSnapshot = await FirebaseFirestore.instance
+              .collection('requests')
+              .where('userId', isEqualTo: userID)
+              .where('courseId', isEqualTo: courseId)
+              .where('allotted', isEqualTo: false)
+              .get();
+
+          if (requestSnapshot.docs.isNotEmpty) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                backgroundColor: Colors.redAccent,
                 content: Text(
-                    "You are not enrolled in this course. Would you like to send a request to the admin for enrollment?"),
-                actions: [
-                  TextButton(
-                    onPressed: () {
-                      Navigator.of(context).pop(); // Dismiss the dialog.
-                    },
-                    child: Text("Cancel"),
-                  ),
-                  TextButton(
-                    onPressed: () async {
-                      // Save the enrollment request.
-                      await FirebaseFirestore.instance.collection('requests').add({
-                        'userId': userID,
-                        'courseId': courseId,
-                        'allotted': false, // initially set to false.
-                        'timestamp': FieldValue.serverTimestamp(),
-                        'email': email,
-                      });
-                      Navigator.of(context).pop(); // Dismiss the dialog.
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Request sent to admin.")),
-                      );
-                    },
-                    child: Text("Send Request"),
-                  ),
-                ],
-              );
-            },
-          );
+                  "You have already sent a request for this course. Please wait for admin response.",
+                  style: TextStyle(color: Colors.black),
+                ),
+              ),
+            );
+          } else {
+            showDialog(
+              context: context,
+              builder: (context) {
+                return AlertDialog(
+                  title: Text("Request Enrollment"),
+                  content: Text(
+                      "You are not enrolled in this course. Would you like to send a request to the admin for enrollment?"),
+                  actions: [
+                    TextButton(
+                      onPressed: () {
+                        Navigator.of(context).pop(); // Dismiss the dialog.
+                      },
+                      child: Text("Cancel"),
+                    ),
+                    TextButton(
+                      onPressed: () async {
+                        await FirebaseFirestore.instance.collection('requests').add({
+                          'userId': userID,
+                          'courseId': courseId,
+                          'allotted': false,
+                          'timestamp': FieldValue.serverTimestamp(),
+                          'email': email,
+                        });
+                        Navigator.of(context).pop(); // Dismiss the dialog.
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text("Request sent to admin.")),
+                        );
+                      },
+                      child: Text("Send Request"),
+                    ),
+                  ],
+                );
+              },
+            );
+          }
         }
+      } catch (e) {
+        debugPrint("Error checking enrollment status: $e");
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+                "An error occurred while checking enrollment status. Please try again."),
+          ),
+        );
       }
-    } catch (e) {
-      debugPrint("Error checking enrollment status: $e");
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-              "An error occurred while checking enrollment status. Please try again."),
-        ),
-      );
+    } else {
+      debugPrint("Course ID is missing.");
     }
-  } else {
-    debugPrint("Course ID is missing.");
   }
 }
 
+class Responsive {
+  static bool isWebLayout(BuildContext context) {
+    return MediaQuery.of(context).size.width >= 600;
+  }
 }
