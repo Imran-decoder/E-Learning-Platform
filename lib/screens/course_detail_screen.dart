@@ -145,9 +145,13 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_course!.title),
-        backgroundColor: Colors.deepOrange,
+        title: Text(_course!.title,
+        style: TextStyle(fontWeight: FontWeight.bold,
+        color: Colors.white),
+        ),
+        backgroundColor: const Color.fromRGBO(255, 110, 65, 1.0),
       ),
+
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
@@ -279,7 +283,8 @@ class _CourseEditScreenState extends State<CourseEditScreen> {
           children: [
             TextFormField(
               controller: _titleController,
-              decoration: const InputDecoration(labelText: 'Course Title'),
+              decoration: const InputDecoration(labelText: 'Course Title', 
+              labelStyle: TextStyle(fontWeight: FontWeight.bold),),
               validator: (value) {
                 if (value == null || value.isEmpty) {
                   return 'Please enter a title';

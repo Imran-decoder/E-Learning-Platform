@@ -52,7 +52,7 @@ class _SplashState extends State<Splash> with SingleTickerProviderStateMixin {
             Image.asset('assets/images/splash.png'),
             const SizedBox(height: 20),
             const Text(
-              'THE FIRE VALA',
+              'THE FIRE WALA',
               style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
             ),
             const SizedBox(height: 20),
