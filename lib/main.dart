@@ -103,9 +103,10 @@ class _BottomNavBarAppState extends State<BottomNavBarApp> {
 
   @override
   Widget build(BuildContext context) {
+    final bool isWebLayout = MediaQuery.of(context).size.width >= 600;
     return Scaffold(
       body: _screens[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
+      bottomNavigationBar: isWebLayout?null: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
         items: [
