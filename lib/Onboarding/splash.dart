@@ -21,7 +21,7 @@ class _SplashState extends State<Splash> with SingleTickerProviderStateMixin {
     var user = FirebaseAuth.instance.currentUser;
 
     // Adding a delay to show the splash screen for a moment.
-    await Future.delayed(const Duration(seconds: 3));
+    await Future.delayed(const Duration(seconds: 1));
 
     if (user != null) {
       // User is logged in

@@ -73,22 +73,22 @@ class SigninOrSignupScreen extends StatelessWidget {
                 const SizedBox(height: 16.0),
 
                 // Button for "Skip"
-                Container(
-                  alignment: Alignment.center,  // Ensure the button is centered horizontally
-                  child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.pushNamed(context, '/dashboard');
-                    },
-                    style: ElevatedButton.styleFrom(
-                      elevation: 0,
-                      foregroundColor: Colors.white,
-                      minimumSize: Size(buttonWidth, buttonHeight),  // Responsive width and height
-                      shape: const StadiumBorder(),
-                      backgroundColor: const Color(0xFFFE9901),
-                    ),
-                    child: const Text("Skip"),
-                  ),
-                ),
+                // Container(
+                //   alignment: Alignment.center,  // Ensure the button is centered horizontally
+                //   child: ElevatedButton(
+                //     onPressed: () {
+                //       Navigator.pushNamed(context, '/dashboard');
+                //     },
+                //     style: ElevatedButton.styleFrom(
+                //       elevation: 0,
+                //       foregroundColor: Colors.white,
+                //       minimumSize: Size(buttonWidth, buttonHeight),  // Responsive width and height
+                //       shape: const StadiumBorder(),
+                //       backgroundColor: const Color(0xFFFE9901),
+                //     ),
+                //     child: const Text("Skip"),
+                //   ),
+                // ),
               ],
             ),
           ),

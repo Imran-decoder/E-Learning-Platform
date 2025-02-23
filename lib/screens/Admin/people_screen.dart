@@ -119,6 +119,7 @@ class PeopleScreen extends StatelessWidget {
                   },
                 ),
               ),
+              const SizedBox(height: 80), // Reduced gap between classmates and bottom
             ],
           ),
         ),
