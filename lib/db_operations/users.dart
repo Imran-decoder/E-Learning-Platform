@@ -6,14 +6,15 @@ class User {
   final String userName;
   final UserProfile Profile;
   final bool isAdmin;
+  final bool isSuperAdmin;
 
   User({
     required this.userID,
     required this.userName,
     required this.Profile,
-    required this.isAdmin, required bool isSuperAdmin,
+    required this.isAdmin, required this.isSuperAdmin,
   });
-
+ 
   // Convert User object to a map for Firestore.
   Map<String, dynamic> toMap() {
     return {
@@ -21,6 +22,7 @@ class User {
       'userName': userName,
       'Profile': Profile.toMap(),  // renamed key to lowercase for consistency
       'isAdmin': isAdmin,
+      'isSuperAdmin': isSuperAdmin,
     };
   }
 
