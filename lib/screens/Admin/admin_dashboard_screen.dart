@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'people_screen.dart';
 import 'manage_course_screen.dart';
+import 'admin_dashboard.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   @override
@@ -194,17 +195,17 @@ class Sidebar extends StatelessWidget {
   }
 }
 
-class AdminHomeScreen extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      color: Colors.black,
-      child: const Center(
-        child: Text(
-          'Admin Home Screen',
-          style: TextStyle(fontSize: 20, color: Colors.white),
-        ),
-      ),
-    );
-  }
-}
+// class AdminHomeScreen extends StatelessWidget {
+//   @override
+//   Widget build(BuildContext context) {
+//     return Container(
+//       color: Colors.black,
+//       child: const Center(
+//         child: Text(
+//           'Admin Home Screen',
+//           style: TextStyle(fontSize: 20, color: Colors.white),
+//         ),
+//       ),
+//     );
+//   }
+// }
