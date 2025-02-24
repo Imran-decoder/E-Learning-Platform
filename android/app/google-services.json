@@ -26,9 +26,9 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:209667955295:android:4017818898ef52f5f319ea",
+        "mobilesdk_app_id": "1:209667955295:android:cfe7d52010b87a2ef319ea",
         "android_client_info": {
-          "package_name": "com.testing.app"
+          "package_name": "com.msd.elearning"
         }
       },
       "oauth_client": [],

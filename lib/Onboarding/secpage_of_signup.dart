@@ -150,6 +150,7 @@ class _CompleteProfileFormState extends State<CompleteProfileForm> {
         userName: _usernameController.text.trim(),
         Profile: userProfile,
         isAdmin: false,
+        isSuperAdmin:false,
       );
 
       await _firestoreService.createUser(user);

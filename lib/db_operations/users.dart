@@ -11,7 +11,7 @@ class User {
     required this.userID,
     required this.userName,
     required this.Profile,
-    required this.isAdmin,
+    required this.isAdmin, required bool isSuperAdmin,
   });
 
   // Convert User object to a map for Firestore.
@@ -32,6 +32,7 @@ class User {
       userName: data['userName'],
       Profile: UserProfile.fromMap(data['Profile']['main']),
       isAdmin: data['isAdmin'],
+      isSuperAdmin: data['isSuperAdmin'],
     );
   }
 }

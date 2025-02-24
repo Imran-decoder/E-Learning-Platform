@@ -43,17 +43,34 @@ class PeopleScreen extends StatelessWidget {
                     );
                   }
                   final admins = snapshot.data!.docs;
-                  return ListView.builder(
-                    shrinkWrap: true, // List will take only the space it needs.
-                    physics: const NeverScrollableScrollPhysics(), // Prevent inner scrolling.
-                    itemCount: admins.length,
-                    itemBuilder: (context, index) {
-                      final admin = admins[index];
-                      final name =
-                          admin['Profile']?['main']?['firstName'] ?? "Unknown";
-                      final username = admin['userName'] ?? "No username";
-                      return _buildPersonTile(name,
-                          username: username, isAdmin: true);
+                  // Check if current user is a superAdmin.
+                  return FutureBuilder<bool>(
+                    future: _checkIfSuperAdmin(),
+                    builder: (context, superAdminSnapshot) {
+                      if (superAdminSnapshot.connectionState ==
+                          ConnectionState.waiting) {
+                        return const Center(child: CircularProgressIndicator());
+                      }
+                      final currentUserIsSuperAdmin = superAdminSnapshot.data ?? false;
+                      return ListView.builder(
+                        shrinkWrap: true,
+                        physics: const NeverScrollableScrollPhysics(),
+                        itemCount: admins.length,
+                        itemBuilder: (context, index) {
+                          final admin = admins[index];
+                          final name = admin['Profile']?['main']?['firstName'] ?? "Unknown";
+                          final username = admin['userName'] ?? "No username";
+                          final userId = admin.id;
+                          return _buildPersonTile(
+                            name,
+                            username: username,
+                            isAdmin: true,
+                            showDemoteButton: currentUserIsSuperAdmin,
+                            userId: userId,
+                            context: context,
+                          );
+                        },
+                      );
                     },
                   );
                 },
@@ -125,6 +142,17 @@ class PeopleScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// Checks if the currently signed-in user is a superAdmin.
+  Future<bool> _checkIfSuperAdmin() async {
+    final currentUser = FirebaseAuth.instance.currentUser;
+    if (currentUser == null) return false;
+    final userDoc = await FirebaseFirestore.instance
+        .collection('Users')
+        .doc(currentUser.uid)
+        .get();
+    return userDoc.data()?['isSuperAdmin'] ?? false;
   }
 
   /// Builds the "New User Requests" section using real-time Firestore data.
@@ -387,7 +415,14 @@ class PeopleScreen extends StatelessWidget {
   }
 
   /// Builds a person tile that shows a user's name and username.
-  Widget _buildPersonTile(String name, {required String username, bool isAdmin = false}) {
+  Widget _buildPersonTile(
+    String name, {
+    required String username,
+    bool isAdmin = false,
+    bool showDemoteButton = false,
+    String? userId,
+    BuildContext? context,
+  }) {
     return ListTile(
       leading: CircleAvatar(
         backgroundColor: isAdmin ? Colors.tealAccent : Colors.grey[800],
@@ -409,6 +444,52 @@ class PeopleScreen extends StatelessWidget {
           color: Colors.grey,
           fontSize: 14,
         ),
+      ),
+      trailing: showDemoteButton && userId != null && context != null && FirebaseAuth.instance.currentUser!.uid != userId
+          ? TextButton(
+              onPressed: () => _showDemotionDialog(context, name, userId),
+              child: const Text("Demote", style: TextStyle(color: Colors.red)),
+            )
+          : null,
+    );
+  }
+
+  /// Displays a dialog to confirm admin demotion.
+  void _showDemotionDialog(BuildContext context, String name, String userId) {
+    showDialog(
+      context: context,
+      builder: (context) => CustomDialog(
+        title: 'Demote Admin: $name',
+        content: 'Do you want to demote $name from Admin?',
+        actions: [
+          TextButton(
+            onPressed: () async {
+              try {
+                // Update the user's document to set isAdmin to false.
+                await FirebaseFirestore.instance
+                    .collection('Users')
+                    .doc(userId)
+                    .update({
+                  'isAdmin': false,
+                });
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("User demoted from admin.")),
+                );
+              } catch (e) {
+                Navigator.of(context).pop();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text("Error demoting user.")),
+                );
+              }
+            },
+            child: const Text('Demote', style: TextStyle(color: Colors.red)),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('Cancel', style: TextStyle(color: Colors.green)),
+          ),
+        ],
       ),
     );
   }

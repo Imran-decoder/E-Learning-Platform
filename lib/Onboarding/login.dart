@@ -31,7 +31,12 @@ class _SignInScreenState extends State<SignInScreen> {
         }
       }
     } on FirebaseAuthException catch (e) {
-      print(e);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Authentication failed', style: TextStyle(color: Colors.white)),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -153,6 +158,8 @@ Widget build(BuildContext context) {
                                     throw 'Please enter email and password';
                                   } else {
                                     await signInUserWithEmailAndPassword();
+                                    emailController.clear();
+                                    passwordController.clear();
                                   }
                                 } catch (e) {
                                   print(e);
