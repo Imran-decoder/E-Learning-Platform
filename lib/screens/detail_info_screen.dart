@@ -268,7 +268,7 @@ class _DetailedInfoScreenState extends State<DetailedInfoScreen> {
 class DocumentViewerScreen extends StatefulWidget {
   final String docUrl;
 
-  DocumentViewerScreen({required this.docUrl});
+  const DocumentViewerScreen({super.key, required this.docUrl});
 
   @override
   _DocumentViewerScreenState createState() => _DocumentViewerScreenState();

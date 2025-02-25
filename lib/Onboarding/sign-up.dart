@@ -228,7 +228,7 @@ class _SignUpFormState extends State<SignUpForm> {
           child: Column(
             children: [
               // Email field
-              Container(
+              SizedBox(
                 width: isMobile ? double.infinity : 400, // Full width on mobile, 400px on desktop
                 child: TextFormField(
                   controller: emailController,
@@ -262,7 +262,7 @@ class _SignUpFormState extends State<SignUpForm> {
               const SizedBox(height: 24),
 
               // Password field
-              Container(
+              SizedBox(
                 width: isMobile ? double.infinity : 400, // Full width on mobile, 400px on desktop
                 child: TextFormField(
                   controller: passwordController,
@@ -298,7 +298,7 @@ class _SignUpFormState extends State<SignUpForm> {
               const SizedBox(height: 24),
 
               // Confirm Password field
-              Container(
+              SizedBox(
                 width: isMobile ? double.infinity : 400, // Full width on mobile, 400px on desktop
                 child: TextFormField(
                   controller: rePasswordController,
@@ -333,7 +333,7 @@ class _SignUpFormState extends State<SignUpForm> {
               const SizedBox(height: 32),
 
               // Sign Up button
-              Container(
+              SizedBox(
                 width: isMobile ? double.infinity : 400, // Full width on mobile, 400px on desktop
                 child: SizedBox(
                   height: 48,
@@ -370,10 +370,10 @@ class _SignUpFormState extends State<SignUpForm> {
 
 class SocialCard extends StatelessWidget {
   const SocialCard({
-    Key? key,
+    super.key,
     required this.icon,
     required this.press,
-  }) : super(key: key);
+  });
 
   final Widget icon;
   final VoidCallback press;

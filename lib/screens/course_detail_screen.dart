@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'detail_info_screen.dart';
 import 'package:elearning/components/header_section.dart';
-import 'package:elearning/screens/task_list_screen.dart';
 import 'package:elearning/db_operations/courses.dart';
 
 

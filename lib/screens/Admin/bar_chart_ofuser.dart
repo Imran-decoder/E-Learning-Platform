@@ -4,6 +4,8 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class UserProgressScreen extends StatefulWidget {
+  const UserProgressScreen({super.key});
+
   @override
   _UserProgressScreenState createState() => _UserProgressScreenState();
 }

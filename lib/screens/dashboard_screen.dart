@@ -21,10 +21,10 @@ class GradientText extends StatelessWidget {
 
   const GradientText(
     this.text, {
-    Key? key,
+    super.key,
     required this.gradient,
     this.style,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +53,7 @@ class GradientText extends StatelessWidget {
 }
 
 class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({Key? key}) : super(key: key);
+  const DashboardScreen({super.key});
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();

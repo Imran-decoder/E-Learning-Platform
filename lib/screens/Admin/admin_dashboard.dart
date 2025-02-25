@@ -7,6 +7,8 @@ import 'package:fl_chart/fl_chart.dart';
 import 'package:elearning/screens/Admin/bar_chart_ofuser.dart';
 
 class AdminHomeScreen extends StatefulWidget {
+  const AdminHomeScreen({super.key});
+
   @override
   _AdminHomeScreenState createState() => _AdminHomeScreenState();
 }
@@ -97,6 +99,8 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
 
 
 class CoursePieChart extends StatefulWidget {
+  const CoursePieChart({super.key});
+
   @override
   _CoursePieChartState createState() => _CoursePieChartState();
 }

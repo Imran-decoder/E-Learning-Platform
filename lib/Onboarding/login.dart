@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:elearning/db_operations/users.dart';
 
 class SignInScreen extends StatefulWidget {
-  SignInScreen({super.key});
+  const SignInScreen({super.key});
 
   @override
   State<SignInScreen> createState() => _SignInScreenState();
@@ -30,7 +30,7 @@ class _SignInScreenState extends State<SignInScreen> {
           Navigator.pushNamed(context, '/secpage');
         }
       }
-    } on FirebaseAuthException catch (e) {
+    } on FirebaseAuthException {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Authentication failed', style: TextStyle(color: Colors.white)),
@@ -114,9 +114,9 @@ Widget build(BuildContext context) {
                             hintText: 'Mail or Phone',
                             filled: true,
                             fillColor: Color(0xFFF5FCF9),
-                            contentPadding: const EdgeInsets.symmetric(
+                            contentPadding: EdgeInsets.symmetric(
                                 horizontal: 16, vertical: 14),
-                            border: const OutlineInputBorder(
+                            border: OutlineInputBorder(
                               borderSide: BorderSide.none,
                               borderRadius:
                                   BorderRadius.all(Radius.circular(50)),
@@ -134,7 +134,7 @@ Widget build(BuildContext context) {
                             hintText: 'Password',
                             filled: true,
                             fillColor: Color(0xFFF5FCF9),
-                            contentPadding: const EdgeInsets.symmetric(
+                            contentPadding: EdgeInsets.symmetric(
                                 horizontal: 16, vertical: 14),
                             border: OutlineInputBorder(
                               borderSide: BorderSide.none,

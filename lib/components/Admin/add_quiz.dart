@@ -160,7 +160,7 @@ class AddQuiz extends StatelessWidget {
   final VoidCallback onRemove;
 
   const AddQuiz({
-    Key? key,
+    super.key,
     required this.questionController,
     required this.option1Controller,
     required this.option2Controller,
@@ -168,7 +168,7 @@ class AddQuiz extends StatelessWidget {
     required this.option4Controller,
     required this.correctAnswerController,
     required this.onRemove,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

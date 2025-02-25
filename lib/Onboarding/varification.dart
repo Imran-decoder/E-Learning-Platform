@@ -7,10 +7,10 @@ class VerificationScreen extends StatefulWidget {
   final Function(String) onVerificationSuccess;
 
   const VerificationScreen({
-    Key? key,
+    super.key,
     required this.phoneNumber,
     required this.onVerificationSuccess,
-  }) : super(key: key);
+  });
 
   @override
   _VerificationScreenState createState() => _VerificationScreenState();
@@ -140,16 +140,16 @@ class _VerificationScreenState extends State<VerificationScreen> {
 class OtpForm extends StatelessWidget {
   final ValueChanged<String> onSubmitOtp;
 
-  const OtpForm({Key? key, required this.onSubmitOtp}) : super(key: key);
+  const OtpForm({super.key, required this.onSubmitOtp});
 
   @override
   Widget build(BuildContext context) {
-    final TextEditingController _otpController = TextEditingController();
+    final TextEditingController otpController = TextEditingController();
 
     return Column(
       children: [
         TextFormField(
-          controller: _otpController,
+          controller: otpController,
           keyboardType: TextInputType.number,
           maxLength: 6,
           decoration: const InputDecoration(
@@ -159,7 +159,7 @@ class OtpForm extends StatelessWidget {
         ),
         const SizedBox(height: 16),
         ElevatedButton(
-          onPressed: () => onSubmitOtp(_otpController.text),
+          onPressed: () => onSubmitOtp(otpController.text),
           child: const Text("Verify"),
         ),
       ],

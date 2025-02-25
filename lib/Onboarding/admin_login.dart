@@ -3,7 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class AdminLogin extends StatefulWidget {
-  AdminLogin({super.key});
+  const AdminLogin({super.key});
 
   @override
   State<AdminLogin> createState() => _AdminLoginState();
@@ -79,7 +79,7 @@ class _AdminLoginState extends State<AdminLogin> {
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           // Wrapping in a container with dynamic width to center
-                          Container(
+                          SizedBox(
                             width: MediaQuery.of(context).size.width < 600
                                 ? double.infinity
                                 : 400, // Adjust width for desktop view
@@ -107,7 +107,7 @@ class _AdminLoginState extends State<AdminLogin> {
                           ),
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 16.0),
-                            child: Container(
+                            child: SizedBox(
                               width: MediaQuery.of(context).size.width < 600
                                   ? double.infinity
                                   : 400, // Adjust width for desktop view
@@ -136,7 +136,7 @@ class _AdminLoginState extends State<AdminLogin> {
                           ),
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 16.0),
-                            child: Container(
+                            child: SizedBox(
                               width: MediaQuery.of(context).size.width < 600
                                   ? double.infinity
                                   : 400, // Adjust width for desktop view

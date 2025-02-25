@@ -17,8 +17,6 @@ import 'package:elearning/Onboarding/change_pass.dart';
 import 'package:elearning/Onboarding/secpage_of_signup.dart';
 import 'package:elearning/screens/chat_screen.dart';
 import 'package:elearning/screens/Admin/admin_dashboard_screen.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
-import 'firebase_options.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();

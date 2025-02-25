@@ -6,11 +6,11 @@ class CustomDialog extends StatelessWidget {
   final List<Widget> actions;
 
   const CustomDialog({
-    Key? key,
+    super.key,
     required this.title,
     required this.content,
     required this.actions,
-  }) : super(key: key);
+  });
 
   @override
   Widget build(BuildContext context) {

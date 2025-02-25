@@ -13,8 +13,8 @@ class ScoreScreen extends StatefulWidget {
     required this.courseId,
     required this.taskId,
     required this.score,
-    Key? key,
-  }) : super(key: key);
+    super.key,
+  });
 
   @override
   State<ScoreScreen> createState() => _ScoreScreenState();

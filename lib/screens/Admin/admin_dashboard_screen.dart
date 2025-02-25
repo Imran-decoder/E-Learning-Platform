@@ -4,6 +4,8 @@ import 'manage_course_screen.dart';
 import 'admin_dashboard.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
+  const AdminDashboardScreen({super.key});
+
   @override
   _AdminDashboardScreenState createState() => _AdminDashboardScreenState();
 }
@@ -132,7 +134,7 @@ class Sidebar extends StatelessWidget {
   final int selectedIndex;
   final Function(int) onItemSelected;
 
-  const Sidebar({
+  const Sidebar({super.key, 
     required this.selectedIndex,
     required this.onItemSelected,
   });

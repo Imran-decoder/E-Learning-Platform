@@ -76,7 +76,7 @@ const authOutlineInputBorder = OutlineInputBorder(
 );
 
 class CompleteProfileForm extends StatefulWidget {
-  const CompleteProfileForm({Key? key}) : super(key: key);
+  const CompleteProfileForm({super.key});
 
   @override
   State<CompleteProfileForm> createState() => _CompleteProfileFormState();
@@ -94,7 +94,7 @@ class _CompleteProfileFormState extends State<CompleteProfileForm> {
   final auth.FirebaseAuth _auth = auth.FirebaseAuth.instance;
 
   bool _isLoading = false;
-  bool _isOtpEnabled = false; // Flag to toggle OTP verification
+  final bool _isOtpEnabled = false; // Flag to toggle OTP verification
 
   @override
   void dispose() {
