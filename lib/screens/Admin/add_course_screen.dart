@@ -255,18 +255,18 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
   final ImagePicker _picker = ImagePicker();
 
   // Modify to ensure that logo isn't stored as null
-  Future<void> _setImageUrl() async {
-    final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-
-    setState(() {
-      if (pickedFile != null) {
-        // If an image is selected, store its path
-        _logo = pickedFile.path;
-      } else {
-        _logo = _logo ?? "url_to_image";  // Ensuring the default URL is used if logo is null
-      }
-    });
-  }
+  // Future<void> _setImageUrl() async {
+  //   final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+  //
+  //   setState(() {
+  //     if (pickedFile != null) {
+  //       // If an image is selected, store its path
+  //       _logo = pickedFile.path;
+  //     } else {
+  //       _logo = _logo ?? "url_to_image";  // Ensuring the default URL is used if logo is null
+  //     }
+  //   });
+  // }
 
   void _addChapter() {
     setState(() {
@@ -477,23 +477,23 @@ Future<void> sendCourseAddedNotification(String courseTitle) async {
                 const SizedBox(height: 20),
 
                 // Course Image Selection
-                GestureDetector(
-                  onTap: _setImageUrl,
-                  child: Container(
-                    width: double.infinity,
-                    height: 200,
-                    decoration: BoxDecoration(color: Colors.grey[800], borderRadius: BorderRadius.circular(12)),
-                    child: _logo == null
-                        ? const Center(
-                      child: Icon(Icons.add_a_photo, color: Colors.white, size: 40),
-                    )
-                        : Image.network(
-                      _logo!,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 20),
+                // GestureDetector(
+                //  // onTap: _setImageUrl,
+                //   child: Container(
+                //     width: double.infinity,
+                //     height: 200,
+                //     decoration: BoxDecoration(color: Colors.grey[800], borderRadius: BorderRadius.circular(12)),
+                //     child: _logo == null
+                //         ? const Center(
+                //      // child: Icon(Icons.add_a_photo, color: Colors.white, size: 40),
+                //     )
+                //         : Image.network(
+                //       _logo!,
+                //       fit: BoxFit.cover,
+                //     ),
+                //   ),
+                // ),
+                // const SizedBox(height: 20),
 
                 // Course Title Field
                 TextField(

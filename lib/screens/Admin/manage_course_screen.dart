@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'add_course_screen.dart';
 import 'edit_course_screen.dart';
 
@@ -10,7 +11,7 @@ class ManageCourseScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Manage Courses'),
-        titleTextStyle: const TextStyle(color: Colors.white , fontSize: 20, fontWeight: FontWeight.bold),
+        titleTextStyle: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
         backgroundColor: Colors.black87,
       ),
       body: SafeArea(
@@ -20,9 +21,8 @@ class ManageCourseScreen extends StatelessWidget {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              const SizedBox(height: 50), // Space from top
+              const SizedBox(height: 50),
 
-              // Create New Course Button
               _buildCustomButton(
                 context,
                 "Create New Course",
@@ -35,9 +35,8 @@ class ManageCourseScreen extends StatelessWidget {
                 },
               ),
 
-              const SizedBox(height: 20), // Space between buttons
+              const SizedBox(height: 20),
 
-              // Edit Courses Button
               _buildCustomButton(
                 context,
                 "Edit Courses",
@@ -49,6 +48,20 @@ class ManageCourseScreen extends StatelessWidget {
                   );
                 },
               ),
+
+              const SizedBox(height: 20),
+
+              _buildCustomButton(
+                context,
+                "Delete Course",
+                [Colors.blue, Colors.lightBlueAccent],
+                    () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const DeleteCourseScreen()),
+                  );
+                },
+              ),
             ],
           ),
         ),
@@ -56,7 +69,6 @@ class ManageCourseScreen extends StatelessWidget {
     );
   }
 
-  // Reusable custom button widget with gradient and elevated effect
   Widget _buildCustomButton(
       BuildContext context,
       String label,
@@ -79,7 +91,7 @@ class ManageCourseScreen extends StatelessWidget {
             BoxShadow(
               color: gradientColors[0].withOpacity(0.4),
               blurRadius: 10,
-              offset: Offset(0, 6),
+              offset: const Offset(0, 6),
             ),
           ],
         ),
@@ -94,6 +106,103 @@ class ManageCourseScreen extends StatelessWidget {
               color: Colors.white,
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class DeleteCourseScreen extends StatefulWidget {
+  const DeleteCourseScreen({super.key});
+
+  @override
+  _DeleteCourseScreenState createState() => _DeleteCourseScreenState();
+}
+
+class _DeleteCourseScreenState extends State<DeleteCourseScreen> {
+  final TextEditingController _courseTitleController = TextEditingController();
+
+  Future<void> _deleteCourse() async {
+    String title = _courseTitleController.text.trim();
+    if (title.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please enter a course title.')),
+      );
+      return;
+    }
+
+    try {
+      var querySnapshot = await FirebaseFirestore.instance
+          .collection('Courses')
+          .where('title', isEqualTo: title)
+          .get();
+
+      if (querySnapshot.docs.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('No course found with title: $title')),
+        );
+        return;
+      }
+
+      for (var doc in querySnapshot.docs) {
+        await doc.reference.delete();
+      }
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Course "$title" deleted successfully.')),
+      );
+      _courseTitleController.clear();
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error deleting course: $e')),
+      );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Delete Course'),
+        titleTextStyle: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
+        backgroundColor: Colors.black87,
+      ),
+      body: Container(
+        color: Colors.black,
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text(
+              "Enter Course Title to Delete:",
+              style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),
+            ),
+            const SizedBox(height: 12),
+            TextField(
+              controller: _courseTitleController,
+              style: const TextStyle(color: Colors.white),
+              decoration: InputDecoration(
+                hintText: "Course Title",
+                hintStyle: TextStyle(color: Colors.white70),
+                filled: true,
+                fillColor: Colors.grey[900],
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(10),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton(
+              onPressed: _deleteCourse,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.redAccent,
+                padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 24),
+              ),
+              child: const Text("Delete Course", style: TextStyle(fontSize: 16)),
+            ),
+          ],
         ),
       ),
     );
