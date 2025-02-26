@@ -12,6 +12,8 @@ import 'package:elearning/screens/Admin/admin_dashboard_screen.dart';
 import 'package:elearning/components/greeting_section.dart';
 import 'package:elearning/components/section_header.dart';
 import 'package:elearning/components/course_list.dart';
+import 'package:elearning/screens/intro_screen.dart';
+
 
 // GradientText Widget with dynamic font scaling
 class GradientText extends StatelessWidget {
@@ -21,10 +23,10 @@ class GradientText extends StatelessWidget {
 
   const GradientText(
     this.text, {
-    super.key,
+    Key? key,
     required this.gradient,
     this.style,
-  });
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +55,7 @@ class GradientText extends StatelessWidget {
 }
 
 class DashboardScreen extends StatefulWidget {
-  const DashboardScreen({super.key});
+  const DashboardScreen({Key? key}) : super(key: key);
 
   @override
   State<DashboardScreen> createState() => _DashboardScreenState();
@@ -414,7 +416,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
       leading : IconButton(
         icon: Image.asset('assets/images/splash.png'),
-        onPressed: () => Navigator.pop(context),
+        onPressed: (){ // Navigate to the IntroScreen when the logo is clicked
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => const IntroScreen()),
+    );
+  },
       ),
       actions: isWebLayout ? [] : [
         IconButton(
