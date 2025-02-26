@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'people_screen.dart';
 import 'manage_course_screen.dart';
 import 'admin_dashboard.dart';
+import 'feedback_responses_screen.dart'; // Import feedback screen
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -18,6 +19,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
     AdminHomeScreen(),
     ManageCourseScreen(),
     PeopleScreen(),
+    FeedbackResponsesScreen(), // Added feedback response screen
   ];
 
   void _onItemTapped(int index) {
@@ -39,14 +41,17 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 // Sidebar
                 Container(
                   width: 250,
-                  color: Colors.grey[850],
+                  color: Colors.black, // Fully dark sidebar
                   child: Sidebar(
                     selectedIndex: _selectedIndex,
                     onItemSelected: _onItemTapped,
                   ),
                 ),
                 Expanded(
-                  child: _screens[_selectedIndex],
+                  child: Container(
+                    color: Colors.black, // Ensuring dark background
+                    child: _screens[_selectedIndex],
+                  ),
                 ),
               ],
             ),
@@ -59,16 +64,19 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 'Admin Dashboard',
                 style: TextStyle(color: Colors.white),
               ),
-              backgroundColor: Colors.grey[850],
+              backgroundColor: Colors.black, // Dark theme for app bar
             ),
             drawer: Drawer(
-              backgroundColor: Colors.grey[900],
+              backgroundColor: Colors.black,
               child: Sidebar(
                 selectedIndex: _selectedIndex,
                 onItemSelected: _onItemTapped,
               ),
             ),
-            body: _screens[_selectedIndex],
+            body: Container(
+              color: Colors.black,
+              child: _screens[_selectedIndex],
+            ),
           );
         } else {
           // Mobile layout with floating BottomNavigationBar
@@ -77,7 +85,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
             body: Stack(
               children: [
                 Positioned.fill(
-                  child: _screens[_selectedIndex],
+                  child: Container(
+                    color: Colors.black,
+                    child: _screens[_selectedIndex],
+                  ),
                 ),
                 Positioned(
                   bottom: 16,
@@ -85,7 +96,7 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   right: 16,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: Colors.grey[900],
+                      color: Colors.black, // Fully dark navbar
                       borderRadius: BorderRadius.circular(32),
                       boxShadow: [
                         BoxShadow(
@@ -98,9 +109,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                     child: ClipRRect(
                       borderRadius: BorderRadius.circular(32),
                       child: BottomNavigationBar(
-                        backgroundColor: Colors.transparent,
+                        backgroundColor: Colors.black,
                         selectedItemColor: Colors.tealAccent,
-                        unselectedItemColor: Colors.white54,
+                        unselectedItemColor: Colors.white70,
+                        type: BottomNavigationBarType.fixed,
                         currentIndex: _selectedIndex,
                         onTap: _onItemTapped,
                         items: const [
@@ -115,6 +127,10 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                           BottomNavigationBarItem(
                             icon: Icon(Icons.people),
                             label: 'People',
+                          ),
+                          BottomNavigationBarItem(
+                            icon: Icon(Icons.feedback),
+                            label: 'Feedback',
                           ),
                         ],
                       ),
@@ -134,41 +150,50 @@ class Sidebar extends StatelessWidget {
   final int selectedIndex;
   final Function(int) onItemSelected;
 
-  const Sidebar({super.key, 
+  const Sidebar({
+    super.key,
     required this.selectedIndex,
     required this.onItemSelected,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        const DrawerHeader(
-          child: Text(
-            'Admin Panel',
-            style: TextStyle(
-              fontSize: 24,
-              color: Colors.white,
-              fontWeight: FontWeight.bold,
+    return Container(
+      color: Colors.black, // Fully dark theme
+      child: Column(
+        children: [
+          const DrawerHeader(
+            child: Text(
+              'Admin Panel',
+              style: TextStyle(
+                fontSize: 24,
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
-        ),
-        _buildMenuItem(
-          index: 0,
-          icon: Icons.dashboard,
-          label: 'Dashboard',
-        ),
-        _buildMenuItem(
-          index: 1,
-          icon: Icons.book,
-          label: 'Manage Courses',
-        ),
-        _buildMenuItem(
-          index: 2,
-          icon: Icons.people,
-          label: 'People',
-        ),
-      ],
+          _buildMenuItem(
+            index: 0,
+            icon: Icons.dashboard,
+            label: 'Dashboard',
+          ),
+          _buildMenuItem(
+            index: 1,
+            icon: Icons.book,
+            label: 'Manage Courses',
+          ),
+          _buildMenuItem(
+            index: 2,
+            icon: Icons.people,
+            label: 'People',
+          ),
+          _buildMenuItem(
+            index: 3,
+            icon: Icons.feedback,
+            label: 'Feedback',
+          ),
+        ],
+      ),
     );
   }
 
@@ -180,34 +205,19 @@ class Sidebar extends StatelessWidget {
     return ListTile(
       leading: Icon(
         icon,
-        color: selectedIndex == index ? Colors.tealAccent : Colors.white54,
+        color: selectedIndex == index ? Colors.tealAccent : Colors.white70,
       ),
       title: Text(
         label,
         style: TextStyle(
-          color: selectedIndex == index ? Colors.tealAccent : Colors.white54,
+          color: selectedIndex == index ? Colors.tealAccent : Colors.white70,
           fontWeight: selectedIndex == index ? FontWeight.bold : FontWeight.normal,
         ),
       ),
       onTap: () {
-        onItemSelected(index);  // This updates the selected screen directly
+        onItemSelected(index);
       },
-      tileColor: selectedIndex == index ? Colors.grey[700] : Colors.transparent,
+      tileColor: selectedIndex == index ? Colors.grey[800] : Colors.transparent,
     );
   }
 }
-
-// class AdminHomeScreen extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return Container(
-//       color: Colors.black,
-//       child: const Center(
-//         child: Text(
-//           'Admin Home Screen',
-//           style: TextStyle(fontSize: 20, color: Colors.white),
-//         ),
-//       ),
-//     );
-//   }
-// }

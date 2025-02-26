@@ -421,7 +421,6 @@ Future<void> sendCourseAddedNotification(String courseTitle) async {
     try {
       String serverKey = '7412734dc7727d8078ae52dd2d6f956e26815c14';
 
-
       // Step 1: Fetch user FCM tokens from Firestore
       QuerySnapshot usersSnapshot = await FirebaseFirestore.instance.collection('Users').get();
 

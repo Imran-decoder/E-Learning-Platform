@@ -1,8 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'detail_info_screen.dart';
+import 'feedback_form_screen.dart';
 import 'package:elearning/components/header_section.dart';
 import 'package:elearning/db_operations/courses.dart';
-
 
 class Section {
   final String title;
@@ -13,7 +14,6 @@ class Section {
   final String taskId;
   final String document;
 
-
   Section({
     required this.title,
     required this.content,
@@ -22,10 +22,8 @@ class Section {
     required this.videoUrl,
     required this.taskId,
     required this.document,
-
   });
 
-  // Helper method to convert Task to Section
   static Section fromTask(Task task) {
     return Section(
       title: task.title,
@@ -34,15 +32,14 @@ class Section {
       number: task.number,
       videoUrl: task.video,
       taskId: task.id,
-      document: task.document ?? '',  // ✅ Fetch from Task
-
+      document: task.document ?? '',
     );
   }
 }
 
 class CourseDetailsScreen extends StatefulWidget {
   final String courseId;
-  final String  userId;
+  final String userId;
 
   const CourseDetailsScreen({required this.courseId, required this.userId, super.key});
 
@@ -77,7 +74,7 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
         number: task.number,
         videoUrl: task.video,
         taskId: task.id,
-        document: task.document ?? '', // Use task's document if available
+        document: task.document ?? '',
       ));
     }
 
@@ -144,13 +141,12 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(_course!.title,
-        style: TextStyle(fontWeight: FontWeight.bold,
-        color: Colors.white),
+        title: Text(
+          _course!.title,
+          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
         backgroundColor: const Color.fromRGBO(255, 110, 65, 1.0),
       ),
-
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(16.0),
@@ -166,8 +162,7 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
               ),
               const SizedBox(height: 16),
               const SizedBox(height: 24),
-              
-              // List of Sections
+
               ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -194,141 +189,56 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
                                   videoUrl: section.videoUrl,
                                   taskId: section.taskId,
                                   courseId: widget.courseId,
-                                  document: section.document, // Pass the document URL
+                                  document: section.document,
                                 ),
                               ),
                             );
                           },
                         ),
-                        // Display the document link if available
-                        
                       ],
                     ),
                   );
                 },
               ),
-           
-    
-  
-
-
-              // Task Management Section
-              const SizedBox(height: 24),
-              
-              
             ],
           ),
         ),
       ),
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: () async {
-      //     final wasAdded = await Navigator.push<bool>(
-      //       context,
-      //       MaterialPageRoute(
-      //         builder: (context) => AddTaskScreen(courseId: widget.courseId),
-      //       ),
-      //     );
-
-      //     if (wasAdded == true) {
-      //       await _loadCourseData();
-      //     }
-      //   },
-      //   tooltip: 'Add New Chapter',
-      //   child: const Icon(Icons.add),
-      // ),
-    );
-  }
-}
-
-// Course Edit Screen
-class CourseEditScreen extends StatefulWidget {
-  final Course course;
-
-  const CourseEditScreen({required this.course, super.key});
-
-  @override
-  State<CourseEditScreen> createState() => _CourseEditScreenState();
-}
-
-class _CourseEditScreenState extends State<CourseEditScreen> {
-  final _formKey = GlobalKey<FormState>();
-  late TextEditingController _titleController;
-  late TextEditingController _descriptionController;
-
-  @override
-  void initState() {
-    super.initState();
-    _titleController = TextEditingController(text: widget.course.title);
-  }
-
-  @override
-  void dispose() {
-    _titleController.dispose();
-    _descriptionController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Edit Course'),
-        backgroundColor: Colors.deepOrange,
-      ),
-      body: Form(
-        key: _formKey,
-        child: ListView(
-          padding: const EdgeInsets.all(16.0),
-          children: [
-            TextFormField(
-              controller: _titleController,
-              decoration: const InputDecoration(labelText: 'Course Title', 
-              labelStyle: TextStyle(fontWeight: FontWeight.bold),),
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter a title';
-                }
-                return null;
-              },
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => FeedbackFormScreen(
+                courseId: widget.courseId,
+                userId: widget.userId,
+              ),
             ),
-            const SizedBox(height: 16),
-            TextFormField(
-              controller: _descriptionController,
-              decoration: const InputDecoration(labelText: 'Course Description'),
-              maxLines: 3,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return 'Please enter a description';
-                }
-                return null;
-              },
+          );
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            gradient: const LinearGradient(
+              colors: [Colors.deepOrange, Colors.orangeAccent],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
             ),
-            const SizedBox(height: 32),
-            ElevatedButton(
-              onPressed: () async {
-                if (_formKey.currentState!.validate()) {
-                  final repository = CourseRepository();
-                  try {
-                    final updatedCourse = Course(
-                      id: widget.course.id,
-                      title: _titleController.text,
-                      logo: widget.course.logo,
-                      tasks: widget.course.tasks,
-                    );
-
-                    await repository.updateCourse(updatedCourse);
-
-                    Navigator.pop(context, true);
-                  } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Failed to update course: $e')),
-                    );
-                  }
-                }
-              },
-              child: const Text('Save Changes'),
-            ),
-          ],
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.3),
+                blurRadius: 10,
+                spreadRadius: 2,
+                offset: const Offset(0, 5),
+              ),
+            ],
+          ),
+          padding: const EdgeInsets.all(15),
+          child: const Icon(
+            Icons.feedback,
+            color: Colors.white54,
+            size: 30,
+          ),
         ),
       ),
     );
