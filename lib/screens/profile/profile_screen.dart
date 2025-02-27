@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:elearning/screens/profile/help_center_screen.dart';
+import 'package:elearning/screens/profile/settings_screen.dart';
+import 'package:elearning/screens/profile/my_account_screen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -22,7 +25,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   Future<void> _fetchUserFirstName() async {
     try {
-      final User? user = FirebaseAuth.instance.currentUser;
+      final User? user = FirebaseAuth.instance.currentUser ;
       if (user != null) {
         final DocumentSnapshot userDoc = await FirebaseFirestore.instance
             .collection('Users')
@@ -34,19 +37,19 @@ class _ProfileScreenState extends State<ProfileScreen> {
             userDoc['Profile']['main']['firstName'];
 
         setState(() {
-          firstName = fetchedFirstName ?? "User"; // Fallback to "User" if null
+          firstName = fetchedFirstName ?? "User "; // Fallback to "User " if null
           isLoading = false; // Stop loading
         });
       } else {
         setState(() {
-          firstName = "User";
+          firstName = "User ";
           isLoading = false;
         });
       }
     } catch (e) {
       debugPrint('Error fetching user name: $e');
       setState(() {
-        firstName = "User";
+        firstName = "User ";
         isLoading = false;
       });
     }
@@ -71,7 +74,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
         title: isLoading
             ? const CircularProgressIndicator()
             : Text(
-                firstName ?? "User", // Show the first name in the AppBar title
+                firstName ?? "User ", // Show the first name in the AppBar title
                 style: const TextStyle(
                   color: Colors.black,
                   fontWeight: FontWeight.bold, // Make the username bold
@@ -96,19 +99,34 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     ProfileMenu(
                       text: "My Account",
                       icon: 'assets/icons/user.svg',
-                      press: () => {},
+                      press: () => {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => MyAccountScreen()),
+                        ),
+                      },
                       isDesktop: isDesktop,
                     ),
                     ProfileMenu(
                       text: "Settings",
                       icon: "assets/icons/setting.svg",
-                      press: () {},
+                      press: () => {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => SettingsScreen()),
+                        ),
+                      },
                       isDesktop: isDesktop,
                     ),
                     ProfileMenu(
                       text: "Help Center",
                       icon: "assets/icons/help.svg",
-                      press: () {},
+                      press: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => HelpCenterScreen()),
+                        );
+                      },
                       isDesktop: isDesktop,
                     ),
                     ProfileMenu(
@@ -159,32 +177,33 @@ class ProfilePic extends StatefulWidget {
 }
 
 class _ProfilePicState extends State<ProfilePic> {
-  Image? img;
+  String? profilePictureUrl; // Change to String to hold the URL
+
   @override
   void initState() {
     super.initState();
-    _fetchUserProfilePicture();
+    _fetchUserprofilePicture();
   }
 
-  Future<void> _fetchUserProfilePicture() async {
+  Future<void> _fetchUserprofilePicture() async {
     try {
-      final User? user = FirebaseAuth.instance.currentUser;
+      final User? user = FirebaseAuth.instance.currentUser ;
       if (user != null) {
         // Fetch the user's document from Firestore
         final DocumentSnapshot userDoc = await FirebaseFirestore.instance
             .collection('Users') // Ensure this matches your Firestore structure
             .doc(user.uid)
             .get();
-        final Image? fetchedImage =
-            userDoc['Profile']['main']['ProfilePicture'];
+        final String? fetchedImageUrl =
+            userDoc['Profile']['main']['profilePicture']; // Get the URL
         setState(() {
-          img = fetchedImage;
+          profilePictureUrl = fetchedImageUrl; // Store the URL
         });
       }
     } catch (e) {
       debugPrint('Error fetching user profile picture: $e');
       setState(() {
-        img = null; // Handle errors gracefully
+        profilePictureUrl = null; // Handle errors gracefully
       });
     }
   }
@@ -199,11 +218,10 @@ class _ProfilePicState extends State<ProfilePic> {
         clipBehavior: Clip.none,
         children: [
           CircleAvatar(
-            backgroundImage: img != null
-                ? NetworkImage((img as Image).image.toString())
-                : AssetImage("assets/images/boy_illustration.png")
-                    as ImageProvider, // Fallback to AssetImage
-            radius: 50.0,
+            backgroundImage: profilePictureUrl != null
+                ? NetworkImage(profilePictureUrl!)
+                : const AssetImage("assets/images/boy_illustration.png") as ImageProvider, // Fallback to AssetImage
+            radius: 60.0,
           ),
           Positioned(
             right: -15,
@@ -256,8 +274,7 @@ class ProfileMenu extends StatelessWidget {
             style: TextButton.styleFrom(
               foregroundColor: const Color(0xFFFF7643),
               padding: const EdgeInsets.all(20),
-              shape:
-                  RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
               backgroundColor: const Color(0xFFF5F6F9),
             ),
             onPressed: press,
