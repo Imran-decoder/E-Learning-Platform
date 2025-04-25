@@ -174,13 +174,27 @@ class _DetailedInfoScreenState extends State<DetailedInfoScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            ClipRRect(
-              borderRadius: BorderRadius.circular(12),
-              child: YoutubePlayer(
-                controller: _controller,
-                aspectRatio: 16 / 9,
-              ),
+
+            LayoutBuilder(
+              builder: (context, constraints) {
+                final double screenWidth = MediaQuery.of(context).size.width;
+                final double videoWidth = screenWidth * 0.6; // 90% of screen width
+                final double maxVideoHeight = MediaQuery.of(context).size.height * 0.7;
+                final double height = videoWidth / (16 / 9);
+
+                return Center(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(12),
+                    child: SizedBox(
+                      width: videoWidth,
+                      height: height > maxVideoHeight ? maxVideoHeight : height,
+                      child: YoutubePlayer(controller: _controller),
+                    ),
+                  ),
+                );
+              },
             ),
+
             const SizedBox(height: 16.0),
             Row(
               children: [
