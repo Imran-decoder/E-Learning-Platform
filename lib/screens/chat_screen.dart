@@ -185,10 +185,10 @@ class _ChatScreenState extends State<ChatScreen> {
             padding: const EdgeInsets.all(10.0),
             child: Row(
               children: [
-                IconButton(
-                  icon: const Icon(Icons.attach_file, color: Colors.orange),
-                  onPressed: _pickImage, // Trigger image picker
-                ),
+                // IconButton(
+                //   // icon: const Icon(Icons.attach_file, color: Colors.orange),
+                //   onPressed: _pickImage, // Trigger image picker
+                // ),
                 Expanded(
                   child: TextField(
                     controller: _controller,

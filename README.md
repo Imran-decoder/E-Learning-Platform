@@ -18,32 +18,7 @@ The development of an e-learning online courses Flutter project involves leverag
 
 </div>
 
-Some Screenshots Of The Application: 
-<p align="center" float="left">
-<table>
-  <tr>
-    <td>Logo</td>
-    <td>Home Screen</td>
-    <td>Course In Progress</td>
-  </tr>
-  <tr>
-    <td><img src="https://github.com/MuditAggarwal1/E-Learning-Project/assets/135834440/07420dfb-1433-40e6-bd9d-d7c6404e2f2f" width="220"></td>
-    <td><img src="https://github.com/MuditAggarwal1/E-Learning-Project/assets/135834440/1a2e1dec-57cc-40ca-af10-00917b7d525d" width="220"></td>
-    <td><img src="https://github.com/MuditAggarwal1/E-Learning-Project/assets/135834440/b1fbcc8a-f296-4ef9-9cdc-e2255b2d2ef6" width="220"></td>
-  </tr>
- </table>
- <table>
-  <tr
-    <td>Categories</td>
-  </tr>
-  <tr>
-    <td><img src="https://github.com/MuditAggarwal1/E-Learning-Project/assets/135834440/f9b1d057-41d2-435a-b284-7d53c0c48d81" width="220"></td>
-  </tr>
- </table>
- </p>
- APP APK LINK  (https://drive.google.com/file/d/14mXbCsZxE87AB31JfdKG16Q5UaCKX-YX/view?usp=sharing)
- 
- APP VIDEO LINK (https://drive.google.com/file/d/1Mf8mf51V2uxVW5_Br4CHtCb6YIlnFa7c/view?usp=sharing)
+
 
  
 # E-Learning-Project
