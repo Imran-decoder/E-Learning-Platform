@@ -3,7 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:google_generative_ai/google_generative_ai.dart';
 
-const apiKey = 'AIzaSyCYwUIfwmenL0BJ7nE5oEJkbYbpbZYfTes'; // Replace with your actual Gemini API key
+const apiKey =
+    'AIzaSyCYwUIfwmenL0BJ7nE5oEJkbYbpbZYfTes'; // Replace with your actual Gemini API key
 
 void main() {
   runApp(MyApp());
@@ -32,7 +33,8 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final TextEditingController _controller = TextEditingController();
   final ImagePicker _picker = ImagePicker();
-  final List<Map<String, dynamic>> _messages = []; // Supports both text and image messages
+  final List<Map<String, dynamic>> _messages =
+      []; // Supports both text and image messages
   late final GenerativeModel _model;
 
   @override
@@ -49,19 +51,20 @@ class _ChatScreenState extends State<ChatScreen> {
     setState(() {
       _messages.add({'type': 'image', 'content': image});
     });
-
     // For demonstration, describe the image manually
     // Replace this part with OCR or captioning if supported by your app
     String imageDescription = "This is an image uploaded by the user.";
 
     try {
-      final response = await _model.generateContent([Content.text(imageDescription)]);
+      final response =
+          await _model.generateContent([Content.text(imageDescription)]);
       setState(() {
         _messages.add({'type': 'response', 'content': response.text});
       });
     } catch (e) {
       setState(() {
-        _messages.add({'type': 'response', 'content': 'Error analyzing the image.'});
+        _messages
+            .add({'type': 'response', 'content': 'Error analyzing the image.'});
       });
     }
   }
@@ -82,13 +85,15 @@ class _ChatScreenState extends State<ChatScreen> {
       });
 
       try {
-        final response = await _model.generateContent([Content.text(_controller.text)]);
+        final response =
+            await _model.generateContent([Content.text(_controller.text)]);
         setState(() {
           _messages.add({'type': 'response', 'content': response.text});
         });
       } catch (e) {
         setState(() {
-          _messages.add({'type': 'response', 'content': 'Error fetching response.'});
+          _messages
+              .add({'type': 'response', 'content': 'Error fetching response.'});
         });
       }
 
@@ -159,7 +164,8 @@ class _ChatScreenState extends State<ChatScreen> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: const Color(0xFFFF9800),
-        title: const Text('Gemini Chat', style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+        title: const Text('Gemini Chat',
+            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
         centerTitle: true,
         elevation: 4,
       ),
@@ -170,7 +176,8 @@ class _ChatScreenState extends State<ChatScreen> {
               reverse: true,
               itemCount: _messages.length,
               itemBuilder: (context, index) {
-                return _buildMessageBubble(_messages[_messages.length - 1 - index]);
+                return _buildMessageBubble(
+                    _messages[_messages.length - 1 - index]);
               },
             ),
           ),
