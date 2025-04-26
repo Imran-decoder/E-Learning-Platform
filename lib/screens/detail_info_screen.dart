@@ -164,45 +164,48 @@ class _DetailedInfoScreenState extends State<DetailedInfoScreen> {
       appBar: AppBar(
         title: Text(
           widget.title,
-          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          style:
+              const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
         backgroundColor: Colors.deepOrangeAccent,
         elevation: 0,
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(8.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-
             LayoutBuilder(
               builder: (context, constraints) {
-                final double screenWidth = MediaQuery.of(context).size.width;
-                final double videoWidth = screenWidth * 0.6; // 90% of screen width
-                final double maxVideoHeight = MediaQuery.of(context).size.height * 0.7;
-                final double height = videoWidth / (16 / 9);
+                final isDesktop = constraints.maxWidth > 600;
+                final double maxVideoWidth =
+                    isDesktop ? 720 : constraints.maxWidth;
+                final double height =
+                    isDesktop ? maxVideoWidth / (16 / 9) : 220;
 
                 return Center(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: SizedBox(
-                      width: videoWidth,
-                      height: height > maxVideoHeight ? maxVideoHeight : height,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 2),
+                    width: maxVideoWidth,
+                    height: height,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
                       child: YoutubePlayer(controller: _controller),
                     ),
                   ),
                 );
               },
             ),
-
             const SizedBox(height: 16.0),
             Row(
               children: [
-                const Icon(Icons.timer, color: Colors.deepOrangeAccent, size: 20),
+                const Icon(Icons.timer,
+                    color: Colors.deepOrangeAccent, size: 20),
                 const SizedBox(width: 8.0),
                 Text(
                   'Duration: ${widget.duration} seconds',
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                      fontSize: 16, fontWeight: FontWeight.w600),
                 ),
               ],
             ),
@@ -224,12 +227,17 @@ class _DetailedInfoScreenState extends State<DetailedInfoScreen> {
                   child: ElevatedButton(
                     onPressed: isCourseCompleted ? _markTaskAsCompleted : null,
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: isCourseCompleted ? Colors.deepOrangeAccent : Colors.grey,
+                      backgroundColor: isCourseCompleted
+                          ? Colors.deepOrangeAccent
+                          : Colors.grey,
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30)),
                       elevation: 8,
                     ),
-                    child: const Text('Course Completed', style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                    child: const Text('Course Completed',
+                        style: TextStyle(
+                            fontSize: 18, fontWeight: FontWeight.bold)),
                   ),
                 ),
                 const SizedBox(height: 12),
@@ -240,11 +248,13 @@ class _DetailedInfoScreenState extends State<DetailedInfoScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.blue,
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30)),
                       elevation: 8,
                     ),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center, // Centers the text and icon
+                      mainAxisAlignment:
+                          MainAxisAlignment.center, // Centers the text and icon
                       children: const [
                         Text(
                           'View Document',
@@ -254,8 +264,10 @@ class _DetailedInfoScreenState extends State<DetailedInfoScreen> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(width: 8), // Adds spacing between text and icon
-                        Icon(Icons.arrow_forward, color: Colors.white, size: 28),
+                        SizedBox(
+                            width: 8), // Adds spacing between text and icon
+                        Icon(Icons.arrow_forward,
+                            color: Colors.white, size: 28),
                       ],
                     ),
                   ),
@@ -268,11 +280,13 @@ class _DetailedInfoScreenState extends State<DetailedInfoScreen> {
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.orangeAccent,
                       padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+                      shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(30)),
                       elevation: 8,
                     ),
                     child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center, // Centers the content
+                      mainAxisAlignment:
+                          MainAxisAlignment.center, // Centers the content
                       children: const [
                         Text(
                           'Take Quiz',
@@ -282,8 +296,10 @@ class _DetailedInfoScreenState extends State<DetailedInfoScreen> {
                             color: Colors.white,
                           ),
                         ),
-                        SizedBox(width: 8), // Adds spacing between text and icon
-                        Icon(Icons.arrow_forward, color: Colors.white, size: 28),
+                        SizedBox(
+                            width: 8), // Adds spacing between text and icon
+                        Icon(Icons.arrow_forward,
+                            color: Colors.white, size: 28),
                       ],
                     ),
                   ),
@@ -306,12 +322,16 @@ class DocumentViewerScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Document Viewer', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24)),
+        title: const Text('Document Viewer',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24)),
         backgroundColor: Colors.redAccent,
         centerTitle: true,
         foregroundColor: Colors.white,
       ),
-      body: WebViewWidget(controller: WebViewController()..setJavaScriptMode(JavaScriptMode.unrestricted)..loadRequest(Uri.parse(docUrl))),
+      body: WebViewWidget(
+          controller: WebViewController()
+            ..setJavaScriptMode(JavaScriptMode.unrestricted)
+            ..loadRequest(Uri.parse(docUrl))),
     );
   }
 }
