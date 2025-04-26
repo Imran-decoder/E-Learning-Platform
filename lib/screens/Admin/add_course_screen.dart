@@ -105,6 +105,7 @@ class AddChapter extends StatefulWidget {
   final TextEditingController videoLinkController;
   final TextEditingController durationController;
   final TextEditingController documentLinkController;
+  final TextEditingController quizLinkController;
   final VoidCallback onRemove;
 
   const AddChapter({
@@ -115,6 +116,7 @@ class AddChapter extends StatefulWidget {
     required this.videoLinkController,
     required this.durationController,
     required this.documentLinkController,
+    required this.quizLinkController,
     required this.onRemove,
   });
 
@@ -277,7 +279,9 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
         'video': TextEditingController(),
         'duration': TextEditingController(),
         'document' : TextEditingController(),
+        'quizLink': TextEditingController(),//google form link
         'quizzes': [],
+        'googleFormUrls': [], // Initialize the list for Google Form URLs
       });
     });
   }
@@ -295,6 +299,18 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
         'options': List.generate(4, (index) => TextEditingController()),  // Ensure this list is initialized
         'correctAnswer': TextEditingController(),
       });
+    });
+  }
+
+  void _addGoogleFormUrl(int chapterIndex) {
+    setState(() {
+      chapters[chapterIndex]['googleFormUrls'].add(TextEditingController());
+    });
+  }
+
+  void _removeGoogleFormUrl(int chapterIndex, int urlIndex) {
+    setState(() {
+      chapters[chapterIndex]['googleFormUrls'].removeAt(urlIndex);
     });
   }
 
@@ -340,6 +356,7 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
         String chapterVideo = chapter['video']!.text;
         String chapterDuration = chapter['duration']!.text;
         String chapterDocument = chapter['document']!.text;
+        String chapterQuizLink = chapter['quizLink']!.text;
         if (chapterTitle.isEmpty || chapterDescription.isEmpty || chapterNumber.isEmpty) {
           continue;  // Skip this chapter if any essential fields are empty
         }
@@ -351,6 +368,7 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
           'video': chapterVideo.isEmpty ? "" : chapterVideo,  // Default empty string if no video link
           'duration': chapterDuration.isEmpty ? "" : chapterDuration,  // Default empty string if no duration
           'document' : chapterDocument.isEmpty ? "" : chapterDocument,
+          'quizLink': chapterQuizLink.isEmpty ? "" : chapterQuizLink,  // Default empty string if no quiz link
         };
 
         DocumentReference chapterRef = await courseRef.collection('tasks').add(taskData);
@@ -521,7 +539,8 @@ Future<void> sendCourseAddedNotification(String courseTitle) async {
                           videoLinkController: chapters[chapterIndex]['video']!,
                           durationController: chapters[chapterIndex]['duration']!,
                           documentLinkController: chapters[chapterIndex]['document']!,
-                          onRemove: () => _removeChapter(chapterIndex),
+                          quizLinkController: chapters[chapterIndex]['quizLink'],
+                          onRemove: () => _removeChapter(chapterIndex), 
                         ),
                         // Add quiz button
                         Padding(
@@ -547,6 +566,62 @@ Future<void> sendCourseAddedNotification(String courseTitle) async {
                             ),
                           ),
                         ),
+
+                        // Add Google Form URL button
+                        Padding(
+                          padding: const EdgeInsets.only(bottom: 20.0),
+                          child: ElevatedButton.icon(
+                            onPressed: () => _addGoogleFormUrl(chapterIndex),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.orange,
+                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(30),
+                              ),
+                              minimumSize: Size(MediaQuery.of(context).size.width - 40, 50),
+                            ),
+                            icon: const Icon(Icons.add_link, color: Colors.white),
+                            label: const Text(
+                              'Add Google Form URL',
+                              style: TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+
+                        // Render Google Form URLs for this chapter
+                        Column(
+                          children: List.generate(chapters[chapterIndex]['googleFormUrls']?.length ?? 0, (urlIndex) {
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 12.0),
+                              child: Row(
+                                children: [
+                                  Expanded(
+                                    child: TextField(
+                                      controller: chapters[chapterIndex]['googleFormUrls'][urlIndex],
+                                      style: const TextStyle(color: Colors.white),
+                                      decoration: const InputDecoration(
+                                        labelText: "Google Form URL",
+                                        labelStyle: TextStyle(color: Colors.white),
+                                        border: OutlineInputBorder(),
+                                        filled: true,
+                                        fillColor: Colors.black54,
+                                      ),
+                                    ),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.remove_circle_outline, color: Colors.red),
+                                    onPressed: () => _removeGoogleFormUrl(chapterIndex, urlIndex),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }),
+                        ),
+
                         // Render quizzes for this chapter
                         Column(
                           children: List.generate(chapters[chapterIndex]['quizzes']?.length ?? 0, (quizIndex) {
