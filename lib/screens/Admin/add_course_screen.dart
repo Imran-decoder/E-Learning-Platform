@@ -2,8 +2,102 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:image_picker/image_picker.dart';
+// import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart' as http;
+
+// import 'package:flutter/material.dart';
+// import 'package:cloud_firestore/cloud_firestore.dart';
+
+class AddGoogleFormUrlScreen extends StatefulWidget {
+  @override
+  _AddGoogleFormUrlScreenState createState() => _AddGoogleFormUrlScreenState();
+}
+
+class _AddGoogleFormUrlScreenState extends State<AddGoogleFormUrlScreen> {
+  final TextEditingController _googleFormUrlController =
+      TextEditingController();
+  bool _isLoading = false;
+
+  Future<void> _saveGoogleFormUrl() async {
+    String url = _googleFormUrlController.text.trim();
+    if (url.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Please enter a Google Form URL')),
+      );
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      await FirebaseFirestore.instance.collection('quiz-form').add({
+        'url': url,
+        'timestamp': FieldValue.serverTimestamp(),
+      });
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Google Form URL saved successfully!')),
+      );
+      _googleFormUrlController.clear();
+    } catch (e) {
+      print('Error saving Google Form URL: $e');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Failed to save URL')),
+      );
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          TextField(
+            controller: _googleFormUrlController,
+            style: TextStyle(color: Colors.white),
+            decoration: InputDecoration(
+              labelText: 'Google Form URL',
+              labelStyle: TextStyle(color: Colors.white),
+              border: OutlineInputBorder(),
+              filled: true,
+              fillColor: Colors.black54,
+            ),
+          ),
+          SizedBox(height: 20),
+          ElevatedButton.icon(
+            onPressed: _isLoading ? null : _saveGoogleFormUrl,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.orange,
+              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(30),
+              ),
+              minimumSize: Size(MediaQuery.of(context).size.width - 40, 50),
+            ),
+            icon: Icon(Icons.add_link, color: Colors.white),
+            label: _isLoading
+                ? CircularProgressIndicator(color: Colors.white)
+                : Text(
+                    'Save Google Form URL',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+          ),
+        ],
+      ),
+    );
+  }
+}
 
 class AddQuizScreen extends StatelessWidget {
   final TextEditingController questionController;
@@ -53,7 +147,8 @@ class AddQuizScreen extends StatelessWidget {
           // Options Fields with consistent space between each
           for (var i = 0; i < 4; i++) ...[
             Padding(
-              padding: const EdgeInsets.only(bottom: 12.0), // Space between each option
+              padding: const EdgeInsets.only(
+                  bottom: 12.0), // Space between each option
               child: TextField(
                 controller: options[i],
                 style: const TextStyle(color: Colors.white),
@@ -101,7 +196,7 @@ class AddQuizScreen extends StatelessWidget {
 class AddChapter extends StatefulWidget {
   final TextEditingController titleController;
   final TextEditingController descriptionController;
-  final TextEditingController  chapterNoController;
+  final TextEditingController chapterNoController;
   final TextEditingController videoLinkController;
   final TextEditingController durationController;
   final TextEditingController documentLinkController;
@@ -248,27 +343,13 @@ class AddCourseScreen extends StatefulWidget {
 }
 
 class _AddCourseScreenState extends State<AddCourseScreen> {
-  String? _logo = "https://upload.wikimedia.org/wikipedia/commons/0/0e/DefaultImage.png";
+  String? _logo =
+      "https://upload.wikimedia.org/wikipedia/commons/0/0e/DefaultImage.png";
   final TextEditingController _titleController = TextEditingController();
   final TextEditingController _descriptionController = TextEditingController();
+  final TextEditingController _formUrlController = TextEditingController();
   List<Map<String, dynamic>> chapters = [];
   bool _isLoading = false;
-
-  final ImagePicker _picker = ImagePicker();
-
-  // Modify to ensure that logo isn't stored as null
-  // Future<void> _setImageUrl() async {
-  //   final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-  //
-  //   setState(() {
-  //     if (pickedFile != null) {
-  //       // If an image is selected, store its path
-  //       _logo = pickedFile.path;
-  //     } else {
-  //       _logo = _logo ?? "url_to_image";  // Ensuring the default URL is used if logo is null
-  //     }
-  //   });
-  // }
 
   void _addChapter() {
     setState(() {
@@ -278,10 +359,9 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
         'number': TextEditingController(),
         'video': TextEditingController(),
         'duration': TextEditingController(),
-        'document' : TextEditingController(),
-        'quizLink': TextEditingController(),//google form link
+        'document': TextEditingController(),
+        'quizLink': TextEditingController(),
         'quizzes': [],
-        'googleFormUrls': [], // Initialize the list for Google Form URLs
       });
     });
   }
@@ -296,24 +376,26 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
     setState(() {
       chapters[chapterIndex]['quizzes'].add({
         'question': TextEditingController(),
-        'options': List.generate(4, (index) => TextEditingController()),  // Ensure this list is initialized
+        'options': List.generate(
+            4,
+            (index) =>
+                TextEditingController()), // Ensure this list is initialized
         'correctAnswer': TextEditingController(),
       });
     });
   }
 
-  void _addGoogleFormUrl(int chapterIndex) {
-    setState(() {
-      chapters[chapterIndex]['googleFormUrls'].add(TextEditingController());
-    });
-  }
+  // void _addGoogleFormUrl(int chapterIndex) {
+  //   setState(() {
+  //     chapters[chapterIndex]['googleFormUrls'].add(TextEditingController());
+  //   });
+  // }
 
-  void _removeGoogleFormUrl(int chapterIndex, int urlIndex) {
-    setState(() {
-      chapters[chapterIndex]['googleFormUrls'].removeAt(urlIndex);
-    });
-  }
-
+  // void _removeGoogleFormUrl(int chapterIndex, int urlIndex) {
+  //   setState(() {
+  //     chapters[chapterIndex]['googleFormUrls'].removeAt(urlIndex);
+  //   });
+  // }
 
   void _removeQuiz(int chapterIndex, int quizIndex) {
     setState(() {
@@ -329,7 +411,8 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
     String courseTitle = _titleController.text;
 
     if (courseTitle.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Course title is required')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Course title is required')));
       setState(() {
         _isLoading = false;
       });
@@ -338,7 +421,7 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
 
     // Ensure that logo is not null
     if (_logo == null || _logo!.isEmpty) {
-      _logo = "url_to_image";  // Set default image URL if no logo is selected
+      _logo = "url_to_image"; // Set default image URL if no logo is selected
     }
 
     Map<String, dynamic> courseData = {
@@ -347,7 +430,9 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
     };
 
     try {
-      DocumentReference courseRef = await FirebaseFirestore.instance.collection('Courses').add(courseData);
+      DocumentReference courseRef = await FirebaseFirestore.instance
+          .collection('Courses')
+          .add(courseData);
 
       for (var chapter in chapters) {
         String chapterTitle = chapter['title']!.text;
@@ -357,21 +442,30 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
         String chapterDuration = chapter['duration']!.text;
         String chapterDocument = chapter['document']!.text;
         String chapterQuizLink = chapter['quizLink']!.text;
-        if (chapterTitle.isEmpty || chapterDescription.isEmpty || chapterNumber.isEmpty) {
-          continue;  // Skip this chapter if any essential fields are empty
+        if (chapterTitle.isEmpty ||
+            chapterDescription.isEmpty ||
+            chapterNumber.isEmpty) {
+          continue; // Skip this chapter if any essential fields are empty
         }
 
         Map<String, dynamic> taskData = {
           'title': chapterTitle,
           'description': chapterDescription,
           'number': int.tryParse(chapterNumber) ?? 0,
-          'video': chapterVideo.isEmpty ? "" : chapterVideo,  // Default empty string if no video link
-          'duration': chapterDuration.isEmpty ? "" : chapterDuration,  // Default empty string if no duration
-          'document' : chapterDocument.isEmpty ? "" : chapterDocument,
-          'quizLink': chapterQuizLink.isEmpty ? "" : chapterQuizLink,  // Default empty string if no quiz link
+          'video': chapterVideo.isEmpty
+              ? ""
+              : chapterVideo, // Default empty string if no video link
+          'duration': chapterDuration.isEmpty
+              ? ""
+              : chapterDuration, // Default empty string if no duration
+          'document': chapterDocument.isEmpty ? "" : chapterDocument,
+          'quizLink': chapterQuizLink.isEmpty
+              ? ""
+              : chapterQuizLink, // Default empty string if no quiz link
         };
 
-        DocumentReference chapterRef = await courseRef.collection('tasks').add(taskData);
+        DocumentReference chapterRef =
+            await courseRef.collection('tasks').add(taskData);
 
         for (var quiz in chapter['quizzes']) {
           String question = quiz['question']!.text;
@@ -383,8 +477,10 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
           ];
           String correctAnswer = quiz['correctAnswer']!.text;
 
-          if (question.isEmpty || correctAnswer.isEmpty || options.any((opt) => opt.isEmpty)) {
-            continue;  // Skip quiz if any essential field is empty
+          if (question.isEmpty ||
+              correctAnswer.isEmpty ||
+              options.any((opt) => opt.isEmpty)) {
+            continue; // Skip quiz if any essential field is empty
           }
 
           Map<String, dynamic> quizData = {
@@ -396,9 +492,16 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
           await chapterRef.collection('quizQuestions').add(quizData);
         }
       }
+      String url = _formUrlController.text.trim();
+      if (url.isNotEmpty) {
+        await courseRef.collection('googleForm').add({
+          'url': url,
+          'timestamp': FieldValue.serverTimestamp(),
+        });
+      }
+
       // Send Notification (Message) after adding course
       await sendCourseAddedNotification(courseTitle);
-
     } catch (e) {
       print('Error adding course: $e');
     }
@@ -407,17 +510,20 @@ class _AddCourseScreenState extends State<AddCourseScreen> {
       _titleController.clear();
       _descriptionController.clear();
       chapters.clear();
+      _formUrlController.clear();
       _logo = null;
       _isLoading = false;
     });
 
-    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Course added successfully')));
+    ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Course added successfully')));
   }
 
-Future<void> sendCourseAddedNotification(String courseTitle) async {
-    try{
+  Future<void> sendCourseAddedNotification(String courseTitle) async {
+    try {
       String notificationTitle = "New Course Added";
-      String notificationBody = "New course $courseTitle has been added to the platform.";
+      String notificationBody =
+          "New course $courseTitle has been added to the platform.";
 
       // ✅ Step 1: Store notification in Firestore (for in-app notification screen)
       await FirebaseFirestore.instance.collection('notifications').add({
@@ -429,10 +535,10 @@ Future<void> sendCourseAddedNotification(String courseTitle) async {
 
       // ✅ Step 2: Send push notification to users via FCM
       await sendPushNotification(notificationTitle, notificationBody);
-    } catch (e){
-     print('Error sending Notification $e');
+    } catch (e) {
+      print('Error sending Notification $e');
     }
-}
+  }
 
 // Function to send FCM Push Notification
   Future<void> sendPushNotification(String title, String body) async {
@@ -440,10 +546,12 @@ Future<void> sendCourseAddedNotification(String courseTitle) async {
       String serverKey = '7412734dc7727d8078ae52dd2d6f956e26815c14';
 
       // Step 1: Fetch user FCM tokens from Firestore
-      QuerySnapshot usersSnapshot = await FirebaseFirestore.instance.collection('Users').get();
+      QuerySnapshot usersSnapshot =
+          await FirebaseFirestore.instance.collection('Users').get();
 
       // Step 2: Collect FCM tokens from users
-      List<String> userTokens = usersSnapshot.docs.map((doc) => doc['fcm_token'] as String).toList();
+      List<String> userTokens =
+          usersSnapshot.docs.map((doc) => doc['fcm_token'] as String).toList();
 
       // Step 3: Send the notification to all users (if tokens exist)
       if (userTokens.isNotEmpty) {
@@ -455,13 +563,14 @@ Future<void> sendCourseAddedNotification(String courseTitle) async {
               'Authorization': 'key=$serverKey', // Auth with FCM
             },
             body: jsonEncode({
-              'to': token,  // Send notification to each user individually
+              'to': token, // Send notification to each user individually
               'notification': {
                 'title': title,
                 'body': body,
               },
               'data': {
-                'screen': '/screen/notification_screen',  // Used for navigation when tapped
+                'screen':
+                    '/screen/notification_screen', // Used for navigation when tapped
               },
             }),
           );
@@ -473,6 +582,7 @@ Future<void> sendCourseAddedNotification(String courseTitle) async {
       print("Error sending FCM push notification: $e");
     }
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -490,28 +600,12 @@ Future<void> sendCourseAddedNotification(String courseTitle) async {
               children: [
                 const Text(
                   "Enter Course Details",
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
+                  style: TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
                 ),
                 const SizedBox(height: 20),
-
-                // Course Image Selection
-                // GestureDetector(
-                //  // onTap: _setImageUrl,
-                //   child: Container(
-                //     width: double.infinity,
-                //     height: 200,
-                //     decoration: BoxDecoration(color: Colors.grey[800], borderRadius: BorderRadius.circular(12)),
-                //     child: _logo == null
-                //         ? const Center(
-                //      // child: Icon(Icons.add_a_photo, color: Colors.white, size: 40),
-                //     )
-                //         : Image.network(
-                //       _logo!,
-                //       fit: BoxFit.cover,
-                //     ),
-                //   ),
-                // ),
-                // const SizedBox(height: 20),
 
                 // Course Title Field
                 TextField(
@@ -527,6 +621,19 @@ Future<void> sendCourseAddedNotification(String courseTitle) async {
                 ),
                 const SizedBox(height: 20),
 
+                TextField(
+                  controller: _formUrlController,
+                  style: const TextStyle(color: Colors.white),
+                  decoration: const InputDecoration(
+                    labelText: "Google Form URL",
+                    labelStyle: TextStyle(color: Colors.white),
+                    border: OutlineInputBorder(),
+                    filled: true,
+                    fillColor: Colors.black54,
+                  ),
+                ),
+                const SizedBox(height: 20),
+
                 // Chapters List
                 Column(
                   children: List.generate(chapters.length, (chapterIndex) {
@@ -534,13 +641,18 @@ Future<void> sendCourseAddedNotification(String courseTitle) async {
                       children: [
                         AddChapter(
                           titleController: chapters[chapterIndex]['title']!,
-                          descriptionController: chapters[chapterIndex]['description']!,
-                          chapterNoController: chapters[chapterIndex]['number']!,
+                          descriptionController: chapters[chapterIndex]
+                              ['description']!,
+                          chapterNoController: chapters[chapterIndex]
+                              ['number']!,
                           videoLinkController: chapters[chapterIndex]['video']!,
-                          durationController: chapters[chapterIndex]['duration']!,
-                          documentLinkController: chapters[chapterIndex]['document']!,
-                          quizLinkController: chapters[chapterIndex]['quizLink'],
-                          onRemove: () => _removeChapter(chapterIndex), 
+                          durationController: chapters[chapterIndex]
+                              ['duration']!,
+                          documentLinkController: chapters[chapterIndex]
+                              ['document']!,
+                          quizLinkController: chapters[chapterIndex]
+                              ['quizLink'],
+                          onRemove: () => _removeChapter(chapterIndex),
                         ),
                         // Add quiz button
                         Padding(
@@ -549,40 +661,17 @@ Future<void> sendCourseAddedNotification(String courseTitle) async {
                             onPressed: () => _addQuiz(chapterIndex),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.blue,
-                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                              padding: const EdgeInsets.symmetric(
+                                  vertical: 12, horizontal: 20),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(30),
                               ),
-                              minimumSize: Size(MediaQuery.of(context).size.width - 40, 50),
+                              minimumSize: Size(
+                                  MediaQuery.of(context).size.width - 40, 50),
                             ),
                             icon: const Icon(Icons.add, color: Colors.white),
                             label: const Text(
-                                'Add Quiz',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                            ),
-                          ),
-                        ),
-
-                        // Add Google Form URL button
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 20.0),
-                          child: ElevatedButton.icon(
-                            onPressed: () => _addGoogleFormUrl(chapterIndex),
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: Colors.orange,
-                              padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(30),
-                              ),
-                              minimumSize: Size(MediaQuery.of(context).size.width - 40, 50),
-                            ),
-                            icon: const Icon(Icons.add_link, color: Colors.white),
-                            label: const Text(
-                              'Add Google Form URL',
+                              'Add Quiz',
                               style: TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
@@ -591,45 +680,58 @@ Future<void> sendCourseAddedNotification(String courseTitle) async {
                             ),
                           ),
                         ),
+                        // Column(
+                        //   children: [
+                        //     // Add Google Form URL Screen
+                        //     AddGoogleFormUrlScreen(),
+                        //   ],
+                        // ),
 
                         // Render Google Form URLs for this chapter
-                        Column(
-                          children: List.generate(chapters[chapterIndex]['googleFormUrls']?.length ?? 0, (urlIndex) {
-                            return Padding(
-                              padding: const EdgeInsets.only(bottom: 12.0),
-                              child: Row(
-                                children: [
-                                  Expanded(
-                                    child: TextField(
-                                      controller: chapters[chapterIndex]['googleFormUrls'][urlIndex],
-                                      style: const TextStyle(color: Colors.white),
-                                      decoration: const InputDecoration(
-                                        labelText: "Google Form URL",
-                                        labelStyle: TextStyle(color: Colors.white),
-                                        border: OutlineInputBorder(),
-                                        filled: true,
-                                        fillColor: Colors.black54,
-                                      ),
-                                    ),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.remove_circle_outline, color: Colors.red),
-                                    onPressed: () => _removeGoogleFormUrl(chapterIndex, urlIndex),
-                                  ),
-                                ],
-                              ),
-                            );
-                          }),
-                        ),
+                        // Column(
+                        //   children: List.generate(chapters[chapterIndex]['googleFormUrls']?.length ?? 0, (urlIndex) {
+                        //     return AddGoogleFormUrlScreen();
+                        //     // Padding(
+                        //     //   padding: const EdgeInsets.only(bottom: 12.0),
+                        //     //   child: Row(
+                        //     //     children: [
+                        //     //       Expanded(
+                        //     //         child: TextField(
+                        //     //           controller: chapters[chapterIndex]['googleFormUrls'][urlIndex],
+                        //     //           style: const TextStyle(color: Colors.white),
+                        //     //           decoration: const InputDecoration(
+                        //     //             labelText: "Google Form URL",
+                        //     //             labelStyle: TextStyle(color: Colors.white),
+                        //     //             border: OutlineInputBorder(),
+                        //     //             filled: true,
+                        //     //             fillColor: Colors.black54,
+                        //     //           ),
+                        //     //         ),
+                        //     //       ),
+                        //     //       IconButton(
+                        //     //         icon: const Icon(Icons.remove_circle_outline, color: Colors.red),
+                        //     //         onPressed: () => _removeGoogleFormUrl(chapterIndex, urlIndex),
+                        //     //       ),
+                        //     //     ],
+                        //     //   ),
+                        //     // );
+                        //   }),
+                        // ),
 
                         // Render quizzes for this chapter
                         Column(
-                          children: List.generate(chapters[chapterIndex]['quizzes']?.length ?? 0, (quizIndex) {
+                          children: List.generate(
+                              chapters[chapterIndex]['quizzes']?.length ?? 0,
+                              (quizIndex) {
                             return AddQuizScreen(
-                              questionController: chapters[chapterIndex]['quizzes'][quizIndex]['question']!,
-                              options: chapters[chapterIndex]['quizzes'][quizIndex]['options']!,
-                              correctAnswerController: chapters[chapterIndex]['quizzes'][quizIndex]['correctAnswer']!,
-                              onRemove: () => _removeQuiz(chapterIndex, quizIndex),
+                              questionController: chapters[chapterIndex]
+                                  ['quizzes'][quizIndex]['question']!,
+                              options: chapters[chapterIndex]['quizzes']
+                                  [quizIndex]['options']!,
+                              correctAnswerController: chapters[chapterIndex]
+                                  ['quizzes'][quizIndex]['correctAnswer']!,
+                              onRemove: () =>
+                                  _removeQuiz(chapterIndex, quizIndex),
                             );
                           }),
                         ),
@@ -650,7 +752,8 @@ Future<void> sendCourseAddedNotification(String courseTitle) async {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30),
                         ),
-                        minimumSize: Size(MediaQuery.of(context).size.width / 2 - 24, 60),
+                        minimumSize: Size(
+                            MediaQuery.of(context).size.width / 2 - 24, 60),
                       ),
                       child: const Text(
                         'Add Chapter',
@@ -665,14 +768,16 @@ Future<void> sendCourseAddedNotification(String courseTitle) async {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(30),
                         ),
-                        minimumSize: Size(MediaQuery.of(context).size.width / 2 - 24, 60),
+                        minimumSize: Size(
+                            MediaQuery.of(context).size.width / 2 - 24, 60),
                       ),
                       child: _isLoading
                           ? const CircularProgressIndicator(color: Colors.white)
                           : const Text(
-                        'Add Course',
-                        style: TextStyle(fontSize: 18, color: Colors.white),
-                      ),
+                              'Add Course',
+                              style:
+                                  TextStyle(fontSize: 18, color: Colors.white),
+                            ),
                     ),
                   ],
                 ),
