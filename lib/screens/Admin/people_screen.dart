@@ -51,14 +51,17 @@ class PeopleScreen extends StatelessWidget {
                           ConnectionState.waiting) {
                         return const Center(child: CircularProgressIndicator());
                       }
-                      final currentUserIsSuperAdmin = superAdminSnapshot.data ?? false;
+                      final currentUserIsSuperAdmin =
+                          superAdminSnapshot.data ?? false;
                       return ListView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
                         itemCount: admins.length,
                         itemBuilder: (context, index) {
                           final admin = admins[index];
-                          final name = admin['Profile']?['main']?['firstName'] ?? "Unknown";
+                          final name = admin['Profile']?['main']
+                                  ?['firstName'] ??
+                              "Unknown";
                           final username = admin['userName'] ?? "No username";
                           final userId = admin.id;
                           return _buildPersonTile(
@@ -88,7 +91,8 @@ class PeopleScreen extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               _buildNewUserRequests(context),
-              const SizedBox(height: 8), // Reduced gap between requests and classmates
+              const SizedBox(
+                  height: 8), // Reduced gap between requests and classmates
 
               // Classmates Section (Non-admin users)
               const Text(
@@ -104,7 +108,8 @@ class PeopleScreen extends StatelessWidget {
                 child: StreamBuilder<QuerySnapshot>(
                   stream: FirebaseFirestore.instance
                       .collection('Users')
-                      .where('isAdmin', isEqualTo: false) // Fetch only non-admins
+                      .where('isAdmin',
+                          isEqualTo: false) // Fetch only non-admins
                       .snapshots(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
@@ -136,7 +141,8 @@ class PeopleScreen extends StatelessWidget {
                   },
                 ),
               ),
-              const SizedBox(height: 80), // Reduced gap between classmates and bottom
+              const SizedBox(
+                  height: 80), // Reduced gap between classmates and bottom
             ],
           ),
         ),
@@ -253,8 +259,8 @@ class PeopleScreen extends StatelessWidget {
     }
   }
 
-  Widget _buildRequestTile(BuildContext context, String requestId, String userId,
-      String courseId, bool allotted, String email) {
+  Widget _buildRequestTile(BuildContext context, String requestId,
+      String userId, String courseId, bool allotted, String email) {
     return FutureBuilder<Map<String, String>>(
       future: _getUserAndCourseInfo(userId, courseId),
       builder: (context, snapshot) {
@@ -302,12 +308,14 @@ class PeopleScreen extends StatelessWidget {
                               .update({'allotted': true});
                           ScaffoldMessenger.of(context).showSnackBar(
                             const SnackBar(
-                                content: Text("Request approved and user enrolled.")),
+                                content: Text(
+                                    "Request approved and user enrolled.")),
                           );
                         } catch (e) {
                           print("Error approving request: $e");
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text("Error approving request.")),
+                            const SnackBar(
+                                content: Text("Error approving request.")),
                           );
                         }
                       },
@@ -331,7 +339,8 @@ class PeopleScreen extends StatelessWidget {
                         } catch (e) {
                           print("Error rejecting request: $e");
                           ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(content: Text("Error rejecting request.")),
+                            const SnackBar(
+                                content: Text("Error rejecting request.")),
                           );
                         }
                       },
@@ -352,7 +361,8 @@ class PeopleScreen extends StatelessWidget {
   }
 
   /// Helper method that fetches the username and course title based on the userId and courseId.
-  Future<Map<String, String>> _getUserAndCourseInfo(String userId, String courseId) async {
+  Future<Map<String, String>> _getUserAndCourseInfo(
+      String userId, String courseId) async {
     final userDoc =
         await FirebaseFirestore.instance.collection('Users').doc(userId).get();
     final courseDoc = await FirebaseFirestore.instance
@@ -445,7 +455,10 @@ class PeopleScreen extends StatelessWidget {
           fontSize: 14,
         ),
       ),
-      trailing: showDemoteButton && userId != null && context != null && FirebaseAuth.instance.currentUser!.uid != userId
+      trailing: showDemoteButton &&
+              userId != null &&
+              context != null &&
+              FirebaseAuth.instance.currentUser!.uid != userId
           ? TextButton(
               onPressed: () => _showDemotionDialog(context, name, userId),
               child: const Text("Demote", style: TextStyle(color: Colors.red)),
@@ -495,7 +508,8 @@ class PeopleScreen extends StatelessWidget {
   }
 
   /// Builds a person tile that shows a user's username and email.
-  Widget _buildPersonRequestTile(String name, String email, {required String username, bool isAdmin = false}) {
+  Widget _buildPersonRequestTile(String name, String email,
+      {required String username, bool isAdmin = false}) {
     return ListTile(
       leading: CircleAvatar(
         backgroundColor: isAdmin ? Colors.tealAccent : Colors.grey[800],

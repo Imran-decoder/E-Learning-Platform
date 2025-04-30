@@ -23,9 +23,12 @@ class _EditChapterComponentState extends State<EditChapterComponent> {
   final TextEditingController _courseTitleController = TextEditingController();
   late Map<String, Map<String, dynamic>> chaptersData;
   final Map<String, TextEditingController> _controllers = {};
-  final Map<String, List<Map<String, dynamic>>> _quizQuestions = {}; // To hold quiz data for each chapter
-  final Map<String, List<TextEditingController>> _quizControllers = {}; // For editing quiz questions
-  final Map<String, List<String>> _correctAnswers = {}; // To store correct answers for each quiz
+  final Map<String, List<Map<String, dynamic>>> _quizQuestions =
+      {}; // To hold quiz data for each chapter
+  final Map<String, List<TextEditingController>> _quizControllers =
+      {}; // For editing quiz questions
+  final Map<String, List<String>> _correctAnswers =
+      {}; // To store correct answers for each quiz
 
   @override
   void initState() {
@@ -61,8 +64,10 @@ class _EditChapterComponentState extends State<EditChapterComponent> {
 
       setState(() {
         _quizQuestions[chapterId] = quizData;
-        _quizControllers[chapterId] = List.generate(quizData.length,
-                (index) => TextEditingController(text: quizData[index]['question']));
+        _quizControllers[chapterId] = List.generate(
+            quizData.length,
+            (index) =>
+                TextEditingController(text: quizData[index]['question']));
 
         // Initialize the correct answers for the chapter
         _correctAnswers[chapterId] = List.generate(
@@ -97,7 +102,6 @@ class _EditChapterComponentState extends State<EditChapterComponent> {
 
       // Update chapters
       for (var chapterId in chaptersData.keys) {
-
         // Check if the chapter exists first
         DocumentSnapshot chapterSnapshot = await FirebaseFirestore.instance
             .collection('Courses')
@@ -121,12 +125,11 @@ class _EditChapterComponentState extends State<EditChapterComponent> {
             'document': chaptersData[chapterId]?.containsKey('document') == true
                 ? chaptersData[chapterId]!['document'] ?? ''
                 : '',
-            'duration' : chaptersData[chapterId]!['duration'] ?? '',
+            'duration': chaptersData[chapterId]!['duration'] ?? '',
           });
 
           // Update quiz questions
           for (int i = 0; i < _quizQuestions[chapterId]!.length; i++) {
-
             DocumentSnapshot quizSnapshot = await FirebaseFirestore.instance
                 .collection('Courses')
                 .doc(widget.courseId)
@@ -173,7 +176,7 @@ class _EditChapterComponentState extends State<EditChapterComponent> {
   Widget build(BuildContext context) {
     return Container(
       color: Colors.black,
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(2.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -189,7 +192,7 @@ class _EditChapterComponentState extends State<EditChapterComponent> {
               fillColor: Colors.black45,
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 2),
 
           // List of Chapters
           Expanded(
@@ -200,18 +203,18 @@ class _EditChapterComponentState extends State<EditChapterComponent> {
 
                 return Card(
                   color: Colors.black54,
-                  margin: const EdgeInsets.symmetric(vertical: 10),
+                  margin: const EdgeInsets.symmetric(vertical: 4),
                   child: Padding(
-                    padding: const EdgeInsets.all(12.0),
+                    padding: const EdgeInsets.all(2.0),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-
                         // Chapter Number
                         TextField(
                           controller: TextEditingController(
                               text: chaptersData[chapterId]!['number']
-                                  ?.toString() ?? ''),
+                                      ?.toString() ??
+                                  ''),
                           onChanged: (value) {
                             setState(() {
                               chaptersData[chapterId]!['number'] =
@@ -248,11 +251,11 @@ class _EditChapterComponentState extends State<EditChapterComponent> {
                         ),
                         const SizedBox(height: 10),
 
-
                         // Chapter Description
                         TextField(
                           controller: TextEditingController(
-                              text: chaptersData[chapterId]!['description'] ?? ''),
+                              text: chaptersData[chapterId]!['description'] ??
+                                  ''),
                           onChanged: (value) {
                             setState(() {
                               chaptersData[chapterId]!['description'] = value;
@@ -308,7 +311,6 @@ class _EditChapterComponentState extends State<EditChapterComponent> {
                           ),
                         ),
 
-
                         // Chapter Document URL
                         TextField(
                           controller: TextEditingController(
@@ -337,83 +339,101 @@ class _EditChapterComponentState extends State<EditChapterComponent> {
                         const SizedBox(height: 10),
                         _quizQuestions[chapterId] == null
                             ? const Text(
-                          'No quiz questions available',
-                          style: TextStyle(color: Colors.white),
-                        )
+                                'No quiz questions available',
+                                style: TextStyle(color: Colors.white),
+                              )
                             : ListView.builder(
-                          shrinkWrap: true,
-                          physics: const NeverScrollableScrollPhysics(),
-                          itemCount: _quizQuestions[chapterId]!.length,
-                          itemBuilder: (context, quizIndex) {
-                            return Column(
-                              crossAxisAlignment:
-                              CrossAxisAlignment.start,
-                              children: [
-                                TextField(
-                                  controller: _quizControllers[chapterId]![quizIndex],
-                                  onChanged: (value) {
-                                    setState(() {
-                                      _quizQuestions[chapterId]![quizIndex]['question'] = value;
-                                    });
-                                  },
-                                  style: const TextStyle(color: Colors.white),
-                                  decoration: const InputDecoration(
-                                    labelText: "Quiz Question",
-                                    labelStyle: TextStyle(color: Colors.white),
-                                    filled: true,
-                                    fillColor: Colors.black45,
-                                    border: OutlineInputBorder(),
-                                  ),
-                                ),
-                                const SizedBox(height: 10),
-                                // Editable options for each quiz
-                                for (int optionIndex = 0;
-                                optionIndex <
-                                    _quizQuestions[chapterId]![quizIndex]['options'].length;
-                                optionIndex++)
-                                  TextField(
-                                    controller: TextEditingController(
-                                      text: _quizQuestions[chapterId]![quizIndex]['options'][optionIndex],
-                                    ),
-                                    onChanged: (newValue) {
-                                      setState(() {
-                                        _quizQuestions[chapterId]![quizIndex]['options'][optionIndex] = newValue;
-                                      });
-                                    },
-                                    style: const TextStyle(color: Colors.white),
-                                    decoration: InputDecoration(
-                                      labelText: 'Option ${optionIndex + 1}',
-                                      labelStyle: const TextStyle(color: Colors.white),
-                                      filled: true,
-                                      fillColor: Colors.black45,
-                                      border: const OutlineInputBorder(),
-                                    ),
-                                  ),
-                                const SizedBox(height: 10),
-                                // Correct Answer Field (Editable)
-                                TextField(
-                                  controller: TextEditingController(
-                                    text: _correctAnswers[chapterId]?[quizIndex] ?? '',
-                                  ),
-                                  onChanged: (newValue) {
-                                    setState(() {
-                                      _correctAnswers[chapterId]![quizIndex] = newValue;
-                                    });
-                                  },
-                                  style: const TextStyle(color: Colors.white),
-                                  decoration: const InputDecoration(
-                                    labelText: "Correct Answer",
-                                    labelStyle: TextStyle(color: Colors.white),
-                                    filled: true,
-                                    fillColor: Colors.black45,
-                                    border: OutlineInputBorder(),
-                                  ),
-                                ),
-                                const SizedBox(height: 10),
-                              ],
-                            );
-                          },
-                        ),
+                                shrinkWrap: true,
+                                physics: const NeverScrollableScrollPhysics(),
+                                itemCount: _quizQuestions[chapterId]!.length,
+                                itemBuilder: (context, quizIndex) {
+                                  return Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      TextField(
+                                        controller: _quizControllers[
+                                            chapterId]![quizIndex],
+                                        onChanged: (value) {
+                                          setState(() {
+                                            _quizQuestions[chapterId]![
+                                                quizIndex]['question'] = value;
+                                          });
+                                        },
+                                        style: const TextStyle(
+                                            color: Colors.white),
+                                        decoration: const InputDecoration(
+                                          labelText: "Quiz Question",
+                                          labelStyle:
+                                              TextStyle(color: Colors.white),
+                                          filled: true,
+                                          fillColor: Colors.black45,
+                                          border: OutlineInputBorder(),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 10),
+                                      // Editable options for each quiz
+                                      for (int optionIndex = 0;
+                                          optionIndex <
+                                              _quizQuestions[chapterId]![
+                                                      quizIndex]['options']
+                                                  .length;
+                                          optionIndex++)
+                                        TextField(
+                                          controller: TextEditingController(
+                                            text: _quizQuestions[chapterId]![
+                                                    quizIndex]['options']
+                                                [optionIndex],
+                                          ),
+                                          onChanged: (newValue) {
+                                            setState(() {
+                                              _quizQuestions[chapterId]![
+                                                      quizIndex]['options']
+                                                  [optionIndex] = newValue;
+                                            });
+                                          },
+                                          style: const TextStyle(
+                                              color: Colors.white),
+                                          decoration: InputDecoration(
+                                            labelText:
+                                                'Option ${optionIndex + 1}',
+                                            labelStyle: const TextStyle(
+                                                color: Colors.white),
+                                            filled: true,
+                                            fillColor: Colors.black45,
+                                            border: const OutlineInputBorder(),
+                                          ),
+                                        ),
+                                      const SizedBox(height: 10),
+                                      // Correct Answer Field (Editable)
+                                      TextField(
+                                        controller: TextEditingController(
+                                          text: _correctAnswers[chapterId]
+                                                  ?[quizIndex] ??
+                                              '',
+                                        ),
+                                        onChanged: (newValue) {
+                                          setState(() {
+                                            _correctAnswers[chapterId]![
+                                                quizIndex] = newValue;
+                                          });
+                                        },
+                                        style: const TextStyle(
+                                            color: Colors.white),
+                                        decoration: const InputDecoration(
+                                          labelText: "Correct Answer",
+                                          labelStyle:
+                                              TextStyle(color: Colors.white),
+                                          filled: true,
+                                          fillColor: Colors.black45,
+                                          border: OutlineInputBorder(),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 10),
+                                    ],
+                                  );
+                                },
+                              ),
                       ],
                     ),
                   ),
@@ -421,40 +441,43 @@ class _EditChapterComponentState extends State<EditChapterComponent> {
               },
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 2),
           ElevatedButton(
             onPressed: _saveChanges,
             style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.blue,  // This is a fallback color for compatibility
+              backgroundColor: const Color.fromARGB(255, 33, 243,
+                  103), // This is a fallback color for compatibility
               elevation: 1,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(30),
+                borderRadius: BorderRadius.circular(10),
               ),
             ).copyWith(
               // Gradient background applied through the decoration
-              side: WidgetStateProperty.all(BorderSide(color: Colors.blue, width: 2)),
+              side: WidgetStateProperty.all(BorderSide(
+                  color: const Color.fromARGB(255, 33, 243, 103), width: 1)),
             ),
             child: Ink(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Colors.blue, Colors.blueAccent],
+                  colors: [
+                    const Color.fromARGB(255, 33, 243, 103),
+                    const Color.fromARGB(255, 19, 247, 95)
+                  ],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
-                borderRadius: BorderRadius.circular(30),
+                borderRadius: BorderRadius.circular(0),
               ),
               child: Text(
-                  'Save Changes',
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                  ),
+                'Save Changes',
+                style: TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
                 ),
               ),
             ),
-
-
+          ),
         ],
       ),
     );
