@@ -4,6 +4,7 @@ import 'detail_info_screen.dart';
 import 'feedback_form_screen.dart';
 import 'package:elearning/components/header_section.dart';
 import 'package:elearning/db_operations/courses.dart';
+import 'package:elearning/screens/google_form_url.dart';
 
 class Section {
   final String title;
@@ -41,7 +42,8 @@ class CourseDetailsScreen extends StatefulWidget {
   final String courseId;
   final String userId;
 
-  const CourseDetailsScreen({required this.courseId, required this.userId, super.key});
+  const CourseDetailsScreen(
+      {required this.courseId, required this.userId, super.key});
 
   @override
   State<CourseDetailsScreen> createState() => _CourseDetailsScreenState();
@@ -143,7 +145,8 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
       appBar: AppBar(
         title: Text(
           _course!.title,
-          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          style:
+              const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
         backgroundColor: const Color.fromRGBO(255, 110, 65, 1.0),
       ),
@@ -162,7 +165,6 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
               ),
               const SizedBox(height: 16),
               const SizedBox(height: 24),
-
               ListView.builder(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
@@ -200,6 +202,37 @@ class _CourseDetailsScreenState extends State<CourseDetailsScreen> {
                   );
                 },
               ),
+              Center(
+                child: ElevatedButton(
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => GoogleFormUrl(
+                          courseId: widget.courseId,
+                          userId: widget.userId,
+                        ),
+                      ),
+                    );
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.red,
+                    padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 20),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
+                  child: const Text(
+                    ' Google Form Final Exam ',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 20),
             ],
           ),
         ),
