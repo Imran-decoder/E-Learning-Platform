@@ -159,22 +159,28 @@ class _CoursePieChartState extends State<CoursePieChart> {
 
     int totalTasks = courseTaskCounts.values.fold(0, (sum, count) => sum + count);
 
-    return Column(
-      children: [
-        SizedBox(
-          height: 250,
-          child: PieChart(
-            PieChartData(
-              sections: _generateChartSections(totalTasks),
-              centerSpaceRadius: 40,
-              sectionsSpace: 2,
+return Column(
+  children: [
+    Expanded(
+      child: Column(
+        children: [
+          SizedBox(
+            height: 220,
+            child: PieChart(
+              PieChartData(
+                sections: _generateChartSections(totalTasks),
+                centerSpaceRadius: 40,
+                sectionsSpace: 2,
+              ),
             ),
           ),
-        ),
-        const SizedBox(height: 20),
-        _buildLegend(),
-      ],
-    );
+          const SizedBox(height: 10),
+          _buildLegend(),
+        ],
+      ),
+    ),
+  ],
+);
   }
 
   List<PieChartSectionData> _generateChartSections(int totalTasks) {
