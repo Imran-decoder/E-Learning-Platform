@@ -47,7 +47,7 @@ class _UserProgressScreenState extends State<UserProgressScreen> {
         int totalTasks = tasks.length;
         int completedTasks =
             tasks.values.where((value) => value == true).length;
-        double progress = totalTasks > 0 ? (completedTasks  / totalTasks) : 0.0;
+        double progress = totalTasks > 0 ? (completedTasks / totalTasks) : 0.0;
 
         // Fetch course details from 'Courses' collection
         DocumentSnapshot courseDoc = await FirebaseFirestore.instance
@@ -81,7 +81,8 @@ class _UserProgressScreenState extends State<UserProgressScreen> {
       // appBar: AppBar(title: Text("User Progress")),
       body: Container(
         decoration: BoxDecoration(
-          color: const Color.fromARGB(255, 0, 0, 0), // Change background color here
+          color: const Color.fromARGB(
+              255, 0, 0, 0), // Change background color here
         ),
         child: Padding(
           padding: const EdgeInsets.all(16.0),
@@ -97,7 +98,8 @@ class _UserProgressScreenState extends State<UserProgressScreen> {
 
                   List<Map<String, dynamic>> users = snapshot.data!;
                   return DropdownButton<String>(
-                    hint: Text("Select User", style: TextStyle(color: Colors.white)),
+                    hint: Text("Select User",
+                        style: TextStyle(color: Colors.white)),
                     dropdownColor: Colors.blueGrey[800],
                     icon: Icon(Icons.arrow_drop_down, color: Colors.white),
                     iconSize: 24,
@@ -128,7 +130,9 @@ class _UserProgressScreenState extends State<UserProgressScreen> {
               ),
               SizedBox(height: 20),
               enrolledCourses.isEmpty
-                  ? Center(child: Text("No enrolled courses" , style: TextStyle(color: Colors.white)))
+                  ? Center(
+                      child: Text("No enrolled courses",
+                          style: TextStyle(color: Colors.white)))
                   : Expanded(child: _buildBarChart()),
             ],
           ),
@@ -159,7 +163,12 @@ class _UserProgressScreenState extends State<UserProgressScreen> {
             sideTitles: SideTitles(
               showTitles: true,
               getTitlesWidget: (double value, TitleMeta meta) {
-                return Text(enrolledCourses[value.toInt()]['courseName'].substring(0, 10) + "...",
+                return Text(
+                    enrolledCourses[value.toInt()]['courseName'].length > 10
+                        ? enrolledCourses[value.toInt()]['courseName']
+                                .substring(0, 10) +
+                            "..."
+                        : enrolledCourses[value.toInt()]['courseName'],
                     style: TextStyle(fontSize: 10, color: Colors.white));
               },
             ),
@@ -169,14 +178,14 @@ class _UserProgressScreenState extends State<UserProgressScreen> {
               showTitles: true,
               reservedSize: 30,
               getTitlesWidget: (double value, TitleMeta meta) {
-                return Text("${value.toInt()}%", style: TextStyle(color: Colors.white));
+                return Text("${value.toInt()}%",
+                    style: TextStyle(fontSize: 10, color: Colors.white));
               },
             ),
           ),
-           rightTitles: AxisTitles(
-           sideTitles: SideTitles(showTitles: false),  
-           ),
-    
+          rightTitles: AxisTitles(
+            sideTitles: SideTitles(showTitles: false),
+          ),
           topTitles: AxisTitles(
             sideTitles: SideTitles(
               showTitles: true,
@@ -278,5 +287,3 @@ class _UserProgressScreenState extends State<UserProgressScreen> {
 //     ),
 //   );
 // }
-
-
